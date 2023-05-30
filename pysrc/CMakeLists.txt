@@ -23,4 +23,4 @@ target_compile_options(_cds_bindings PRIVATE
 # !!! This part is critical and a wrong configuration leads to bad packages
 # !!! without an error. Use a path relative to the project root (or
 # !!! `cmake_install_dir`[setup.py], if used).
-install(TARGETS _cds_bindings DESTINATION ./python/samplns/cds/)
+install(TARGETS _cds_bindings DESTINATION ./pysrc/samplns/cds/)
