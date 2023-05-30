@@ -163,12 +163,9 @@ common guidelines. It uses
 
 ## Often occurring problems
 
-### Bad linking, C++ code cannot find symbol
+## GLIBCXX not found
 
-Probably your conan profile has a wrong default.
-Change `compiler.libcxx=libstdc++` to `compiler.libcxx=libstdc++11`
-in `~/.conan/profiles/default`.
-This is just a workaround and we should find a better solution.
+If you get an error such as `E   ImportError: /home/krupke/anaconda3/envs/mo310/bin/../lib/libstdc++.so.6: version `GLIBCXX_3.4.30' not found (required by /home/krupke/anaconda3/envs/mo310/lib/python3.10/site-packages/samplns/cds/_cds_bindings.cpython-310-x86_64-linux-gnu.so)`, you are probably using conda (good!) but need to update glibcxx. Install the latest version by `conda install -c conda-forge libstdcxx-ng`.
 
 ## Changelog
 

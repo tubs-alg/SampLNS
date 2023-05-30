@@ -1,7 +1,7 @@
 # This is the root file for CMake, which is used to define the native part
 # of the project. It is completely independent of the Python-part and can
 # actually be used just to build a C++-library.
-cmake_minimum_required(VERSION 3.17)  # 3.17 has been released March 2020
+cmake_minimum_required(VERSION 3.24)  # 3.17 has been released March 2020
 
 project(samplns CXX)  # Feel free to add more project information
 set(CMAKE_CXX_STANDARD 17)  # Using C++-17 (most features with good support at 2022)

@@ -9,7 +9,7 @@ from samplns.instances import (
 )
 from samplns.lns.model import VectorizedEdgeModel, TupleIndex
 from samplns.preprocessor import IndexInstance, Preprocessor
-
+from samplns.utils import Timer
 
 def test_sample_mip():
     concrete_features = ["1", "2", "3", "4"]
@@ -42,7 +42,7 @@ def test_sample_mip():
             sample.append({concrete_features[i]: conf[i] for i in range(4)})
     assert len(sample) == 9
     index_instance = Preprocessor().preprocess(instance)
-    mip = VectorizedEdgeModel(index_instance, 16)
+    mip = VectorizedEdgeModel(index_instance, 16, Timer(600))
     covered_tuples = set()
     print("Greedy solution")
     coverages = dict()
