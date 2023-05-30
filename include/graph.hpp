@@ -13,6 +13,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <random>
 
 namespace samplns {
 
@@ -459,9 +460,12 @@ public:
       vertices.push_back(i);
     }
 
+    std::random_device rd;
+    std::mt19937 random_generator(rd());
+
     // sort ascending by number of neighbors, so that first element has highest
     // amount of non-neighbors
-    std::random_shuffle(vertices.begin(), vertices.end());
+    std::shuffle(vertices.begin(), vertices.end(), random_generator);
     std::stable_sort(vertices.begin(), vertices.end(),
                      [&](const feature_id &v, const feature_id &u) {
                        return count_neighbors(v) < count_neighbors(u);

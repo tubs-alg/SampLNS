@@ -8,6 +8,7 @@
 #include <chrono>
 #include <unordered_map>
 #include <vector>
+#include <random>
 
 namespace samplns {
 
@@ -146,6 +147,9 @@ public:
     std::cout << "Starting with CDS of size " << current_cds.size() << "."
               << std::endl;
 
+    std::random_device rd;
+    std::mt19937 random_generator(rd());
+
     const double tstart = timestamp();
 
     auto time_passed = [&]() {
@@ -165,7 +169,8 @@ public:
         break;
 
       // shuffle clique, move cached CDS solutions to front
-      std::random_shuffle(clique.begin(), clique.end());
+
+      std::shuffle(clique.begin(), clique.end(), random_generator);
       std::stable_sort(clique.begin(), clique.end(),
                        [&](const feature_id &i, const feature_id &j) {
                          return cached_node_cds.count(i) >
