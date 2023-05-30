@@ -1,0 +1,18 @@
+exclude tests
+exclude apps
+include conanfile.txt
+include CMakeLists.txt
+include setup.py
+include pyproject.toml
+include requirements.txt
+include *.md
+include cmake/CCache.cmake
+include cmake/CPM.cmake
+recursive-include python *.cpp
+recursive-include python CMakeLists.txt
+recursive-include src *.cpp
+recursive-include src *.h
+recursive-include src *.hpp
+recursive-include src CMakeLists.txt
+recursive-include include *.h
+recursive-include include *.hpp

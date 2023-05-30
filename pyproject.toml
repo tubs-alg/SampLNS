@@ -1,0 +1,10 @@
+[build-system]
+requires = [
+    "conan>=2.0.0",
+    "setuptools",
+    "skbuild_conan>=0.1.2",
+    "scikit-build>=0.16.7",
+    "cmake>=3.17",
+    "ninja",
+]
+build-backend = "setuptools.build_meta"
