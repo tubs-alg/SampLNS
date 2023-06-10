@@ -6,12 +6,16 @@ import typing
 import tarfile
 from collections import defaultdict
 import re
-
+import zipfile
 
 def parse(path: str) -> Instance:
     """
     Parse an instance. An exception is thrown when the instance does not look as we
     expect. In this case: tell us!
+
+    Supports .tar.gz and .zip archives.
+
+    :param path: The path to the instance.
     """
     if path.endswith(".tar.gz"):
         with tarfile.open(path, "r:gz") as tar:
@@ -21,6 +25,12 @@ def parse(path: str) -> Instance:
                         print("Parsing xml file", tarinfo.name)
                         return parse_source(tar.extractfile(tarinfo.name), path)
         raise ValueError("Could not extract xml file from archive")
+    elif path.endswith(".zip"):
+        with zipfile.ZipFile(path) as zip:
+            for info in zip.infolist():
+                if info.filename.endswith(".xml"):
+                    print("Parsing xml file", info.filename)
+                    return parse_source(zip.open(info.filename), path)
     else:
         with open(path) as f:
             return parse_source(f, path)

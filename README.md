@@ -163,6 +163,12 @@ common guidelines. It uses
 
 ## Common problems
 
+Please report any further issues you encounter.
+
+### `RuntimeError: Caught an unknown exception!`
+
+Probably, you have a bad Gurobi-license. We currently do not have a good way of checking that.
+
 ### glibcxx problems: 
 
 If you get an error such as 
@@ -174,7 +180,7 @@ you are probably using conda (good!) but need to update glibcxx. Install the lat
 conda install -c conda-forge libstdcxx-ng
 ```
 
-### ABI problems: Undefined symbole `...__cxx1112basic_stringIcSt11char_...`
+### ABI problems: Undefined symbol `...__cxx1112basic_stringIcSt11char_...`
 
 This problem should be automatically fixed. Please open an issue if you still encounter it.
 
@@ -182,6 +188,7 @@ See [https://docs.conan.io/1/howtos/manage_gcc_abi.html](https://docs.conan.io/1
 
 ## Changelog
 
+- 0.7.0: Adding zip support for instances.
 - 0.6.0: Newly packed version for GitHub. More stable build and stuff.
 - 0.4.0: Timeout for model building for UB. There seem to be some cases in which this
   takes forever.
