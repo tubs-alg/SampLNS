@@ -1,4 +1,32 @@
-# SampLNS
+# SampLNS: A Large Neighborhood Search to compute near minimal samples for feature models
+
+
+SampLNS is an LNS-based optimizer for pairwise configuration sampling that comes with a lower bound proving technique.
+On many of the instances we tested, it is able to compute smaller samples than YASA and frequently to even prove optimality.
+A paper describing the approach is currently in progress.
+
+The implementation is for research purposes only and not yet ready for production.
+Please contact us if you want to use it in production.
+
+**What is a Large Neighborhood Search (LNS)?**
+It is a metaheuristic for optimization problems that works as follows:
+You start with a feasible solution.
+Then, you iteratively destroy a part if the solution and try to repair it in a way that improves the solution.
+We are using Mixed Integer Programming and a SAT-based approach to do so, which allows us to find optimal solutions for the repair step.
+Mixed Integer Programming is a powerful technique that can solve many NP-hard problems optimally up to a reasonable size.
+The size of the destroyed part is scaled automatically to be as large as possible while still being able to find a repair.
+The larger the destroyed part, the more likely it is to escape local minima and find an even better solution, potentially even an optimal solution.
+
+**What is a lower bound and why is it useful?**
+A lower bound is a value that is guaranteed to be smaller than the optimal solution.
+If you have a lower bound, you can stop the optimization process as soon as you reach it.
+The lower bound proves that you cannot find a better solution.
+If the optimization process is not able to match it, the lower bound at least gives you a
+guaranteed upper bound on the error of your solution.
+Computing perfect lower bounds for NP-hard problems is itself NP-hard, so we are only able to
+approximate them.
+However, every lower bound returned is still guaranteed to be smaller than the optimal solution.
+It may just not be sufficient to prove optimality.
 
 ## Installation
 
@@ -9,7 +37,8 @@ in [this video](https://www.youtube.com/watch?v=oW6ma8rdZk8):
 
 - Register an academic account.
 - Install Gurobi (very easy with Conda, you only need the tool `grbgetkey`).
-- Use `grbgetkey` to set up a license on your computer.
+- Use `grbgetkey` to set up a license on your computer. You may have to be within the
+  university network for this to work.
 
 After you got your license, move into the folder with `setup.py` and run
 
