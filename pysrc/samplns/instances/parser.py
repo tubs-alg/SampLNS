@@ -1,13 +1,14 @@
-from .feature import FeatureLiteral, AndFeature, OrFeature, AltFeature, ConcreteFeature
-from .instance import Instance
-from .sat_formula import AND, OR, NOT, VAR, IMPL, EQ, SatNode
-import xml.etree.ElementTree as ET
-import typing
-import tarfile
-from collections import defaultdict
-import re
-import zipfile
 import logging
+import re
+import tarfile
+import typing
+import xml.etree.ElementTree as ET
+import zipfile
+from collections import defaultdict
+
+from .feature import AltFeature, AndFeature, ConcreteFeature, FeatureLiteral, OrFeature
+from .instance import Instance
+from .sat_formula import AND, EQ, IMPL, NOT, OR, VAR, SatNode
 
 
 def _get_logger(parent_logger: typing.Optional[logging.Logger] = None):

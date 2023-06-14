@@ -8,12 +8,12 @@
 #include <functional>
 #include <iostream>
 #include <math.h>
+#include <random>
 #include <stdint.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <random>
 
 namespace samplns {
 

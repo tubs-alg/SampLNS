@@ -6,9 +6,9 @@
 #include "../lns.hpp"
 #include "../mis/mis_ip.hpp"
 #include <chrono>
+#include <random>
 #include <unordered_map>
 #include <vector>
-#include <random>
 
 namespace samplns {
 

@@ -2,8 +2,8 @@
 This module provides the elements for the feature structure.
 """
 
-import typing
 import abc
+import typing
 
 FeatureLabel = typing.Union[str, int]
 
@@ -97,7 +97,6 @@ class FeatureNode(abc.ABC):
         This does not differ between labels used in positive
         or negative literals.
         """
-        pass
 
     @abc.abstractmethod
     def substitute(
@@ -110,14 +109,12 @@ class FeatureNode(abc.ABC):
         `direct` with the value, and all entries in `inverse`
         with the negated value.
         """
-        pass
 
     @abc.abstractmethod
     def all_features(self) -> typing.Iterable[FeatureLabel]:
         """
         Return all feature labels used in the tree.
         """
-        pass
 
     @abc.abstractmethod
     def is_feasible(self, assignment: typing.Dict[FeatureLabel, bool]) -> bool:
@@ -134,7 +131,6 @@ class FeatureNode(abc.ABC):
         """
         Number of nodes in this tree.
         """
-        pass
 
     @abc.abstractmethod
     def all_concrete_literals(self) -> typing.Iterable[FeatureLiteral]:
@@ -142,7 +138,6 @@ class FeatureNode(abc.ABC):
         Returns the literals of all concrete features used, i.e., that
         are used in some leaf.
         """
-        pass
 
     @abc.abstractmethod
     def to_json_data(self):
@@ -190,7 +185,7 @@ class ConcreteFeature(FeatureNode):
 
     def __repr__(self):
         m = "!" if self.mandatory else ""
-        return f"F{m}[{str(self.feature_literal)}]"
+        return f"F{m}[{self.feature_literal!s}]"
 
     def is_feasible(self, assignment: typing.Dict[FeatureLabel, bool]):
         return True
@@ -424,4 +419,5 @@ def _feature_node_from_json(json_data):
             cons = conss[t]
             elements = [_feature_node_from_json(j) for j in json_data["elements"]]
             return cons(feature_literal=literal, mandatory=mandatory, elements=elements)
-    raise ValueError("Invalid JSON data for FeatureNode!")
+    msg = "Invalid JSON data for FeatureNode!"
+    raise ValueError(msg)

@@ -1,4 +1,5 @@
 import typing
+
 from ..instances import Instance
 from .index_instance import IndexInstance
 from .universe_mapping import UniverseMapping
@@ -13,7 +14,7 @@ def substitute_with_int_labels(
     """
     counter = 0
     mapping = UniverseMapping(mapping)
-    direct_substitutions = dict()
+    direct_substitutions = {}
 
     # concrete features get first n labels
     for label in instance.features:

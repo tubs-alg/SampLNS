@@ -2,19 +2,20 @@
 In this file we build the upper bound model using CP-SAT.
 """
 import typing
+
 import ortools.sat.python.cp_model as cp_model
 
 from ..instances import (
-    SatNode,
     OR,
     VAR,
-    FeatureNode,
-    ConcreteFeature,
-    AndFeature,
-    OrFeature,
     AltFeature,
+    AndFeature,
     CompositeFeature,
+    ConcreteFeature,
     FeatureLiteral,
+    FeatureNode,
+    OrFeature,
+    SatNode,
 )
 from ..preprocessor import IndexInstance
 
@@ -92,7 +93,7 @@ class BaseModelCreator:
         literals = [
             self._get_struct_var(variables, element) for element in structure.elements
         ]
-        model.AddBoolOr(literals + [self._get_struct_var(variables, structure).Not()])
+        model.AddBoolOr([*literals, self._get_struct_var(variables, structure).Not()])
         # if a child is active, the Or-Feature has to be active too
         if self.use_linear_parent_dependency:
             model.Add(sum(literals) <= self._get_struct_var(variables, structure))
@@ -117,7 +118,8 @@ class BaseModelCreator:
         elif isinstance(structure, AltFeature):
             self._add_alt_structure_constraint(structure, model, variables)
         else:
-            raise ValueError(f"Unexpected node encountered: {structure}!")
+            msg = f"Unexpected node encountered: {structure}!"
+            raise ValueError(msg)
         for element in structure.elements:
             self._add_structure_constraints(element, model, variables)
 
@@ -130,7 +132,8 @@ class BaseModelCreator:
         for rule in rules:
             if isinstance(rule, OR):
                 if not all(isinstance(lit, VAR) for lit in rule.elements):
-                    raise ValueError("Rule is not in CNF!")
+                    msg = "Rule is not in CNF!"
+                    raise ValueError(msg)
                 elements: typing.List[VAR] = rule.elements
                 literals = [
                     variables[lit.var_name]
@@ -143,7 +146,8 @@ class BaseModelCreator:
                 # todo: should be detected and forced by preprocessor
                 model.Add(variables[rule.var_name] == (1 if not rule.negated else 0))
             else:
-                raise ValueError("Rule is not in CNF!")
+                msg = "Rule is not in CNF!"
+                raise ValueError(msg)
 
     def create(
         self, instance: IndexInstance, model=None

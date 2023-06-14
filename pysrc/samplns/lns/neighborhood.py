@@ -7,8 +7,8 @@ import abc
 import random
 import typing
 
-from .coverage_set import CoverageSet
 from ..preprocessor import IndexInstance
+from .coverage_set import CoverageSet
 
 
 class Neighborhood:
@@ -63,21 +63,18 @@ class NeighborhoodSelector(abc.ABC):
         """
         Called at the beginning. Use as a second constructor.
         """
-        pass
 
     @abc.abstractmethod
     def add_solution(self, solution: typing.List[typing.Dict[int, bool]]):
         """
         Used by the solver to notify you about new solutions.
         """
-        pass
 
     @abc.abstractmethod
     def next(self) -> Neighborhood:
         """
         Return the next neighborhood.
         """
-        pass
 
     @abc.abstractmethod
     def feedback(
@@ -91,7 +88,6 @@ class NeighborhoodSelector(abc.ABC):
         Allows the solver to give feedback on the neighborhood. Should always be
         the previous.
         """
-        pass
 
 
 class RandomNeighborhood(NeighborhoodSelector):

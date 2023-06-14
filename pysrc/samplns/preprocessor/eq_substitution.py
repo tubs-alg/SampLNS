@@ -6,10 +6,8 @@ select at the same time.
 """
 import typing
 
-from ..instances import VAR, EQ
+from ..instances import EQ, VAR, AndFeature, CompositeFeature, FeatureNode, Instance
 from .equivalence import EquivalenceClasses
-from ..instances import FeatureNode, AndFeature, CompositeFeature
-from ..instances import Instance
 from .universe_mapping import UniverseMapping
 
 
@@ -28,7 +26,8 @@ class EqualityOptimizer:
     def _filter_rules(self, instance, eq):
         for rule in instance.rules:
             if isinstance(rule, EQ) and rule.is_variable_equivalence():
-                assert isinstance(rule.a, VAR) and isinstance(rule.b, VAR)
+                assert isinstance(rule.a, VAR)
+                assert isinstance(rule.b, VAR)
                 inverse = rule.a.negated != rule.b.negated
                 eq.mark_equivalent(rule.a.var_name, rule.b.var_name, inverse)
             else:

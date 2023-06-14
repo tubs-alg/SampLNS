@@ -1,8 +1,7 @@
 import itertools
 import random
-import typing
 
-from .base import CdsAlgorithm, Tuples, Samples
+from .base import CdsAlgorithm, Samples, Tuples
 
 
 class IndependentTuples(CdsAlgorithm):
@@ -30,7 +29,7 @@ class IndependentTuples(CdsAlgorithm):
         ]
         ```
         """
-        self.coverage_count = dict()
+        self.coverage_count = {}
         self._non_unique = set()
         self._features = set(range(n_concrete))
         self._nodes = [(f, True) for f in self._features] + [
@@ -45,7 +44,7 @@ class IndependentTuples(CdsAlgorithm):
         in better independent tuples, of which already a small improvement can save
         us quite some time.
         """
-        self.coverage_count = dict()
+        self.coverage_count = {}
         for v, w in itertools.combinations(self._nodes, 2):
             if v > w:
                 v, w = w, v

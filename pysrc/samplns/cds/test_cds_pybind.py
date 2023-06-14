@@ -1,7 +1,6 @@
-from samplns.cds.cds_lns import TransactionGraph, LnsCds
-import json
-import networkx as nx
-import itertools
+
+
+from samplns.cds.cds_lns import LnsCds, TransactionGraph
 
 
 def test_transaction_graph():
@@ -4789,7 +4788,7 @@ def test_cds():
     tg = TransactionGraph.from_conflicts(106, toybox_conflicts)
     s = LnsCds(tg)
 
-    sol = s.optimize(list(), verbose=True, max_iterations=5)
+    sol = s.optimize([], verbose=True, max_iterations=5)
 
     print(sol)
     print(f"Solution size: {len(sol)}")

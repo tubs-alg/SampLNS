@@ -1,6 +1,6 @@
 import typing
 
-from .feature import FeatureNode, FeatureLabel
+from .feature import FeatureLabel, FeatureNode
 from .sat_formula import SatNode
 
 

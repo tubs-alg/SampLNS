@@ -1,4 +1,4 @@
-from ..instances import Instance, AND
+from ..instances import AND, Instance
 
 
 def to_cnf(instance: Instance):

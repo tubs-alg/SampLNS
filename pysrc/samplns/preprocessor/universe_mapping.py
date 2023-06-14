@@ -1,7 +1,7 @@
-import typing
-import unittest
 import logging
-from typing import Dict, Tuple, List
+import typing
+from typing import Dict, List, Tuple
+
 from ..instances import FeatureLabel
 
 
@@ -18,8 +18,8 @@ class UniverseMapping:
     ):
         self._origins: Dict[
             FeatureLabel, Tuple[List[FeatureLabel], List[FeatureLabel]]
-        ] = dict()
-        self._targets: Dict[FeatureLabel, Tuple[bool, FeatureLabel]] = dict()
+        ] = {}
+        self._targets: Dict[FeatureLabel, Tuple[bool, FeatureLabel]] = {}
         self._chain = chain
         if parent_logger is not None:
             self._logger = parent_logger.getChild(self.__class__.__name__)
@@ -64,7 +64,7 @@ class UniverseMapping:
     def to_mapped_universe(self, assignment: typing.Dict[FeatureLabel, bool]):
         self._logger.debug("Starting to translate assignment to mapped universe.")
         assignment_ = dict(assignment)
-        mapped_assignment = dict()
+        mapped_assignment = {}
         if self._chain:
             assignment_.update(self._chain.to_mapped_universe(assignment))
         for var, val in assignment_.items():
@@ -79,7 +79,7 @@ class UniverseMapping:
         self, assignment: typing.Dict[FeatureLabel, bool]
     ) -> typing.Dict[FeatureLabel, bool]:
         self._logger.debug("Starting to translate assignment to origin universe.")
-        origin_assignment = dict()
+        origin_assignment = {}
         for var, val in assignment.items():
             if var in self._origins:
                 for var_ in self._origins[var][0]:

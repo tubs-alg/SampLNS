@@ -1,8 +1,8 @@
 """
 This file provides boolean satisfiability logic for the rules of an instance.
 """
-import typing
 import abc
+import typing
 
 from .feature import FeatureLabel
 
@@ -110,7 +110,8 @@ def NOT(x: SatNode):
 class AND(SatNode):
     def __init__(self, *elements: SatNode):
         if len(elements) <= 1:
-            raise ValueError("Conjunction should have at least two elements.")
+            msg = "Conjunction should have at least two elements."
+            raise ValueError(msg)
         self.elements = []
         for element in elements:
             if isinstance(element, AND):
@@ -152,7 +153,8 @@ class AND(SatNode):
 class OR(SatNode):
     def __init__(self, *elements: SatNode):
         if len(elements) <= 1:
-            raise ValueError("Disjunction should have at least two elements.")
+            msg = "Disjunction should have at least two elements."
+            raise ValueError(msg)
         self.elements = []
         for element in elements:
             if isinstance(element, OR):
@@ -181,7 +183,7 @@ class OR(SatNode):
             aux_vars.append(aux)
             if isinstance(and_clause, AND):
                 for or_clause in and_clause.elements:
-                    assert isinstance(or_clause, VAR) or isinstance(or_clause, OR)
+                    assert isinstance(or_clause, (VAR, OR))
                     clauses.append(OR(aux.NEG(), or_clause))
             else:
                 assert isinstance(and_clause, VAR)
@@ -213,7 +215,8 @@ class OR(SatNode):
 
 class IMPL(SatNode):
     def __init__(self, condition: SatNode, implication: SatNode):
-        assert condition and implication
+        assert condition
+        assert implication
         self.condition = condition
         self.implication = implication
 
@@ -263,7 +266,8 @@ class EQ(SatNode):
     def __init__(self, a: SatNode, b: SatNode):
         self.a = a
         self.b = b
-        assert a and b
+        assert a
+        assert b
 
     def is_variable_equivalence(self) -> bool:
         return isinstance(self.a, VAR) and isinstance(self.b, VAR)
@@ -322,4 +326,5 @@ def _sat_node_from_json(json_data):
             return EQ(
                 _sat_node_from_json(json_data["a"]), _sat_node_from_json(json_data["b"])
             )
-    raise ValueError("Invalid value/json data for SatNode!")
+    msg = "Invalid value/json data for SatNode!"
+    raise ValueError(msg)

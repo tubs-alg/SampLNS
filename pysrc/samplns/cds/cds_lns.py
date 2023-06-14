@@ -1,8 +1,8 @@
-from .base import CdsAlgorithm, Tuples, Samples
-from ..preprocessor import IndexInstance
-from ._cds_bindings import TransactionGraph, LnsCds, AsyncLnsCds, GreedyCds
 import typing
-from time import sleep
+
+from ..preprocessor import IndexInstance
+from ._cds_bindings import AsyncLnsCds, GreedyCds, LnsCds, TransactionGraph
+from .base import CdsAlgorithm, Samples, Tuples
 
 
 class CdsLns(CdsAlgorithm):
@@ -30,11 +30,11 @@ class CdsLns(CdsAlgorithm):
         for config in self.cpp_sample:
             self.graph.add_valid_configuration(config)
 
-        self.log(f"All valid configurations were added to the transaction graph.")
+        self.log("All valid configurations were added to the transaction graph.")
 
         self.solver = AsyncLnsCds(self.graph)
         self.greedy_solver = GreedyCds(self.graph, self.cpp_sample)
-        self.initial_cds_cpp = self.greedy_solver.optimize(list())
+        self.initial_cds_cpp = self.greedy_solver.optimize([])
 
     def __enter__(self):
         self.solver.start(self.initial_cds_cpp, self._iteration_timelimit)
@@ -68,11 +68,11 @@ class CdsLns(CdsAlgorithm):
 
             greedy_sol = self.greedy_solver.optimize(edges)
 
-            for (p, q) in greedy_sol:
+            for p, q in greedy_sol:
                 assert self.graph.has_edge(p, q)
-            for (p, q) in edges:
+            for p, q in edges:
                 assert self.graph.has_edge(p, q)
-                
+
             sol = LnsCds(self.graph, subgraph=edges, use_heur=False).optimize(
                 initial_solution=greedy_sol,
                 max_iterations=5,

@@ -2,15 +2,14 @@
 The CP-SAT models for the optimization, as required by LNS.
 """
 import logging
+import multiprocessing
 import typing
 
-from .base_model import BaseModelCreator
-from ..preprocessor import IndexInstance
-
 import ortools.sat.python.cp_model as cp_model
-import multiprocessing
 
+from ..preprocessor import IndexInstance
 from ..utils import Timer
+from .base_model import BaseModelCreator
 
 
 class TupleIndex:
@@ -55,7 +54,7 @@ class _SubModel:
         self.model = model
         self.variables = self.bmc.create(instance, model)[1]
         # A container with all the tuple variables.
-        self.tuple_variables = dict()
+        self.tuple_variables = {}
         # A variable to indicated, that this configuration is activated.
         self.activated = model.NewBoolVar(f"ACT[{id(self)}]")
         timer.check()
@@ -118,7 +117,7 @@ class VectorizedEdgeModel:
             self.solver.parameters.log_search_progress = True
             self.solver.log_callback = print  # (str)->None
         self.status = None
-        self._symmetry_breaking_tuples = dict()
+        self._symmetry_breaking_tuples = {}
 
     def break_symmetries(self, independent_tuples: typing.Iterable[TupleIndex]):
         independent_tuples = list(independent_tuples)
@@ -187,7 +186,8 @@ class VectorizedEdgeModel:
         Return the best solution. Requires a successful optimization before.
         """
         if not self.is_feasible():
-            raise ValueError("Cannot access solution without solving the model.")
+            msg = "Cannot access solution without solving the model."
+            raise ValueError(msg)
         for submodel in self.submodels:
             if self.solver.Value(submodel.activated):
                 yield submodel.get_configuration(self.solver)

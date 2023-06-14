@@ -1,6 +1,6 @@
 from samplns.instances import parse
+from samplns.lns import RandomNeighborhood
 from samplns.preprocessor import Preprocessor
-from samplns.lns import ModularLns, RandomNeighborhood
 from samplns.simple import ConvertingLns
 
 
@@ -16,9 +16,9 @@ def test_preprocessor():
 """
 A module to easily read the benchmark instances and their solutions.
 """
+import os
 import tarfile
 import typing
-import os
 from collections import defaultdict
 
 
@@ -28,7 +28,7 @@ def list_benchmark_instances() -> typing.Iterable[str]:
     """
     root = os.path.dirname(__file__)
     instance_folder = os.path.join(root, "../../instances")
-    for root, dirs, files in os.walk(instance_folder):
+    for root, _dirs, files in os.walk(instance_folder):
         if "/020_samples/" in root:  # list only the instances with available sampels
             for f in files:
                 if f.endswith(".tar.gz"):
@@ -44,8 +44,8 @@ def list_latest_benchmark_instances() -> typing.Iterable[str]:
     """
     root = os.path.dirname(__file__)
     instance_folder = os.path.join(root, "../../instances")
-    instances_for_class = dict()
-    for root, dirs, files in os.walk(instance_folder):
+    instances_for_class = {}
+    for root, _dirs, files in os.walk(instance_folder):
         if "/020_samples/" in root:  # list only the instances with available sampels
             for f in files:
                 if f.endswith(".tar.gz"):
@@ -102,7 +102,8 @@ def get_solutions_from_file(path) -> typing.Dict[str, list]:
                 if member.isfile() and member.name.startswith(solution_path):
                     f = tar.extractfile(member)
                     if not f:
-                        raise Exception(f"Could not read {member}.")
+                        msg = f"Could not read {member}."
+                        raise Exception(msg)
                     # print("Read sample", member.name)
                     sol = f.readlines()
                     solutions[solution_path].append([s.strip().decode() for s in sol])

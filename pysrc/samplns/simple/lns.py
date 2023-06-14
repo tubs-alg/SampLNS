@@ -3,9 +3,9 @@ import typing
 from samplns.verify import have_equal_coverage
 
 from ..cds import CdsLns
-from ..lns.lns import ModularLns, InternalSolution, LnsLogger
-from ..lns.neighborhood import NeighborhoodSelector
 from ..instances import Instance
+from ..lns.lns import InternalSolution, LnsLogger, ModularLns
+from ..lns.neighborhood import NeighborhoodSelector
 from ..preprocessor import Preprocessor
 
 ExternalSolution = typing.List[
@@ -40,7 +40,8 @@ class ConvertingLns:
 
         if on_new_solution is not None:
             # callback needs exporting solution to original format
-            on_new_solution = lambda sol: on_new_solution(self._export_solution(sol))
+            def on_new_solution(sol):
+                return on_new_solution(self._export_solution(sol))
 
         cds_algorithm = CdsLns(self.index_instance, solution, log=logger)
 

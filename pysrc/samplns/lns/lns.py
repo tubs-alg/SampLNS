@@ -3,11 +3,11 @@ The LNS Algorithm
 """
 import typing
 
-from ..preprocessor import IndexInstance
 from ..cds import CdsAlgorithm
-from .model import VectorizedEdgeModel, TupleIndex
-from .neighborhood import Neighborhood, NeighborhoodSelector
+from ..preprocessor import IndexInstance
 from ..utils.timer import Timer
+from .model import TupleIndex, VectorizedEdgeModel
+from .neighborhood import Neighborhood, NeighborhoodSelector
 
 InternalSolution = typing.List[typing.Dict[int, bool]]  # Solution for working instance
 

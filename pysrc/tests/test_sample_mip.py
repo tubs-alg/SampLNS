@@ -1,14 +1,14 @@
 import itertools
 
 from ..samplns.instances import (
-    OrFeature,
     AndFeature,
     ConcreteFeature,
     FeatureLiteral,
     Instance,
+    OrFeature,
 )
-from ..samplns.lns.model import VectorizedEdgeModel, TupleIndex
-from ..samplns.preprocessor import IndexInstance, Preprocessor
+from ..samplns.lns.model import TupleIndex, VectorizedEdgeModel
+from ..samplns.preprocessor import Preprocessor
 
 
 def test_sample_mip():
@@ -45,7 +45,7 @@ def test_sample_mip():
     mip = VectorizedEdgeModel(index_instance, 16)
     covered_tuples = set()
     print("Greedy solution")
-    coverages = dict()
+    coverages = {}
     for conf in sample:
         conf_ = index_instance.to_mapped_universe(conf)
         is_needed = False
@@ -62,7 +62,7 @@ def test_sample_mip():
                 print(conf_[f], end="   ")
             print()
 
-    for i in range(9):
+    for _i in range(9):
         for conf in sample:
             remove = True
             conf_ = index_instance.to_mapped_universe(conf)
@@ -81,14 +81,14 @@ def test_sample_mip():
         print(conf)
 
     subsample = [sample[1], sample[2], sample[5]]
-    subcoverages = dict()
+    subcoverages = {}
     for conf in subsample:
         conf_ = index_instance.to_mapped_universe(conf)
         for f0, f1 in itertools.combinations(conf_.keys(), 2):
             ti = TupleIndex(f0, conf_[f0], f1, conf_[f1])
             subcoverages[ti] = coverages.get(ti, 0) + 1
     print(f"Subcov has {len(subcoverages.keys())} coverages")
-    for cov in coverages.keys():
+    for cov in coverages:
         if cov not in subcoverages:
             print(
                 "Missing",

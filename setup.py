@@ -14,14 +14,10 @@ the native modules and move them into your source folder.
 The setup options are documented here:
 https://scikit-build.readthedocs.io/en/latest/usage.html#setup-options
 """
-import os
+
 
 from setuptools import find_packages
 from skbuild_conan import setup
-import sys
-import subprocess
-import json
-
 
 
 def readme():
@@ -45,7 +41,7 @@ setup(  # https://scikit-build.readthedocs.io/en/latest/usage.html#setup-options
         "Programming Language :: Python :: 3",
     ],
     use_scm_version=True,
-    setup_requires=['setuptools_scm'],
+    setup_requires=["setuptools_scm"],
     # ~~~~~~~~~~~~ CRITICAL PYTHON SETUP ~~~~~~~~~~~~~~~~~~~
     # This project structures defines the python packages in a subfolder.
     # Thus, we have to collect this subfolder and define it as root.
@@ -90,5 +86,5 @@ setup(  # https://scikit-build.readthedocs.io/en/latest/usage.html#setup-options
     # cmake_args=[]
     #
     # There are further options, but you should be fine with these above.
-    conan_recipes = ["./cmake/conan/gurobi_public"]
+    conan_recipes=["./cmake/conan/gurobi_public"],
 )

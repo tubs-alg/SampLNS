@@ -20,7 +20,7 @@ class CoverageSet:
         sample: A feasible sample that can be used to deduce the feasible interactions
         n_concrete: The number of concrete features.
         """
-        self._features = {i for i in range(n_concrete)}
+        self._features = set(range(n_concrete))
         self._nodes = [(f, True) for f in self._features] + [
             (f, False) for f in self._features
         ]  # nodes in the interaction graph (caveat: contains isolated vertices)

@@ -9,12 +9,13 @@ class EquivalenceClasses:
     """
 
     def __init__(self):
-        self._class = dict()
+        self._class = {}
         self._class_counter = 1  # we use negative to indicate inverse.
 
     def _merge(self, x: int, y: int):
         if x == -y:
-            raise ValueError("Trying to merge inverse!")
+            msg = "Trying to merge inverse!"
+            raise ValueError(msg)
         for key, val in self._class.items():
             if val == y:
                 self._class[key] = x
@@ -55,9 +56,9 @@ class EquivalenceClasses:
         """
         Returns the equality substitutions and the inverse substitutions.
         """
-        direct_subs = dict()
-        inverse_subs = dict()
-        subst = dict()
+        direct_subs = {}
+        inverse_subs = {}
+        subst = {}
         for key, val in self._class.items():
             if abs(val) not in subst:
                 subst[abs(val)] = f"SUB[{key}]"
@@ -71,23 +72,18 @@ class EquivalenceClasses:
 class EquTest(unittest.TestCase):
     def test_trivial(self):
         ec = EquivalenceClasses()
-        self.assertEqual(ec.get_substitutions(), (dict(), dict()))
+        assert ec.get_substitutions() == ({}, {})
 
     def test_two(self):
         ec = EquivalenceClasses()
         ec.mark_equivalent("a", "b")
-        self.assertEqual(
-            ec.get_substitutions(), ({"a": "SUB[a]", "b": "SUB[a]"}, dict())
-        )
+        assert ec.get_substitutions() == ({"a": "SUB[a]", "b": "SUB[a]"}, {})
 
     def test_four(self):
         ec = EquivalenceClasses()
         ec.mark_equivalent("a", "b")
         ec.mark_equivalent("c", "d")
-        self.assertEqual(
-            ec.get_substitutions(),
-            ({"a": "SUB[a]", "b": "SUB[a]", "c": "SUB[c]", "d": "SUB[c]"}, dict()),
-        )
+        assert ec.get_substitutions() == ({"a": "SUB[a]", "b": "SUB[a]", "c": "SUB[c]", "d": "SUB[c]"}, {})
 
     def test_bad(self):
         ec = EquivalenceClasses()
@@ -98,4 +94,4 @@ class EquTest(unittest.TestCase):
     def test_two_inv(self):
         ec = EquivalenceClasses()
         ec.mark_equivalent("a", "b", True)
-        self.assertEqual(ec.get_substitutions(), ({"a": "SUB[a]"}, {"b": "SUB[a]"}))
+        assert ec.get_substitutions() == ({"a": "SUB[a]"}, {"b": "SUB[a]"})

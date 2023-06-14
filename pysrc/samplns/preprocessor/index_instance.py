@@ -1,7 +1,6 @@
 import typing
 
-from ..instances import SatNode
-from ..instances import FeatureNode, FeatureLabel
+from ..instances import FeatureLabel, FeatureNode, SatNode
 from .universe_mapping import UniverseMapping
 
 
@@ -69,9 +68,9 @@ class IndexInstance:
         self, assignment: typing.Dict[typing.Union[int, str], bool], strict: bool = True
     ) -> typing.Dict[FeatureLabel, bool]:
         conf = self._to_original_universe.to_mapped_universe(assignment)
-        if strict:
-            if not self.is_fully_defined(conf):
-                raise ValueError("Configuration does not match the concrete features.")
+        if strict and not self.is_fully_defined(conf):
+            msg = "Configuration does not match the concrete features."
+            raise ValueError(msg)
         return conf
 
     def is_fully_defined(
