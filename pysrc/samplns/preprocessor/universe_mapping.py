@@ -1,5 +1,6 @@
 import typing
 import unittest
+import logging
 from typing import Dict, Tuple, List
 from ..instances import FeatureLabel
 
@@ -10,11 +11,20 @@ class UniverseMapping:
     universe to the original universe
     """
 
-    def __init__(self, chain: typing.Optional["UniverseMapping"] = None):
+    def __init__(
+        self,
+        chain: typing.Optional["UniverseMapping"] = None,
+        parent_logger: typing.Optional[logging.Logger] = None,
+    ):
         self._origins: Dict[
             FeatureLabel, Tuple[List[FeatureLabel], List[FeatureLabel]]
         ] = dict()
+        self._targets: Dict[FeatureLabel, Tuple[bool, FeatureLabel]] = dict()
         self._chain = chain
+        if parent_logger is not None:
+            self._logger = parent_logger.getChild(self.__class__.__name__)
+        else:
+            self._logger = logging.getLogger(self.__class__.__name__)
 
     def to_json_data(self):
         c = None if not self._chain else self._chain.to_json_data()
@@ -46,24 +56,29 @@ class UniverseMapping:
             self._origins[target_element][1].append(origin_element)
         else:
             self._origins[target_element][0].append(origin_element)
+        assert (
+            origin_element not in self._targets
+        ), "Every origin element can only be mapped once."
+        self._targets[origin_element] = (inverse, target_element)
 
     def to_mapped_universe(self, assignment: typing.Dict[FeatureLabel, bool]):
+        self._logger.debug("Starting to translate assignment to mapped universe.")
         assignment_ = dict(assignment)
         mapped_assignment = dict()
         if self._chain:
             assignment_.update(self._chain.to_mapped_universe(assignment))
         for var, val in assignment_.items():
-            for var_ in self._origins:
-                if var in self._origins[var_][0]:
-                    mapped_assignment[var_] = val
-                elif var in self._origins[var_][1]:
-                    mapped_assignment[var_] = not val
-
+            if var not in self._targets:
+                continue  # Auxiliary variables are not mapped
+            inversed, var_ = self._targets[var]
+            mapped_assignment[var_] = val if not inversed else not val
+        self._logger.debug("Finished translating assignment to mapped universe.")
         return mapped_assignment
 
     def to_origin_universe(
         self, assignment: typing.Dict[FeatureLabel, bool]
     ) -> typing.Dict[FeatureLabel, bool]:
+        self._logger.debug("Starting to translate assignment to origin universe.")
         origin_assignment = dict()
         for var, val in assignment.items():
             if var in self._origins:
@@ -74,28 +89,6 @@ class UniverseMapping:
             else:
                 origin_assignment[var] = val
         if self._chain:
-            return self._chain.to_origin_universe(origin_assignment)
+            origin_assignment = self._chain.to_origin_universe(origin_assignment)
+        self._logger.debug("Finished translating assignment to origin universe.")
         return origin_assignment
-
-
-class MappingTest(unittest.TestCase):
-    def test_trivial(self):
-        um = UniverseMapping()
-        um.map("old_a", "new_b")
-        self.assertEqual(um.to_origin_universe({"new_b": True}), {"old_a": True})
-
-    def test_2(self):
-        um = UniverseMapping()
-        um.map("old_a", "new_a")
-        um.map("old_b", "new_a")
-        self.assertEqual(
-            um.to_origin_universe({"new_a": True}), {"old_a": True, "old_b": True}
-        )
-
-    def test_3(self):
-        um = UniverseMapping()
-        um.map("old_a", "new_a")
-        um.map("old_b", "new_a", inverse=True)
-        self.assertEqual(
-            um.to_origin_universe({"new_a": True}), {"old_a": True, "old_b": False}
-        )

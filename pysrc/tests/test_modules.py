@@ -146,7 +146,9 @@ def test_lns():
     solutions = get_solutions(instance_name)
     best_solution = min(solutions.values(), key=len)
     instance = get_instance(instance_name)
-    best_solution = [{f: f in conf for f in instance.features} for conf in best_solution]
+    best_solution = [
+        {f: f in conf for f in instance.features} for conf in best_solution
+    ]
     lns = ConvertingLns(
         instance=instance,
         initial_solution=best_solution,
