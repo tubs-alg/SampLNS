@@ -14,6 +14,7 @@ from samplns.utils import Timer
 
 logger = logging.getLogger("SampLNS")
 
+
 def test_sample_mip():
     concrete_features = ["1", "2", "3", "4"]
     tree = AndFeature(

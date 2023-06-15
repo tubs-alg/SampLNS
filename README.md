@@ -5,8 +5,18 @@ with a lower bound proving technique. On many of the instances we tested, it is
 able to compute smaller samples than YASA and frequently to even prove
 optimality. A paper describing the approach is currently in progress.
 
-The implementation is for research purposes only and not yet ready for
-production. Please contact us if you want to use it in production.
+> :warning: The implementation is for research purposes only and not yet ready
+> for production. Please contact us if you want to use it in production.
+
+The general idea of SampLNS is as follows: Theoretically, the problem of finding
+a minimal can be expressed as a SAT-problem. However, this is not feasible in
+practice as the formula is way too large. If we have an initial sample, we can
+use it to fix a part of the formula and then solve the remaining, much smaller,
+formula. If we repeat this process multiple times, we have a good chance of
+finding a minimal sample. This is essentially a Large Neighborhood Search (LNS).
+To break symmetries in the formula and supply the LNS with a lower bound, we
+have an additional optimizer that searches for a large set of mutually exclusive
+pairs of features.
 
 **What is a Large Neighborhood Search (LNS)?** It is a metaheuristic for
 optimization problems that works as follows: You start with a feasible solution.
@@ -36,6 +46,15 @@ problems is itself NP-hard, so we are only able to approximate them. However,
 every lower bound returned is still guaranteed to be smaller than the optimal
 solution. It may just not be sufficient to prove optimality.
 
+**Why does SampLNS not compute its own initial samples?** SampLNS requires an
+initial sample to start the optimization process. We do not compute this initial
+sample ourselves, but require the user to provide it. This is because there are
+already many good tools for computing initial samples, such as
+[FeatureIDE](https://featureide.github.io/). We do not want to reinvent the
+wheel and instead focus on the optimization process. If you do not have an
+initial solution, you can use the [FeatureIDE](https://featureide.github.io/) to
+compute one.
+
 ## Installation
 
 This package requires a valid license of the commercial MIP-solver Gurobi. You
@@ -54,9 +73,23 @@ After you got your license, move into the folder with `setup.py` and run
 pip install .
 ```
 
-This should automatically install dependencies and build the package for you.
-Only tested with Linux. Potentially works with Mac OS, likely fails with
-Windows.
+This command should automatically install all dependencies and build the package.
+The package contains native C++-code that is compiled during installation. This
+requires a C++-compiler. On most systems, this should be installed by default.
+If not, you can install it via
+
+```shell
+sudo apt install build-essential  # Ubuntu
+sudo pacman -S base-devel         # Arch
+```
+
+Generally, the installation will take a while as it has to compile the C++, but
+it should work out of the box. If you encounter any problems, please open an
+issue. Unfortunately, the performance of native code is bought with a more
+complex installation process, and it is difficult to make it work on all
+systems. Windows systems are especially difficult to support. We suggest using
+a Linux system.
+
 
 > If you got a bad license, the code may just crash without a proper error
 > message. This will be fixed soon.
@@ -97,7 +130,6 @@ if __name__ == "__main__":
 
 > ! There is no CLI, yet. We will add it with the next version.
 
-
 ## Logging
 
 The optimizer uses the Python logging module. You can configure it as you like.
@@ -106,12 +138,14 @@ change the logging level by adding the following lines to your code:
 
 ```python
 import logging
-logging.getLogger("SampLNS").basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
+
+logging.getLogger("SampLNS").basicConfig(
+    format="%(levelname)s:%(message)s", level=logging.INFO
+)
 ```
 
 You can also pass a custom logger to the optimizer. This is useful if you want
 to capture the log messages for analysis.
-
 
 ## Modules
 

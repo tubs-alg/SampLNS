@@ -20,11 +20,12 @@ class SampLns:
     A simple interface to the LNS algorithm. It takes care of the preprocessing
     and converting the solutions back to the original universe.
     """
+
     def __init__(
         self,
         instance: Instance,
         initial_solution: ExternalSolution,
-        neighborhood_selector: typing.Optional[NeighborhoodSelector]=None,
+        neighborhood_selector: typing.Optional[NeighborhoodSelector] = None,
         on_new_solution: typing.Optional[
             typing.Callable[[ExternalSolution], None]
         ] = None,
@@ -67,7 +68,6 @@ class SampLns:
             observer=observer,
             logger=self.log,
         )
-
 
     def _import_solution(self, solution: ExternalSolution) -> InternalSolution:
         """
