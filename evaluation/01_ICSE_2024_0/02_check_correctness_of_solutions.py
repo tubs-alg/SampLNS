@@ -1,8 +1,6 @@
+from _utils import get_instance, parse_sample
 from aemeasure import Database
 from samplns.verify import have_equal_coverage
-
-from _utils import get_instance, parse_solution_overview, parse_sample
-
 
 TIME_LIMIT = 900
 BASE = "900_seconds_5_it"
@@ -22,5 +20,4 @@ if __name__ == "__main__":
         if have_equal_coverage(instance, lns_sample, initial_sample):
             data_.append(entry)
         else:
-            assert False
-
+            raise AssertionError()

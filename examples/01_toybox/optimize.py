@@ -3,7 +3,7 @@ import logging
 
 from samplns.instances import parse
 from samplns.lns import RandomNeighborhood
-from samplns.simple import ConvertingLns
+from samplns.simple import SampLns
 
 if __name__ == "__main__":
     logger = logging.getLogger("samplns")
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     feature_model = parse("./toybox_2006-10-31_23-30-06/model.xml", logger=logger)
     with open("./yasa_sample.json") as f:
         initial_sample = json.load(f)
-    solver = ConvertingLns(
+    solver = SampLns(
         instance=feature_model,
         initial_solution=initial_sample,
         neighborhood_selector=RandomNeighborhood(logger=logger),

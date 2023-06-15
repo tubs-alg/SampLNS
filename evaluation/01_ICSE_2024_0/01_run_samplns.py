@@ -11,15 +11,13 @@ can be restarted without doing repetitive work.
 """
 import os
 
-from aemeasure import MeasurementSeries, read_as_pandas_table, Database
 import slurminade
-
-from samplns.simple import ConvertingLns
-from samplns.utils import Timer
+from _utils import get_instance, parse_sample, parse_solution_overview
+from aemeasure import Database, MeasurementSeries, read_as_pandas_table
 from samplns.lns.lns import LnsLogger
-from samplns.lns.neighborhood import RandomNeighborhood, Neighborhood
-
-from _utils import get_instance, parse_solution_overview, parse_sample
+from samplns.lns.neighborhood import Neighborhood, RandomNeighborhood
+from samplns.simple import SampLns
+from samplns.utils import Timer
 
 # ================================================
 # SLURM CONFIGURATION FOR DISTRIBUTED EXECUTION
@@ -68,7 +66,7 @@ class MyLnsLogger(LnsLogger):
         self.iterations.append({})
 
     def report_iteration_end(
-            self, iteration: int, runtime: float, lb: int, solution, events
+        self, iteration: int, runtime: float, lb: int, solution, events
     ):
         self.iterations[-1].update(
             {
@@ -80,9 +78,6 @@ class MyLnsLogger(LnsLogger):
                 "events": events,
             }
         )
-
-    def __call__(self, *args, **kwargs):
-        print(f"LOG[{self.timer.time()}]", *args)
 
 
 @slurminade.slurmify
@@ -98,35 +93,34 @@ def optimize(instance_name: str, solution_path: str):
         return
     sample = parse_sample(sample_path=solution_path, archive_path=INPUT_SAMPLE_ARCHIVE)
 
-    with MeasurementSeries(RESULT_FOLDER) as ms:
-        with ms.measurement() as m:
-            m["instance"] = instance_name
-            m["initial_sample_path"] = solution_path
-            m["iteration_time_limit"] = ITERATION_TIME_LIMIT
-            m["iterations"] = ITERATIONS
-            m["time_limit"] = TIME_LIMIT
+    with MeasurementSeries(RESULT_FOLDER) as ms, ms.measurement() as m:
+        m["instance"] = instance_name
+        m["initial_sample_path"] = solution_path
+        m["iteration_time_limit"] = ITERATION_TIME_LIMIT
+        m["iterations"] = ITERATIONS
+        m["time_limit"] = TIME_LIMIT
 
-            # setup (needs time measurement as already involves calculations)
-            logger = MyLnsLogger()
-            solver = ConvertingLns(
-                instance=instance,
-                initial_solution=sample,
-                neighborhood_selector=RandomNeighborhood(),
-                logger=logger,
-            )
+        # setup (needs time measurement as already involves calculations)
+        logger = MyLnsLogger()
+        solver = SampLns(
+            instance=instance,
+            initial_solution=sample,
+            neighborhood_selector=RandomNeighborhood(),
+            logger=logger,
+        )
 
-            solver.optimize(
-                iterations=ITERATIONS,
-                iteration_timelimit=ITERATION_TIME_LIMIT,
-                timelimit=TIME_LIMIT,
-            )
-            # get optimized sample and verify its correctness (takes some time).
-            m["solution"] = solver.get_best_solution(verify=True)
-            m["lower_bound"] = solver.get_lower_bound()
-            m["upper_bound"] = len(solver.get_best_solution())
-            m["optimal"] = solver.get_lower_bound() == len(solver.get_best_solution())
-            m["runtime"] = m.time().total_seconds()
-            m["iteration_info"] = logger.iterations
+        solver.optimize(
+            iterations=ITERATIONS,
+            iteration_timelimit=ITERATION_TIME_LIMIT,
+            timelimit=TIME_LIMIT,
+        )
+        # get optimized sample and verify its correctness (takes some time).
+        m["solution"] = solver.get_best_solution(verify=True)
+        m["lower_bound"] = solver.get_lower_bound()
+        m["upper_bound"] = len(solver.get_best_solution())
+        m["optimal"] = solver.get_lower_bound() == len(solver.get_best_solution())
+        m["runtime"] = m.time().total_seconds()
+        m["iteration_info"] = logger.iterations
 
 
 @slurminade.slurmify(mail_type="ALL")
@@ -146,7 +140,8 @@ def configure_grb_license_path():
         Path.home(), ".gurobi", socket.gethostname(), "gurobi.lic"
     )
     if not os.path.exists(os.environ["GRB_LICENSE_FILE"]):
-        raise RuntimeError("Gurobi License File does not exist.")
+        msg = "Gurobi License File does not exist."
+        raise RuntimeError(msg)
 
 
 if __name__ == "__main__":

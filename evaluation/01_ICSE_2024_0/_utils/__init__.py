@@ -1,5 +1,6 @@
 import os.path
 from zipfile import ZipFile
+
 import pandas as pd
 from samplns.instances import parse_source
 
@@ -58,16 +59,15 @@ def parse_solution_overview(path, subpath=None):
 
 
 def parse_sample(archive_path, sample_path):
-    with ZipFile(archive_path) as archive:
-        with archive.open(sample_path) as f:
-            t = pd.read_csv(f, sep=";", index_col="Configuration")
-            samples = []
+    with ZipFile(archive_path) as archive, archive.open(sample_path) as f:
+        t = pd.read_csv(f, sep=";", index_col="Configuration")
+        samples = []
 
-            def f(row):
-                samples.append({k: v == "+" for k, v in row.items()})
+        def f(row):
+            samples.append({k: v == "+" for k, v in row.items()})
 
-            t.apply(f, axis=1)
-            return samples
+        t.apply(f, axis=1)
+        return samples
 
 
 def get_results(input_sample_archive, result_folder, max_vars=1500):

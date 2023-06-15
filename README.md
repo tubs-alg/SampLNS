@@ -68,18 +68,16 @@ There is an example in `examples/`.
 ```python
 import json
 
-from samplns.simple import ConvertingLns
+from samplns.simple import SampLns
 from samplns.instances import parse
-from samplns.lns import RandomNeighborhood
 
 if __name__ == "__main__":
     feature_model = parse("./toybox_2006-10-31_23-30-06/model.xml")
     with open("./yasa_sample.json") as f:
         initial_sample = json.load(f)
-    solver = ConvertingLns(
+    solver = SampLns(
         instance=feature_model,
         initial_solution=initial_sample,
-        neighborhood_selector=RandomNeighborhood(),
     )
 
     solver.optimize(
@@ -98,6 +96,22 @@ if __name__ == "__main__":
 > results may be wrong. We will add automatic warnings for that soon.
 
 > ! There is no CLI, yet. We will add it with the next version.
+
+
+## Logging
+
+The optimizer uses the Python logging module. You can configure it as you like.
+The default logger is named "SampLNS" and does not print anything. You can
+change the logging level by adding the following lines to your code:
+
+```python
+import logging
+logging.getLogger("SampLNS").basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
+```
+
+You can also pass a custom logger to the optimizer. This is useful if you want
+to capture the log messages for analysis.
+
 
 ## Modules
 

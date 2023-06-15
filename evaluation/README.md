@@ -4,15 +4,17 @@ This folder contains the experiments and evaluations of the algorithm.
 
 ## Structure
 
-Evaluations should follow the following structure that enables a proper documentation
-and reproducibility.
+Evaluations should follow the following structure that enables a proper
+documentation and reproducibility.
 
 - Have everything numbered in the way things were created/run.
-- Make output files in a way that you can easily find their origin. Often you have to copy
-  some results and then a year later you want to know where you got it from.
-- Add as many README.md as possible, even if they just say who and when did this. Better
-  also write in a sentence the initial motivation. This is very quickly done and can help
-  tremendously a year later when you have to look into the results again for some reason.
+- Make output files in a way that you can easily find their origin. Often you
+  have to copy some results and then a year later you want to know where you got
+  it from.
+- Add as many README.md as possible, even if they just say who and when did
+  this. Better also write in a sentence the initial motivation. This is very
+  quickly done and can help tremendously a year later when you have to look into
+  the results again for some reason.
 
 This structure is just an example and does not match the actual experiments.
 
@@ -33,13 +35,14 @@ This structure is just an example and does not match the actual experiments.
     - `01_run_old_algorithms.py`
     - `02_process_results.py`
     - `02_results/`
-    - `03_first_look.ipynb` Quick look into the results to make sure they look as
-      expected.
+    - `03_first_look.ipynb` Quick look into the results to make sure they look
+      as expected.
   - `02_run_new_algorithm/`
     - `00_prepare_instances.py`
     - `01_run_new_algorithm.py`
     - `02_process_results.py`
     - `02_results/`
-    - `03_first_look.ipynb` Quick look into the results to make sure they look as
-      expected.
-  - `03_compare_algorithms.ipynb` Compare the performance of algorithms in some plots.
+    - `03_first_look.ipynb` Quick look into the results to make sure they look
+      as expected.
+  - `03_compare_algorithms.ipynb` Compare the performance of algorithms in some
+    plots.

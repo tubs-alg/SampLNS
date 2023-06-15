@@ -15,7 +15,7 @@ class CoverageSet:
     The coverage set is for computing which interactions are covered.
     """
 
-    def __init__(self, sample: Sample, n_concrete):
+    def __init__(self, sample: Sample, n_concrete: int):
         """
         sample: A feasible sample that can be used to deduce the feasible interactions
         n_concrete: The number of concrete features.

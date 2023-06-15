@@ -4,7 +4,7 @@ import zipfile
 
 from samplns.instances import parse
 from samplns.lns import RandomNeighborhood
-from samplns.simple import ConvertingLns
+from samplns.simple import SampLns
 
 if __name__ == "__main__":
     logger = logging.getLogger("samplns")
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     with zipfile.ZipFile("./yasa_sample.zip") as zip, zip.open("yasa_sample.json") as f:
         initial_sample = json.load(f)
-    solver = ConvertingLns(
+    solver = SampLns(
         instance=feature_model,
         initial_solution=initial_sample,
         neighborhood_selector=RandomNeighborhood(logger=logger),

@@ -4,7 +4,7 @@ import typing
 from ..cds import CdsLns
 from ..instances import Instance
 from ..lns.lns import InternalSolution, LnsObserver, ModularLns
-from ..lns.neighborhood import NeighborhoodSelector
+from ..lns.neighborhood import NeighborhoodSelector, RandomNeighborhood
 from ..preprocessor import Preprocessor
 from ..verify import have_equal_coverage
 
@@ -15,12 +15,16 @@ ExternalSolution = typing.List[
 _logger = logging.getLogger("SampLNS")
 
 
-class ConvertingLns:
+class SampLns:
+    """
+    A simple interface to the LNS algorithm. It takes care of the preprocessing
+    and converting the solutions back to the original universe.
+    """
     def __init__(
         self,
         instance: Instance,
         initial_solution: ExternalSolution,
-        neighborhood_selector: NeighborhoodSelector,
+        neighborhood_selector: typing.Optional[NeighborhoodSelector]=None,
         on_new_solution: typing.Optional[
             typing.Callable[[ExternalSolution], None]
         ] = None,
@@ -28,18 +32,21 @@ class ConvertingLns:
         logger: logging.Logger = _logger,
     ):
         """
-        instance: The instance we want to find a sample for.
-        initial_solution: A (good) initial solution we want to improve.
-        neighborhood_selector: The heart of the LNS algorithm, its neighborhood.
-        use_hints: Use CP-SAT hints using the previous solution.
-        on_new_solution: A callback that notifies about every new solution.
+        :param instance: The instance we want to find a sample for.
+        :param initial_solution: A (good) initial solution we want to improve.
+        :param neighborhood_selector: The heart of the LNS algorithm, its neighborhood.
+        :param on_new_solution: A callback that notifies about every new solution.
+        :param observer: An observer that is notified about the progress.
+        :param logger: A logger.
         """
         self.log = logger
         self.original_instance = instance
+        if not neighborhood_selector:
+            neighborhood_selector = RandomNeighborhood(logger=logger)
         self.index_instance = Preprocessor(logger=logger).preprocess(instance)
         self.initial_solution = initial_solution
         solution = self._import_solution(initial_solution)
-        neighborhood_selector = neighborhood_selector
+        self.neighborhood_selector = neighborhood_selector
         neighborhood_selector.setup(self.index_instance, solution)
 
         if on_new_solution is not None:
@@ -61,7 +68,6 @@ class ConvertingLns:
             logger=self.log,
         )
 
-        # cds_algorithm.register_ub_alg(self._lns)
 
     def _import_solution(self, solution: ExternalSolution) -> InternalSolution:
         """

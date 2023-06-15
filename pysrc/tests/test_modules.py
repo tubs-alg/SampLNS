@@ -3,7 +3,7 @@ import logging
 from samplns.instances import parse
 from samplns.lns import RandomNeighborhood
 from samplns.preprocessor import Preprocessor
-from samplns.simple import ConvertingLns
+from samplns.simple import SampLns
 
 
 def test_instance():
@@ -153,7 +153,7 @@ def test_lns():
     best_solution = [
         {f: f in conf for f in instance.features} for conf in best_solution
     ]
-    lns = ConvertingLns(
+    lns = SampLns(
         instance=instance,
         initial_solution=best_solution,
         neighborhood_selector=RandomNeighborhood(logger, 200),
