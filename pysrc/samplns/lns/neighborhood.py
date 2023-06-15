@@ -4,11 +4,14 @@ for the LNS and some examples.
 """
 
 import abc
+import logging
 import random
 import typing
 
 from ..preprocessor import IndexInstance
 from .coverage_set import CoverageSet
+
+_logger = logging.getLogger("SampLNS")
 
 
 class Neighborhood:
@@ -96,7 +99,14 @@ class RandomNeighborhood(NeighborhoodSelector):
     The size will increase or decrease by a specified factor
     """
 
-    def __init__(self, max_free_tuples: int = 250, incr_factor=1.25, decr_factor=0.75):
+    def __init__(
+        self,
+        max_free_tuples: int = 250,
+        incr_factor=1.25,
+        decr_factor=0.75,
+        logger: logging.Logger = _logger,
+    ):
+        self.log = logger
         self.instance = None
         self.coverage_set = None
         self.n = max_free_tuples
@@ -109,10 +119,12 @@ class RandomNeighborhood(NeighborhoodSelector):
         instance: IndexInstance,
         initial_solution: typing.List[typing.Dict[int, bool]],
     ):
+        self.log.info("Setting up random neighborhood selector.")
         self.instance = instance
         self.best_solution = initial_solution
         self.coverage_set = CoverageSet(initial_solution, instance.n_concrete)
         self.n_interactions = len(self.coverage_set)
+        self.log.info("Neighborhood selector is ready.")
 
     def add_solution(self, solution: typing.List[typing.Dict[int, bool]]):
         if self.best_solution is None or len(solution) < len(self.best_solution):
@@ -145,8 +157,8 @@ class RandomNeighborhood(NeighborhoodSelector):
 
     def decrease(self):
         self.n *= self.decr_factor
-        print(f"NEIGHBORHOOD: Decreasing size to {self.n}.")
+        self.log.info("Decreasing neighborhood size to %d tuples.", self.n)
 
     def increase(self):
         self.n *= self.incr_factor
-        print(f"NEIGHBORHOOD: Increasing size to {self.n}.")
+        self.log.info("Increasing neighborhood size to %d tuples.", self.n)

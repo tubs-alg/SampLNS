@@ -3,6 +3,7 @@ This module provides the elements for the feature structure.
 """
 
 import abc
+import logging
 import typing
 
 FeatureLabel = typing.Union[str, int]
@@ -155,9 +156,7 @@ class ConcreteFeature(FeatureNode):
     sub-features.
     """
 
-    def __init__(
-        self, feature_literal: FeatureLiteral, mandatory: bool = False
-    ) -> None:
+    def __init__(self, feature_literal: FeatureLiteral, mandatory: bool) -> None:
         super().__init__(feature_literal, mandatory)
 
     def concrete_features(self):
@@ -204,7 +203,7 @@ class CompositeFeature(FeatureNode, abc.ABC):
         self,
         feature_literal: FeatureLiteral,
         elements: typing.List[FeatureNode],
-        mandatory: bool = False,
+        mandatory: bool,
     ) -> None:
         super().__init__(feature_literal, mandatory)
         self.elements = elements
@@ -253,9 +252,11 @@ class AndFeature(CompositeFeature):
         self,
         feature_literal: FeatureLiteral,
         elements: typing.List[FeatureNode],
-        mandatory: bool = False,
+        mandatory: bool,
+        logger: logging.Logger,
     ) -> None:
         super().__init__(feature_literal, elements, mandatory)
+        self.logger = logger
 
     def substitute(
         self,
@@ -264,7 +265,7 @@ class AndFeature(CompositeFeature):
     ) -> FeatureNode:
         elements = [e.substitute(direct, inverse) for e in self.elements]
         x = self.feature_literal.sub(direct, inverse)
-        return AndFeature(x, elements, self.mandatory)
+        return AndFeature(x, elements, mandatory=self.mandatory, logger=self.logger)
 
     def is_feasible(self, assignment: typing.Dict[FeatureLabel, bool]) -> bool:
         if not all(el.is_feasible(assignment) for el in self.elements):
@@ -276,14 +277,14 @@ class AndFeature(CompositeFeature):
                 if mand_el.mandatory
             )
             if not all_mandatory_elements_are_active:
-                print("Not all mandatory elements of AND are active.")
+                self.logger.warning("Not all mandatory elements of AND are active.")
             return all_mandatory_elements_are_active
         else:
             no_element_active = all(
                 not el.is_active(assignment) for el in self.elements
             )
             if not no_element_active:
-                print("AND not active, but elements of it are")
+                self.logger.warning("AND not active, but elements of it are")
             return no_element_active
 
     def __repr__(self):
@@ -306,11 +307,13 @@ class OrFeature(CompositeFeature):
         self,
         feature_literal: FeatureLiteral,
         elements: typing.List[FeatureNode],
-        mandatory: bool = False,
+        mandatory: bool,
+        logger: logging.Logger,
     ) -> None:
         super().__init__(feature_literal, elements, mandatory)
+        self.logger = logger
         if self.mandatory_elements():
-            print("WARNING: Making mandatory elements of OR non-mandatory.")
+            self.logger.warning("Making mandatory elements of OR non-mandatory.")
             for f in self.elements:
                 f.mandatory = False
         assert not self.mandatory_elements()
@@ -322,7 +325,7 @@ class OrFeature(CompositeFeature):
     ) -> FeatureNode:
         elements = [e.substitute(direct, inverse) for e in self.elements]
         x = self.feature_literal.sub(direct, inverse)
-        return OrFeature(x, elements, self.mandatory)
+        return OrFeature(x, elements, self.mandatory, logger=self.logger)
 
     def __repr__(self):
         m = "!" if self.mandatory else ""
@@ -336,14 +339,14 @@ class OrFeature(CompositeFeature):
         if self.is_active(assignment):
             satisfied = any(el.is_active(assignment) for el in self.elements)
             if not satisfied:
-                print("OR active, but no element of it.")
+                self.logger.warning("OR active, but no element of it.")
             return satisfied
         else:
             no_element_active = all(
                 not el.is_active(assignment) for el in self.elements
             )
             if not no_element_active:
-                print("OR not active, but elements of it are")
+                self.logger.warning("OR not active, but elements of it are")
             return no_element_active
 
     def to_json_data(self):
@@ -362,11 +365,13 @@ class AltFeature(CompositeFeature):
         self,
         feature_literal: FeatureLiteral,
         elements: typing.List[FeatureNode],
-        mandatory: bool = False,
+        mandatory: bool,
+        logger: logging.Logger,
     ) -> None:
         super().__init__(feature_literal, elements, mandatory)
+        self.logger = logger
         if self.mandatory_elements():
-            print("WARNING: Making mandatory elements of ALT non-mandatory.")
+            self.logger.warning("Making mandatory elements of ALT non-mandatory.")
             for f in self.elements:
                 f.mandatory = False
         assert not self.mandatory_elements()
@@ -378,7 +383,7 @@ class AltFeature(CompositeFeature):
     ) -> FeatureNode:
         elements = [e.substitute(direct, inverse) for e in self.elements]
         x = self.feature_literal.sub(direct, inverse)
-        return AltFeature(x, elements, self.mandatory)
+        return AltFeature(x, elements, self.mandatory, logger=self.logger)
 
     def __repr__(self):
         m = "!" if self.mandatory else ""
@@ -391,14 +396,14 @@ class AltFeature(CompositeFeature):
             n_active = sum(1 if el.is_active(assignment) else 0 for el in self.elements)
             one_active = n_active == 1
             if not one_active:
-                print(f"ALT active and {n_active} elements.")
+                self.logger.warning(f"ALT active and {n_active} elements.")
             return one_active
         else:
             no_element_active = all(
                 not el.is_active(assignment) for el in self.elements
             )
             if not no_element_active:
-                print("ALT not active, but elements of it are")
+                self.logger.warning("ALT not active, but elements of it are")
             return no_element_active
 
     def to_json_data(self):

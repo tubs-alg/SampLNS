@@ -1,3 +1,10 @@
+"""
+This file contains the parser for the XML format.
+Currently, we only support the feature tree based format.
+Pure CNF, e.g. in DIMACS, is not supported, yet.
+We use the feature tree to extract the concrete features (leaves)
+and the ALT-nodes which can be expressed more efficiently than in pure CNF.
+"""
 import logging
 import re
 import tarfile
@@ -10,16 +17,10 @@ from .feature import AltFeature, AndFeature, ConcreteFeature, FeatureLiteral, Or
 from .instance import Instance
 from .sat_formula import AND, EQ, IMPL, NOT, OR, VAR, SatNode
 
-
-def _get_logger(parent_logger: typing.Optional[logging.Logger] = None):
-    return (
-        parent_logger.getChild("Parser")
-        if parent_logger
-        else logging.getLogger("Parser")
-    )
+_logger = logging.getLogger("SampLNS")
 
 
-def parse(path: str, parent_logger: typing.Optional[logging.Logger]) -> Instance:
+def parse(path: str, logger: logging.Logger = _logger) -> Instance:
     """
     Parse an instance. An exception is thrown when the instance does not look as we
     expect. In this case: tell us!
@@ -28,14 +29,13 @@ def parse(path: str, parent_logger: typing.Optional[logging.Logger]) -> Instance
 
     :param path: The path to the instance.
     """
-    logger = _get_logger(parent_logger)
     if path.endswith(".tar.gz"):
         with tarfile.open(path, "r:gz") as tar:
             for tarinfo in tar:
                 if tarinfo.isreg() and tarinfo.name.endswith(".xml"):
                     logger.info("Parsing xml file: %s", tarinfo.name)
                     return parse_source(
-                        tar.extractfile(tarinfo.name), path, parent_logger=parent_logger
+                        tar.extractfile(tarinfo.name), path, logger=logger
                     )
         error_msg = "Could not extract xml file from archive"
         raise ValueError(error_msg)
@@ -44,24 +44,19 @@ def parse(path: str, parent_logger: typing.Optional[logging.Logger]) -> Instance
             for info in zip.infolist():
                 if info.filename.endswith(".xml"):
                     logger.info("Parsing xml file: %s", info.filename)
-                    return parse_source(
-                        zip.open(info.filename), path, parent_logger=parent_logger
-                    )
+                    return parse_source(zip.open(info.filename), path, logger=logger)
         error_msg = "Could not extract xml file from archive"
         raise ValueError(error_msg)
     else:
         with open(path) as f:
-            return parse_source(f, path, parent_logger=parent_logger)
+            return parse_source(f, path, logger=logger)
 
 
-def parse_source(
-    source_file, instance_name, parent_logger: typing.Optional[logging.Logger] = None
-):
-    logger = _get_logger(parent_logger)
+def parse_source(source_file, instance_name, logger: logging.Logger = _logger):
     tree = ET.parse(source_file)
-    structure = parse_features(tree, parent_logger=parent_logger)
+    structure = parse_features(tree, logger=logger)
     features = list(structure.concrete_features())
-    rules = parse_rules(tree, parent_logger=parent_logger)
+    rules = parse_rules(tree, logger=logger)
     logger.info(
         "Parsed instance '%s' with %d features and %d rules.",
         instance_name,
@@ -73,22 +68,23 @@ def parse_source(
     return instance
 
 
-def parse_features(xmltree: ET, parent_logger: typing.Optional[logging.Logger] = None):
-    return parse_feature(xmltree.find("struct"), parent_logger=parent_logger)
+def parse_features(xmltree: ET, logger: logging.Logger):
+    return parse_feature(xmltree.find("struct"), logger=logger)
 
 
-def parse_feature(feature_node, parent_logger: typing.Optional[logging.Logger]):
-    logger = _get_logger(parent_logger)
-    elements = [
-        parse_feature(child, parent_logger=parent_logger) for child in feature_node
-    ]
+def parse_feature(feature_node, logger: logging.Logger):
+    elements = [parse_feature(child, logger=logger) for child in feature_node]
     elements = [e for e in elements if e]
     mandatory = feature_node.attrib.get("mandatory", "false") == "true"
     feature_literal = FeatureLiteral(feature_node.attrib.get("name"))
     if feature_node.tag == "and":
-        return AndFeature(feature_literal, mandatory=mandatory, elements=elements)
+        return AndFeature(
+            feature_literal, mandatory=mandatory, elements=elements, logger=logger
+        )
     elif feature_node.tag == "or":
-        return OrFeature(feature_literal, mandatory=mandatory, elements=elements)
+        return OrFeature(
+            feature_literal, mandatory=mandatory, elements=elements, logger=logger
+        )
     elif feature_node.tag == "alt":
         if len(elements) == 1:
             logger.warning(
@@ -97,7 +93,9 @@ def parse_feature(feature_node, parent_logger: typing.Optional[logging.Logger]):
             )
             elements[0].mandatory = mandatory
             return elements[0]
-        return AltFeature(feature_literal, mandatory=mandatory, elements=elements)
+        return AltFeature(
+            feature_literal, mandatory=mandatory, elements=elements, logger=logger
+        )
     elif feature_node.tag == "feature":
         return ConcreteFeature(feature_literal, mandatory=mandatory)
     elif feature_node.tag == "struct":
@@ -109,9 +107,8 @@ def parse_feature(feature_node, parent_logger: typing.Optional[logging.Logger]):
     raise ValueError(error_msg)
 
 
-def parse_rule(rule_node, parent_logger: logging.Logger):
-    logger = _get_logger(parent_logger)
-    children = [parse_rule(child, parent_logger) for child in rule_node]
+def parse_rule(rule_node, logger: logging.Logger):
+    children = [parse_rule(child, logger) for child in rule_node]
     tag = rule_node.tag
     if tag == "conj":
         if len(children) == 1:
@@ -139,13 +136,13 @@ def parse_rule(rule_node, parent_logger: logging.Logger):
     raise ValueError(error_msg)
 
 
-def parse_rules(xmltree: ET, parent_logger: logging.Logger) -> typing.List[SatNode]:
+def parse_rules(xmltree: ET, logger: logging.Logger) -> typing.List[SatNode]:
     rules_node = xmltree.find("constraints")
     rules = []
     for rule in rules_node.findall("rule"):
         children = tuple(rule)
         assert len(children) == 1
-        r = parse_rule(children[0], parent_logger=parent_logger)
+        r = parse_rule(children[0], logger=logger)
         rules.append(r)
     return rules
 

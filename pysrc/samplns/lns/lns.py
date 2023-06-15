@@ -1,6 +1,7 @@
 """
 The LNS Algorithm
 """
+import logging
 import typing
 
 from ..cds import CdsAlgorithm
@@ -11,8 +12,10 @@ from .neighborhood import Neighborhood, NeighborhoodSelector
 
 InternalSolution = typing.List[typing.Dict[int, bool]]  # Solution for working instance
 
+_logger = logging.getLogger("SampLNS")
 
-class LnsLogger:
+
+class LnsObserver:
     def report_new_lb(self, lb: int):
         pass
 
@@ -33,12 +36,6 @@ class LnsLogger:
         solution: InternalSolution,
         events,
     ):
-        print(
-            f"Iteration {iteration} finished in {runtime}s. LB={lb}, UB={len(solution)}. Events: {events}."
-        )
-        pass
-
-    def __call__(self, *args, **kwargs):
         pass
 
 
@@ -59,7 +56,8 @@ class ModularLns:
         on_new_solution: typing.Optional[
             typing.Callable[[InternalSolution], None]
         ] = None,
-        logger=LnsLogger(),
+        observer=LnsObserver(),
+        logger: logging.Logger = _logger,
     ):
         """
         instance: The instance we want to find a sample for.
@@ -68,6 +66,7 @@ class ModularLns:
         use_hints: Use CP-SAT hints using the previous solution.
         on_new_solution: A callback that notifies about every new solution.
         """
+        self.log = logger
         self.index_instance = instance
         self.neighborhood_selector = neighborhood_selector
         solution = initial_solution
@@ -76,15 +75,16 @@ class ModularLns:
         self.lb = 0
         self._solution_pool = [solution]
         self.on_new_solution = on_new_solution
-        self.logger = logger
+        self.observer = observer
 
     def add_lower_bound(self, lb: int) -> None:
         """
         Add a lower bound.
         """
         if lb > self.lb:
+            self.log.info("Increased lower bound to %d (from %d).", lb, self.lb)
             self.lb = lb
-            self.logger.report_new_lb(lb)
+            self.observer.report_new_lb(lb)
 
     def get_best_solution(self) -> InternalSolution:
         """
@@ -104,7 +104,7 @@ class ModularLns:
         self.neighborhood_selector.add_solution(solution)
         if self.on_new_solution is not None:
             self.on_new_solution(solution)
-        self.logger.report_new_solution(solution)
+        self.observer.report_new_solution(solution)
 
     def _build_neighborhood_model(
         self, neighborhood: Neighborhood, independent: typing.List, timer: Timer
@@ -114,8 +114,9 @@ class ModularLns:
         The independent interactions are an important speed-up.
         """
         k = len(neighborhood.initial_solution)
-        model = VectorizedEdgeModel(self.index_instance, k, timer)
-        self.logger(f"Using {len(independent)} tuples to break symmetry!")
+        self.log.info("Building model for neighborhood of size %d.", k)
+        model = VectorizedEdgeModel(self.index_instance, k, timer, logger=self.log)
+        self.log.info("Using %d tuples to break symmetries.", len(independent))
         model.break_symmetries(
             TupleIndex(t[0][0], t[0][1], t[1][0], t[1][1]) for t in independent
         )
@@ -125,6 +126,7 @@ class ModularLns:
             if i % 1000 == 0:
                 timer.check()
             model.enforce_tuple(TupleIndex(t[0][0], t[0][1], t[1][0], t[1][1]))
+        self.log.info("Model built.")
         return model
 
     def optimize_neighborhood(
@@ -139,12 +141,12 @@ class ModularLns:
         """
         if timer is None:
             timer = Timer(timelimit)  # create an empty dummy timer
-        self.logger.report_neighborhood_optimization(neighborhood)
+        self.observer.report_neighborhood_optimization(neighborhood)
         k = len(neighborhood.initial_solution)
 
         # Trivial cases
         if not neighborhood.missing_tuples:
-            self.logger("No missing tuples!")
+            self.log.info("No optimization necessary: no missing tuples.")
             return 0, 0
         if k <= 1:
             return k, k
@@ -160,7 +162,9 @@ class ModularLns:
         #    t in neighborhood.missing_tuples for t in independent
         # ), "All independent tuples should be missing tuples."
         if len(independent) == k:
-            self.logger("Optimal by independent tuples.")
+            self.log.info(
+                "No optimization necessary: lower bound fits available solution."
+            )
             return k, k
 
         # Optimize neighborhood
@@ -183,7 +187,7 @@ class ModularLns:
                 return model.get_lb(), len(samples)
             lb = model.get_lb()
         except TimeoutError:
-            self.logger("Timeout in iteration")
+            self.log.info("Timeout in iteration.")
         return lb, k
 
     def optimize(
@@ -198,8 +202,11 @@ class ModularLns:
 
         Returns, whether the solution was optimal in the end.
         """
-        self.logger(
-            f"Beginning optimization with iterations={iterations}, iteration_timelimit={iteration_timelimit}, timelimit={timelimit}"
+        self.log.info(
+            "Beginning optimization with the following parameters: iterations=%d, iteration_timelimit=%f, timelimit=%f",
+            iterations,
+            iteration_timelimit,
+            timelimit,
         )
         opt_timer = Timer(timelimit)
         with self._cds(iteration_timelimit=iteration_timelimit):
@@ -208,23 +215,30 @@ class ModularLns:
             for i in range(iterations):
                 # Check time
                 if opt_timer.is_out_of_time():
-                    self.logger("Global timeout")
+                    self.log.info("Optimization reached time limit.")
                     break
-                self.logger.report_iteration_begin(i)
+                self.log.info("Beginning iteration %d.", i)
+                self.observer.report_iteration_begin(i)
                 iter_timer = Timer(min(iteration_timelimit, opt_timer.remaining()))
                 # Optimize
                 nbrhd = self.neighborhood_selector.next()
+                self.log.info(
+                    "Selected neighborhood, removing %d configurations, leaving %d tuples uncovered.",
+                    len(nbrhd.initial_solution),
+                    len(nbrhd.missing_tuples),
+                )
                 iter_timer.lap("neighborhood_selected")
                 lb, ub = self.optimize_neighborhood(
                     nbrhd, iter_timer.remaining(), iter_timer
                 )
+                self.log.info("Optimized neighborhood, lb=%d, ub=%d.", lb, ub)
                 iter_timer.lap("neighborhood_optimized")
 
                 # lb and ub are regarding neighborhood, not global.
                 # Give the CDS algorithm a chance to update the lower bound.
                 self.add_lower_bound(self._cds.get_lb())
                 iter_timer.lap("global_lb_iteration_finished")
-                self.logger.report_iteration_end(
+                self.observer.report_iteration_end(
                     i,
                     iter_timer.time(),
                     self.lb,

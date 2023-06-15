@@ -37,6 +37,4 @@ def test_gurobi_license():
         m.optimize()
     except gurobipy.GurobiError as e:
         msg = f"There is most likely an issue with your gurobi license. Exception: {e}"
-        raise AssertionError(
-            msg
-        )
+        raise AssertionError(msg)

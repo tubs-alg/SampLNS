@@ -1,4 +1,5 @@
 import itertools
+import logging
 
 from samplns.instances import (
     AndFeature,
@@ -11,6 +12,7 @@ from samplns.lns.model import TupleIndex, VectorizedEdgeModel
 from samplns.preprocessor import Preprocessor
 from samplns.utils import Timer
 
+logger = logging.getLogger("SampLNS")
 
 def test_sample_mip():
     concrete_features = ["1", "2", "3", "4"]
@@ -20,21 +22,24 @@ def test_sample_mip():
             OrFeature(
                 FeatureLiteral("Or1"),
                 [
-                    ConcreteFeature(FeatureLiteral("1")),
-                    ConcreteFeature(FeatureLiteral("2")),
+                    ConcreteFeature(FeatureLiteral("1"), mandatory=False),
+                    ConcreteFeature(FeatureLiteral("2"), mandatory=False),
                 ],
                 mandatory=True,
+                logger=logger,
             ),
             OrFeature(
                 FeatureLiteral("Or2"),
                 [
-                    ConcreteFeature(FeatureLiteral("3")),
-                    ConcreteFeature(FeatureLiteral("4")),
+                    ConcreteFeature(FeatureLiteral("3"), mandatory=False),
+                    ConcreteFeature(FeatureLiteral("4"), mandatory=False),
                 ],
                 mandatory=True,
+                logger=logger,
             ),
         ],
         mandatory=True,
+        logger=logger,
     )
     instance = Instance(concrete_features, structure=tree, rules=[])
     sample = []
@@ -43,7 +48,7 @@ def test_sample_mip():
             sample.append({concrete_features[i]: conf[i] for i in range(4)})
     assert len(sample) == 9
     index_instance = Preprocessor().preprocess(instance)
-    mip = VectorizedEdgeModel(index_instance, 16, Timer(600))
+    mip = VectorizedEdgeModel(index_instance, 16, Timer(600), logger=logger)
     covered_tuples = set()
     print("Greedy solution")
     coverages = {}

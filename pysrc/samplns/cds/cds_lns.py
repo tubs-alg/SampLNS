@@ -1,21 +1,27 @@
+import logging
 import typing
 
 from ..preprocessor import IndexInstance
 from ._cds_bindings import AsyncLnsCds, GreedyCds, LnsCds, TransactionGraph
 from .base import CdsAlgorithm, Samples, Tuples
 
+_logger = logging.getLogger("SampLNS.CdsLns")
+
 
 class CdsLns(CdsAlgorithm):
     def __init__(
-        self, instance: IndexInstance, initial_samples: Samples, verbose=True, log=print
+        self,
+        instance: IndexInstance,
+        initial_samples: Samples,
+        logger: logging.Logger = _logger,
     ) -> None:
         self.instance = instance
-        self._verbose = verbose
         self._iteration_timelimit = 60.0
-        self._logger = log
-        self.log(
-            f"Building transaction graph for {instance.instance_name} "
-            f"with {instance.n_concrete} concrete features!"
+        self._logger = logger
+        self._logger.info(
+            "Building transaction graph for %s " "with %s concrete features!",
+            instance.instance_name,
+            instance.n_concrete,
         )
 
         self.graph = TransactionGraph(instance.n_concrete)
@@ -30,7 +36,9 @@ class CdsLns(CdsAlgorithm):
         for config in self.cpp_sample:
             self.graph.add_valid_configuration(config)
 
-        self.log("All valid configurations were added to the transaction graph.")
+        self._logger.info(
+            "All valid configurations were added to the transaction graph."
+        )
 
         self.solver = AsyncLnsCds(self.graph)
         self.greedy_solver = GreedyCds(self.graph, self.cpp_sample)
@@ -38,15 +46,16 @@ class CdsLns(CdsAlgorithm):
 
     def __enter__(self):
         self.solver.start(self.initial_cds_cpp, self._iteration_timelimit)
-        self.log(
-            "Async Solver started with iteration timelimit", self._iteration_timelimit
+        self._logger.info(
+            "Async Solver started with iteration timelimit %d",
+            self._iteration_timelimit,
         )
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.solver:
             self.solver.stop()
-            self.log("Async Solver stopped")
+            self._logger.info("Async Solver stopped")
 
     def __call__(self, **kwargs):
         if "iteration_timelimit" in kwargs:
@@ -55,10 +64,6 @@ class CdsLns(CdsAlgorithm):
 
     def stop(self):
         self.solver.stop()
-
-    def log(self, *args):
-        if self._verbose:
-            self._logger("[CdsLns]", *args)
 
     def compute_independent_set(self, edges: typing.Optional[Tuples]) -> Tuples:
         # Filter by the edges passed as an argument
@@ -83,8 +88,10 @@ class CdsLns(CdsAlgorithm):
                 (p, q) in edges or (q, p) in edges for (p, q) in sol
             ), "The solution contains edges that are not within the specified subgraph edges!"
             sol = self.__cpp_to_py_format(sol)
-            self.log(
-                f"The greedy solver found {len(greedy_sol)} tuples, the LNS found {len(sol)} tuples!"
+            self._logger.info(
+                "The greedy solver found %d tuples, the LNS found %d tuples!",
+                len(greedy_sol),
+                len(sol),
             )
 
         return sol

@@ -1,16 +1,18 @@
+import logging
 import typing
-
-from samplns.verify import have_equal_coverage
 
 from ..cds import CdsLns
 from ..instances import Instance
-from ..lns.lns import InternalSolution, LnsLogger, ModularLns
+from ..lns.lns import InternalSolution, LnsObserver, ModularLns
 from ..lns.neighborhood import NeighborhoodSelector
 from ..preprocessor import Preprocessor
+from ..verify import have_equal_coverage
 
 ExternalSolution = typing.List[
     typing.Dict[str, bool]
 ]  # Solution for the original instance
+
+_logger = logging.getLogger("SampLNS")
 
 
 class ConvertingLns:
@@ -22,7 +24,8 @@ class ConvertingLns:
         on_new_solution: typing.Optional[
             typing.Callable[[ExternalSolution], None]
         ] = None,
-        logger=LnsLogger(),
+        observer=LnsObserver(),
+        logger: logging.Logger = _logger,
     ):
         """
         instance: The instance we want to find a sample for.
@@ -31,8 +34,9 @@ class ConvertingLns:
         use_hints: Use CP-SAT hints using the previous solution.
         on_new_solution: A callback that notifies about every new solution.
         """
+        self.log = logger
         self.original_instance = instance
-        self.index_instance = Preprocessor().preprocess(instance)
+        self.index_instance = Preprocessor(logger=logger).preprocess(instance)
         self.initial_solution = initial_solution
         solution = self._import_solution(initial_solution)
         neighborhood_selector = neighborhood_selector
@@ -43,7 +47,9 @@ class ConvertingLns:
             def on_new_solution(sol):
                 return on_new_solution(self._export_solution(sol))
 
-        cds_algorithm = CdsLns(self.index_instance, solution, log=logger)
+        cds_algorithm = CdsLns(
+            self.index_instance, solution, logger=self.log.getChild("CDS")
+        )
 
         self._lns = ModularLns(
             instance=self.index_instance,
@@ -51,7 +57,8 @@ class ConvertingLns:
             neighborhood_selector=neighborhood_selector,
             cds_algorithm=cds_algorithm,
             on_new_solution=on_new_solution,
-            logger=logger,
+            observer=observer,
+            logger=self.log,
         )
 
         # cds_algorithm.register_ub_alg(self._lns)

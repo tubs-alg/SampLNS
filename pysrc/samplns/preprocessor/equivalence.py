@@ -83,7 +83,10 @@ class EquTest(unittest.TestCase):
         ec = EquivalenceClasses()
         ec.mark_equivalent("a", "b")
         ec.mark_equivalent("c", "d")
-        assert ec.get_substitutions() == ({"a": "SUB[a]", "b": "SUB[a]", "c": "SUB[c]", "d": "SUB[c]"}, {})
+        assert ec.get_substitutions() == (
+            {"a": "SUB[a]", "b": "SUB[a]", "c": "SUB[c]", "d": "SUB[c]"},
+            {},
+        )
 
     def test_bad(self):
         ec = EquivalenceClasses()

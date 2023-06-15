@@ -1,3 +1,5 @@
+import logging
+
 from samplns.instances import parse
 from samplns.lns import RandomNeighborhood
 from samplns.preprocessor import Preprocessor
@@ -143,6 +145,7 @@ def get_instance(instance):
 
 
 def test_lns():
+    logger = logging.getLogger("samplns")
     instance_name = "toybox-case-study|2020|2020-12-06_00-02-46"
     solutions = get_solutions(instance_name)
     best_solution = min(solutions.values(), key=len)
@@ -153,7 +156,7 @@ def test_lns():
     lns = ConvertingLns(
         instance=instance,
         initial_solution=best_solution,
-        neighborhood_selector=RandomNeighborhood(200),
+        neighborhood_selector=RandomNeighborhood(logger, 200),
     )
     lns.optimize(10, 60)
     print(len(lns.get_best_solution()))

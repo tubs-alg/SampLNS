@@ -102,7 +102,15 @@ class VectorizedEdgeModel:
     The edges to be covered can be added iteratively.
     """
 
-    def __init__(self, instance: IndexInstance, k: int, timer: Timer, verbose=True):
+    def __init__(
+        self,
+        instance: IndexInstance,
+        k: int,
+        timer: Timer,
+        logger: logging.Logger,
+        verbose=True,
+    ):
+        self.log = logger
         self.model = cp_model.CpModel()
         self.submodels = [_SubModel(instance, self.model, timer) for _ in range(k)]
         self.model.Minimize(sum(submodel.activated for submodel in self.submodels))
@@ -110,12 +118,14 @@ class VectorizedEdgeModel:
         self.solver.parameters.num_search_workers = (
             multiprocessing.cpu_count() - 1
         )  # all but one thread
-        print(
-            f"VectorizedEdgeModel uses {self.solver.parameters.num_search_workers} for search!"
+        self.log.info(
+            "Using %d threads for search.", self.solver.parameters.num_search_workers
         )
         if verbose:
             self.solver.parameters.log_search_progress = True
-            self.solver.log_callback = print  # (str)->None
+            self.solver.parameters.log_to_stdout = False
+            cpsat_logger = self.log.getChild("CPSAT")
+            self.solver.log_callback = lambda msg: cpsat_logger.info(msg)  # (str)->None
         self.status = None
         self._symmetry_breaking_tuples = {}
 
@@ -158,8 +168,10 @@ class VectorizedEdgeModel:
         submods = self.submodels[len(self._symmetry_breaking_tuples) :]
         assert len(solution) <= len(submods)
         if len(solution) < len(submods):
-            logging.getLogger("VecorizedEdgeModel").warning(
-                "Unnecessary large k. Initial solution is smaller."
+            self.log.warning(
+                "Unnecessary large k (%d). Initial solution is smaller (%d).",
+                len(self.submodels),
+                len(solution) + len(self._symmetry_breaking_tuples),
             )
         for conf, submod in zip(solution, submods):
             submod.set_hint(conf)
