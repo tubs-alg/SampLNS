@@ -60,26 +60,27 @@ public:
 
     this->add_solution_to_pool(solution);
 
-    //std::cout << "Utilized " << std::fixed << std::setprecision(2)
-    //          << time_utilization * 100.0 << "% of the CDS-LNS iteration time."
-    //          << std::endl;
+    // std::cout << "Utilized " << std::fixed << std::setprecision(2)
+    //           << time_utilization * 100.0 << "% of the CDS-LNS iteration
+    //           time."
+    //           << std::endl;
     if (time_utilization < 0.5) {
-      //std::cout << "Increasing neighborhood size from " << max_free_edges;
+      // std::cout << "Increasing neighborhood size from " << max_free_edges;
       max_free_edges += max_free_edges / 10;
-      //std::cout << " to " << max_free_edges << "." << std::endl;
+      // std::cout << " to " << max_free_edges << "." << std::endl;
     } else if (time_utilization > 0.95) {
-      //std::cout << "Decreasing neighborhood size from " << max_free_edges;
+      // std::cout << "Decreasing neighborhood size from " << max_free_edges;
       max_free_edges -= max_free_edges / 10;
       max_free_edges = std::max(max_free_edges, FREE_EDGES_LOW_CAP);
-      //std::cout << " to " << max_free_edges << "." << std::endl;
+      // std::cout << " to " << max_free_edges << "." << std::endl;
     }
 
     if (time_utilization >= 0.1 && nb_utilization >= 0.5) {
-      //std::cout << "Used more than 50% of the time for nbhd "
-      //             "construction. Increasing the number of edges added per "
-      //             "iteration to ";
+      // std::cout << "Used more than 50% of the time for nbhd "
+      //              "construction. Increasing the number of edges added per "
+      //              "iteration to ";
       edges_to_add_seq++;
-      //std::cout << edges_to_add_seq << "." << std::endl;
+      // std::cout << edges_to_add_seq << "." << std::endl;
     }
 
     stagnation_counter++;
@@ -91,7 +92,8 @@ public:
   better_solution_callback(const std::vector<feature_pair> &solution) override {
     this->edges_to_add_seq =
         std::max(this->edges_to_add_seq, (solution.size() / 100));
-    //std::cout << "edges_to_add_seq = " << this->edges_to_add_seq << std::endl;
+    // std::cout << "edges_to_add_seq = " << this->edges_to_add_seq <<
+    // std::endl;
     this->best_solution = solution;
     stagnation_counter = 0;
   }
@@ -114,8 +116,8 @@ public:
       // choose solution by chance
       initial_solution = solution_pool[std::rand() % solution_pool.size()];
 
-      //std::cout << "Stagnation detected: Using pool solution with "
-      //          << initial_solution.size() << " edges." << std::endl;
+      // std::cout << "Stagnation detected: Using pool solution with "
+      //           << initial_solution.size() << " edges." << std::endl;
     }
 
     // shuffle for higher randomness
@@ -155,9 +157,9 @@ public:
 
     // Restore penultimate step if all edges were eliminated
     if (remaining_edges.empty()) {
-      //std::cout << "Erased all edges. Restoring "
-      //             "penultimate state."
-      //          << std::endl;
+      // std::cout << "Erased all edges. Restoring "
+      //              "penultimate state."
+      //           << std::endl;
       for (size_t i = 0; i < edges_added_in_iter; i++) {
         initial_solution.push_back(fixed_edges.back());
         fixed_edges.pop_back();
@@ -167,8 +169,8 @@ public:
 
     // erase random edges if remaining_edges are still too many
     if (remaining_edges.size() > max_free_edges) {
-      //std::cout << "Randomly erased "
-      //          << remaining_edges.size() - max_free_edges;
+      // std::cout << "Randomly erased "
+      //           << remaining_edges.size() - max_free_edges;
 
       // erase all edges from initial_solution from remaining_edges
       if (initial_solution.size() > 0) {
@@ -193,11 +195,11 @@ public:
       remaining_edges.resize(max_free_edges - initial_solution.size());
       remaining_edges.insert(remaining_edges.end(), initial_solution.cbegin(),
                              initial_solution.cend());
-      //std::cout << " edges." << std::endl;
+      // std::cout << " edges." << std::endl;
     }
 
-    //std::cout << "CDS neighborhood has " << remaining_edges.size()
-    //          << " free edges." << std::endl;
+    // std::cout << "CDS neighborhood has " << remaining_edges.size()
+    //           << " free edges." << std::endl;
 
     return {fixed_edges, remaining_edges};
   }

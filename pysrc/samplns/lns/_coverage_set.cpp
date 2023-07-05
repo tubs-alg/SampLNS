@@ -1,6 +1,6 @@
 #include <pybind11/functional.h> // automatic conversion of lambdas/functions?
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>        // automatic conversion of vectors
+#include <pybind11/stl.h> // automatic conversion of vectors
 
 class CoveredTuples {
 public:
@@ -10,13 +10,15 @@ public:
   }
 
   CoveredTuples(const std::vector<std::vector<bool>> &initial_sample,
-                  int num_concrete_features) {
+                int num_concrete_features) {
 
     this->num_concrete_features = num_concrete_features;
     this->set_up_matrix();
     for (const auto &conf : initial_sample) {
-      if(conf.size() != this->num_concrete_features) {
-        throw std::invalid_argument("The number of concrete features in the initial sample does not match the number of concrete features in the graph.");
+      if (conf.size() != this->num_concrete_features) {
+        throw std::invalid_argument(
+            "The number of concrete features in the initial sample does not "
+            "match the number of concrete features in the graph.");
       }
       this->add_tuples_of_configuration(conf);
     }
@@ -74,7 +76,8 @@ private:
 class CoverageSet {
 public:
   CoverageSet(CoveredTuples feasible_tuples)
-      : feasible_tuples{feasible_tuples}, covered_tuples{feasible_tuples.num_concrete_features} {}
+      : feasible_tuples{feasible_tuples},
+        covered_tuples{feasible_tuples.num_concrete_features} {}
 
   ~CoverageSet() {}
 
@@ -87,27 +90,37 @@ public:
            this->covered_tuples.num_covered_tuples;
   }
 
-  void clear() { this->covered_tuples = CoveredTuples{this->feasible_tuples.num_concrete_features}; }
+  void clear() {
+    this->covered_tuples =
+        CoveredTuples{this->feasible_tuples.num_concrete_features};
+  }
 
-  std::vector<std::pair<std::pair<int, bool>, std::pair<int, bool>>> get_missing_tuples() {
-    std::vector<std::pair<std::pair<int, bool>, std::pair<int, bool>>> missing_tuples;
+  std::vector<std::pair<std::pair<int, bool>, std::pair<int, bool>>>
+  get_missing_tuples() {
+    std::vector<std::pair<std::pair<int, bool>, std::pair<int, bool>>>
+        missing_tuples;
     for (int i = 0; i < this->feasible_tuples.num_concrete_features; i++) {
-      for (int j = i + 1; j < this->feasible_tuples.num_concrete_features; j++) {
-        if (this->feasible_tuples.is_contained(i, true, j, true) && !this->covered_tuples.is_contained(i, true, j, true)) {
-          missing_tuples.push_back(std::make_pair(
-              std::make_pair(i, true), std::make_pair(j, true)));
+      for (int j = i + 1; j < this->feasible_tuples.num_concrete_features;
+           j++) {
+        if (this->feasible_tuples.is_contained(i, true, j, true) &&
+            !this->covered_tuples.is_contained(i, true, j, true)) {
+          missing_tuples.push_back(
+              std::make_pair(std::make_pair(i, true), std::make_pair(j, true)));
         }
-        if (this->feasible_tuples.is_contained(i, true, j, false) && !this->covered_tuples.is_contained(i, true, j, false)) {
-          missing_tuples.push_back(std::make_pair(
-              std::make_pair(i, true), std::make_pair(j, false)));
+        if (this->feasible_tuples.is_contained(i, true, j, false) &&
+            !this->covered_tuples.is_contained(i, true, j, false)) {
+          missing_tuples.push_back(std::make_pair(std::make_pair(i, true),
+                                                  std::make_pair(j, false)));
         }
-        if (this->feasible_tuples.is_contained(i, false, j, true) && !this->covered_tuples.is_contained(i, false, j, true)) {
-          missing_tuples.push_back(std::make_pair(
-              std::make_pair(i, false), std::make_pair(j, true)));
+        if (this->feasible_tuples.is_contained(i, false, j, true) &&
+            !this->covered_tuples.is_contained(i, false, j, true)) {
+          missing_tuples.push_back(std::make_pair(std::make_pair(i, false),
+                                                  std::make_pair(j, true)));
         }
-        if (this->feasible_tuples.is_contained(i, false, j, false) &&  !this->covered_tuples.is_contained(i, false, j, false)) {
-          missing_tuples.push_back(std::make_pair(
-              std::make_pair(i, false), std::make_pair(j, false)));
+        if (this->feasible_tuples.is_contained(i, false, j, false) &&
+            !this->covered_tuples.is_contained(i, false, j, false)) {
+          missing_tuples.push_back(std::make_pair(std::make_pair(i, false),
+                                                  std::make_pair(j, false)));
         }
       }
     }
@@ -127,9 +140,9 @@ PYBIND11_MODULE(_coverage_set, m) {
       .def("__eq__", &CoveredTuples::operator==)
       .def_readonly("num_concrete_features",
                     &CoveredTuples::num_concrete_features)
-      .def_readonly("num_covered_tuples",
-                    &CoveredTuples::num_covered_tuples);
-  py::class_<CoverageSet>(m, "CoverageSet").def(py::init<CoveredTuples>())
+      .def_readonly("num_covered_tuples", &CoveredTuples::num_covered_tuples);
+  py::class_<CoverageSet>(m, "CoverageSet")
+      .def(py::init<CoveredTuples>())
       .def("add_configuration", &CoverageSet::add_configuration)
       .def("num_missing_tuples", &CoverageSet::num_missing_tuples)
       .def("clear", &CoverageSet::clear)

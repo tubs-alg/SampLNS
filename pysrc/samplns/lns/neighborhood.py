@@ -122,7 +122,9 @@ class RandomNeighborhood(NeighborhoodSelector):
         self.log.info("Setting up random neighborhood selector.")
         self.instance = instance
         self.best_solution = initial_solution
-        self.coverage_set = CoverageSet(initial_solution, instance.n_concrete, logger=self.log)
+        self.coverage_set = CoverageSet(
+            initial_solution, instance.n_concrete, logger=self.log
+        )
         self.n_interactions = len(self.coverage_set)
         self.log.info("Neighborhood selector is ready.")
 

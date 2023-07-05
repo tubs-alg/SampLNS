@@ -12,7 +12,7 @@ pybind11_add_module(
   _coverage_set.cpp) # the file with the API.
 # enable compilation warnings
 target_compile_options(
-    _coverage_set PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>")
+  _coverage_set PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>")
 # This definition is important for skbuild to copy the binary to the right
 # position in the package. !!! This part is critical and a wrong configuration
 # leads to bad packages !!! without an error. Use a path relative to the project

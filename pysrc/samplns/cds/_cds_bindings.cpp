@@ -82,4 +82,15 @@ PYBIND11_MODULE(_cds_bindings, m) {
       .def(py::init<const TransactionGraph &,
                     const std::vector<std::vector<feature_id>> &>())
       .def("optimize", &GreedyCDS::optimize);
+  // gurobi exception
+  static py::exception<GRBException> exc(m, "GRBException");
+  py::register_exception_translator([](std::exception_ptr p) {
+    try {
+      if (p)
+        std::rethrow_exception(p);
+    } catch (const GRBException &e) {
+      auto msg = e.getMessage();
+      exc(msg.c_str());
+    }
+  });
 }

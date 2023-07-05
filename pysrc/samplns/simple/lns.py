@@ -3,11 +3,11 @@ import typing
 
 from ..cds import CdsLns
 from ..instances import Instance
+from ..lns._coverage_set import CoveredTuples
 from ..lns.lns import InternalSolution, LnsObserver, ModularLns
 from ..lns.neighborhood import NeighborhoodSelector, RandomNeighborhood
 from ..preprocessor import Preprocessor
 from ..verify import have_equal_coverage
-from ..lns._coverage_set import CoveredTuples
 
 ExternalSolution = typing.List[
     typing.Dict[str, bool]
@@ -108,7 +108,11 @@ class SampLns:
             initial_solution = self._import_solution(self.initial_solution)
             final_solution = self._lns.get_best_solution()
             n = self.index_instance.n_concrete
-            assert CoveredTuples([[conf[f] for f in range(n)] for conf in initial_solution], n) == CoveredTuples([[conf[f] for f in range(n)] for conf in final_solution], n)
+            assert CoveredTuples(
+                [[conf[f] for f in range(n)] for conf in initial_solution], n
+            ) == CoveredTuples(
+                [[conf[f] for f in range(n)] for conf in final_solution], n
+            )
         sol = self._export_solution(self._lns.get_best_solution())
         if verify:
             assert have_equal_coverage(

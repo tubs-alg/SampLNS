@@ -56,7 +56,7 @@ public:
   TransactionGraph(uint64_t num_vars)
       : num_vars(num_vars), num_nodes(num_vars * 2),
         num_cells(gauss(num_nodes - 1)), adjacency_matrix(num_nodes) {
-    //std::cout << "Transaction graph built." << std::endl;
+    // std::cout << "Transaction graph built." << std::endl;
   }
 
   /// @brief Returns the number of edges in the graph. Despite it's name, it is

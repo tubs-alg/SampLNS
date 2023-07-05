@@ -76,7 +76,7 @@ class ModularLns:
         self._solution_pool = [solution]
         self.on_new_solution = on_new_solution
         self.observer = observer
-        self._times_failed_to_build_model  = 0
+        self._times_failed_to_build_model = 0
 
     def add_lower_bound(self, lb: int) -> None:
         """
