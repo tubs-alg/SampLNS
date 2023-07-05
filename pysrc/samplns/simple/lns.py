@@ -7,6 +7,7 @@ from ..lns.lns import InternalSolution, LnsObserver, ModularLns
 from ..lns.neighborhood import NeighborhoodSelector, RandomNeighborhood
 from ..preprocessor import Preprocessor
 from ..verify import have_equal_coverage
+from ..lns._coverage_set import CoveredTuples
 
 ExternalSolution = typing.List[
     typing.Dict[str, bool]
@@ -42,7 +43,7 @@ class SampLns:
         """
         self.log = logger
         self.original_instance = instance
-        if not neighborhood_selector:
+        if neighborhood_selector is None:
             neighborhood_selector = RandomNeighborhood(logger=logger)
         self.index_instance = Preprocessor(logger=logger).preprocess(instance)
         self.initial_solution = initial_solution
@@ -99,10 +100,15 @@ class SampLns:
     def get_lower_bound(self) -> int:
         return self._lns.lb
 
-    def get_best_solution(self, verify=False) -> ExternalSolution:
+    def get_best_solution(self, verify=False, fast_verify=False) -> ExternalSolution:
         """
         Returns the best solution.
         """
+        if fast_verify:
+            initial_solution = self._import_solution(self.initial_solution)
+            final_solution = self._lns.get_best_solution()
+            n = self.index_instance.n_concrete
+            assert CoveredTuples([[conf[f] for f in range(n)] for conf in initial_solution], n) == CoveredTuples([[conf[f] for f in range(n)] for conf in final_solution], n)
         sol = self._export_solution(self._lns.get_best_solution())
         if verify:
             assert have_equal_coverage(

@@ -49,8 +49,8 @@ CDSSolverInterface::optimize(std::vector<Edge> initial_solution,
 
   if (!initial_solution.empty() &&
       initial_solution.size() > solver.get_best_solution().size()) {
-    std::cout << "Using initial solution of size " << initial_solution.size()
-              << "." << std::endl;
+    //std::cout << "Using initial solution of size " << initial_solution.size()
+    //          << "." << std::endl;
   }
 
   // Force ordering of vertices in edges

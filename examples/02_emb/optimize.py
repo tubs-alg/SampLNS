@@ -13,7 +13,7 @@ if __name__ == "__main__":
     # create console handler and set level to debug
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
-    logger.getChild("CPSAT").setLevel(logging.WARNING)
+    logger.getChild("CPSAT").setLevel(logging.INFO)
 
     # create formatter
     formatter = logging.Formatter("%(asctime)s - %(message)s")
@@ -35,11 +35,11 @@ if __name__ == "__main__":
         logger=logger,
     )
     solver.optimize(
-        iterations=5,
+        iterations=100,
         iteration_timelimit=60.0,
-        timelimit=90,
+        timelimit=900,
     )
-    optimized_sample = solver.get_best_solution(verify=False)
+    optimized_sample = solver.get_best_solution(verify=False, fast_verify=True)
     print(
         f"Reduced initial sample of size {len(initial_sample)} to {len(optimized_sample)}"
     )

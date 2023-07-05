@@ -38,7 +38,7 @@ if __name__ == "__main__":
         iteration_timelimit=60.0,
         timelimit=900,
     )
-    optimized_sample = solver.get_best_solution(verify=True)
+    optimized_sample = solver.get_best_solution(verify=True, fast_verify=True)
     print(
         f"Reduced initial sample of size {len(initial_sample)} to {len(optimized_sample)}"
     )

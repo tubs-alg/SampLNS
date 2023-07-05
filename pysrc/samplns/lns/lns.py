@@ -76,6 +76,7 @@ class ModularLns:
         self._solution_pool = [solution]
         self.on_new_solution = on_new_solution
         self.observer = observer
+        self._times_failed_to_build_model  = 0
 
     def add_lower_bound(self, lb: int) -> None:
         """
@@ -134,10 +135,11 @@ class ModularLns:
         neighborhood: Neighborhood,
         timelimit: float,
         timer: typing.Optional[Timer] = None,
-    ) -> typing.Tuple[int, int]:
+    ) -> typing.Tuple[int, int, bool]:
         """
         A single iteration of the LNS to optimize one neighborhood.
-        Return lower and upper bound.
+        Return lower and upper bound. Additional flag indicates whether it
+        was not skipped, e.g., because there was no optimization necessary.
         """
         if timer is None:
             timer = Timer(timelimit)  # create an empty dummy timer
@@ -147,9 +149,9 @@ class ModularLns:
         # Trivial cases
         if not neighborhood.missing_tuples:
             self.log.info("No optimization necessary: no missing tuples.")
-            return 0, 0
+            return 0, 0, False
         if k <= 1:
-            return k, k
+            return k, k, False
         independent = list(
             self._cds.compute_independent_set(neighborhood.missing_tuples)
         )
@@ -165,12 +167,14 @@ class ModularLns:
             self.log.info(
                 "No optimization necessary: lower bound fits available solution."
             )
-            return k, k
+            return k, k, False
 
         # Optimize neighborhood
         lb = 1
         try:
+            self._times_failed_to_build_model += 1
             model = self._build_neighborhood_model(neighborhood, independent, timer)
+            self._times_failed_to_build_model -= 1
             timer.lap("model_built")
             model.optimize(max(1.0, timer.remaining()))
             timer.lap("model_optimized")
@@ -184,11 +188,11 @@ class ModularLns:
                 )
                 solution = neighborhood.fixed_samples + samples
                 self._add_new_solution(solution)
-                return model.get_lb(), len(samples)
+                return model.get_lb(), len(samples), True
             lb = model.get_lb()
         except TimeoutError:
             self.log.info("Timeout in iteration.")
-        return lb, k
+        return lb, k, True
 
     def optimize(
         self,
@@ -228,7 +232,7 @@ class ModularLns:
                     len(nbrhd.missing_tuples),
                 )
                 iter_timer.lap("neighborhood_selected")
-                lb, ub = self.optimize_neighborhood(
+                lb, ub, not_skipped = self.optimize_neighborhood(
                     nbrhd, iter_timer.remaining(), iter_timer
                 )
                 self.log.info("Optimized neighborhood, lb=%d, ub=%d.", lb, ub)
@@ -252,8 +256,9 @@ class ModularLns:
                     return True  # optimal solution
                 # Tune size for next iteration
                 tu = iter_timer.time() / iteration_timelimit
-                self.neighborhood_selector.feedback(
-                    nbrhd, lb=lb, ub=ub, time_utilization=tu
-                )
+                if not_skipped or self._times_failed_to_build_model == 0:
+                    self.neighborhood_selector.feedback(
+                        nbrhd, lb=lb, ub=ub, time_utilization=tu
+                    )
             opt_timer.lap("iterations_ended")
         return False

@@ -73,10 +73,10 @@ After you got your license, move into the folder with `setup.py` and run
 pip install .
 ```
 
-This command should automatically install all dependencies and build the package.
-The package contains native C++-code that is compiled during installation. This
-requires a C++-compiler. On most systems, this should be installed by default.
-If not, you can install it via
+This command should automatically install all dependencies and build the
+package. The package contains native C++-code that is compiled during
+installation. This requires a C++-compiler. On most systems, this should be
+installed by default. If not, you can install it via
 
 ```shell
 sudo apt install build-essential  # Ubuntu
@@ -87,9 +87,8 @@ Generally, the installation will take a while as it has to compile the C++, but
 it should work out of the box. If you encounter any problems, please open an
 issue. Unfortunately, the performance of native code is bought with a more
 complex installation process, and it is difficult to make it work on all
-systems. Windows systems are especially difficult to support. We suggest using
-a Linux system.
-
+systems. Windows systems are especially difficult to support. We suggest using a
+Linux system.
 
 > If you got a bad license, the code may just crash without a proper error
 > message. This will be fixed soon.

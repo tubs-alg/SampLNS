@@ -86,8 +86,8 @@ public:
             std::vector<std::vector<feature_id>> sample)
       : graph(graph), cover_counters(graph.count_nodes()) {
     do_sort = sample.size() > 0;
-    std::cout << "GREEDY CDS: Using " << sample.size()
-              << " configurations to count covering." << std::endl;
+    //std::cout << "GREEDY CDS: Using " << sample.size()
+    //          << " configurations to count covering." << std::endl;
 
     // count how many times feature pairs are covered
     for (const auto &configuration : sample) {
@@ -109,8 +109,8 @@ public:
       feasible_tuples = subgraph;
     }
 
-    std::cout << "GREEDY CDS: considering " << feasible_tuples.size()
-              << " tuples!" << std::endl;
+   // std::cout << "GREEDY CDS: considering " << feasible_tuples.size()
+    //          << " tuples!" << std::endl;
 
     // sort tuples ascending by cover counters
     std::shuffle(feasible_tuples.begin(), feasible_tuples.end(), rng());
@@ -123,9 +123,9 @@ public:
                          return cover_counters.get(p, q) <
                                 cover_counters.get(u, v);
                        });
-      std::cout << "GREEDY CDS: Sorting done." << std::endl;
+      //std::cout << "GREEDY CDS: Sorting done." << std::endl;
     } else {
-      std::cout << "GREEDY CDS: Sorting skipped." << std::endl;
+      //std::cout << "GREEDY CDS: Sorting skipped." << std::endl;
     }
 
     // construct cds
@@ -138,8 +138,8 @@ public:
 
     cds_check_solution(graph, solution);
 
-    std::cout << "GREEDY CDS: Found CDS of size " << solution.size() << "."
-              << std::endl;
+   // std::cout << "GREEDY CDS: Found CDS of size " << solution.size() << "."
+    //          << std::endl;
 
     return solution;
   }

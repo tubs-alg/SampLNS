@@ -63,11 +63,11 @@ public:
 
     // test the graph
     graph->test();
-    std::cout << "The graph has " << graph->count_edges() << " edges and "
-              << graph->count_nodes() << " nodes." << std::endl;
+    //std::cout << "The graph has " << graph->count_edges() << " edges and "
+     //         << graph->count_nodes() << " nodes." << std::endl;
 
-    std::cout << "The subgraph has " << subgraph.size() << " edges."
-              << std::endl;
+    //std::cout << "The subgraph has " << subgraph.size() << " edges."
+     //         << std::endl;
   }
 
   std::vector<Edge> optimize(std::vector<Edge> initial_solution,
@@ -127,13 +127,13 @@ public:
   }
 
   void worker_optimize(std::vector<Edge> solution) {
-    std::cout << "AsyncCDSLNS: Got initial solution of size " << solution.size()
-              << "." << std::endl;
+    //std::cout << "AsyncCDSLNS: Got initial solution of size " << solution.size()
+     //         << "." << std::endl;
     while (!this->do_stop.load() && !this->solver.has_optimal_solution()) {
-      this->solver.optimize(solution, 1, this->time_limit.load(), true);
+      this->solver.optimize(solution, 1, this->time_limit.load(), false);
     }
     this->spawn_thread_guard.notify();
-    std::cout << "CDS LNS Worker thread stopped!" << std::endl;
+    //std::cout << "CDS LNS Worker thread stopped!" << std::endl;
   }
 
   std::vector<Edge> get_best_solution() {
