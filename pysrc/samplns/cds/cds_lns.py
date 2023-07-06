@@ -2,7 +2,7 @@ import logging
 import typing
 
 from ..preprocessor import IndexInstance
-from ._cds_bindings import AsyncLnsCds, GreedyCds, LnsCds, TransactionGraph
+from ._cds_bindings import AsyncLnsCds, GreedyCds, LnsCds, TransactionGraph, FeatureTuple
 from .base import CdsAlgorithm, Samples, Tuples
 
 _logger = logging.getLogger("SampLNS.CdsLns")
@@ -84,8 +84,9 @@ class CdsLns(CdsAlgorithm):
                 time_limit=6.0,
                 verbose=False,
             )
+            #sol = [(sol.first, sol.second) for sol in sol]
             assert all(
-                (p, q) in edges or (q, p) in edges for (p, q) in sol
+                e in edges for e in sol
             ), "The solution contains edges that are not within the specified subgraph edges!"
             sol = self.__cpp_to_py_format(sol)
             self._logger.info(
@@ -99,7 +100,7 @@ class CdsLns(CdsAlgorithm):
     @staticmethod
     def __py_to_cpp_format(sol):
         return [
-            (i + 1 if a else -(i + 1), j + 1 if b else -(j + 1))
+            FeatureTuple(i + 1 if a else -(i + 1), j + 1 if b else -(j + 1))
             for ((i, a), (j, b)) in sol
         ]
 
