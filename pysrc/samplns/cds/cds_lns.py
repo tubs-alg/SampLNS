@@ -2,7 +2,13 @@ import logging
 import typing
 
 from ..preprocessor import IndexInstance
-from ._cds_bindings import AsyncLnsCds, GreedyCds, LnsCds, TransactionGraph, FeatureTuple
+from ._cds_bindings import (
+    AsyncLnsCds,
+    FeatureTuple,
+    GreedyCds,
+    LnsCds,
+    TransactionGraph,
+)
 from .base import CdsAlgorithm, Samples, Tuples
 
 _logger = logging.getLogger("SampLNS.CdsLns")
@@ -84,7 +90,7 @@ class CdsLns(CdsAlgorithm):
                 time_limit=6.0,
                 verbose=False,
             )
-            #sol = [(sol.first, sol.second) for sol in sol]
+            # sol = [(sol.first, sol.second) for sol in sol]
             assert all(
                 e in edges for e in sol
             ), "The solution contains edges that are not within the specified subgraph edges!"

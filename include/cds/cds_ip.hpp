@@ -26,6 +26,9 @@ public:
   solve(const std::vector<feature_pair> &edge_subgraph,
         double timelimit = INFINITY,
         const std::vector<feature_pair> &initial_solution = {}) {
+    if (timelimit <= 0.0) {
+      return initial_solution;
+    }
     try {
       // measure model building time
       auto tstart = std::chrono::steady_clock::now();

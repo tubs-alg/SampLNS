@@ -88,9 +88,10 @@ PYBIND11_MODULE(_cds_bindings, m) {
       .def(py::init<feature_id, feature_id>())
       .def_readonly("first", &FeatureTuple::first)
       .def_readonly("second", &FeatureTuple::second)
-      .def("__eq__", [](const FeatureTuple &t1, const FeatureTuple &t2) {
-        return t1.first == t2.first && t1.second == t2.second;
-      })
+      .def("__eq__",
+           [](const FeatureTuple &t1, const FeatureTuple &t2) {
+             return t1.first == t2.first && t1.second == t2.second;
+           })
       .def("__len__", [](const FeatureTuple &t) { return 2; })
       .def("__getitem__",
            [](const FeatureTuple &t, int i) {

@@ -9,6 +9,7 @@ Configuration = typing.Dict[int, bool]
 Sample = typing.List[Configuration]
 Literal = typing.Tuple[int, bool]
 
+# Native code for significantly speeding up the computation of the coverage set.
 from ._coverage_set import CoverageSet as _CoverageSet
 from ._coverage_set import CoveredTuples as _CoveredTuples
 

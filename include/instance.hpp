@@ -12,27 +12,25 @@ using json = nlohmann::json;
 using feature_id = int32_t; // used for encoding literals. -v is the negated
                             // literal, v the positive
 
-
-class FeatureTuple: public std::pair<feature_id, feature_id> {
+class FeatureTuple : public std::pair<feature_id, feature_id> {
 public:
   FeatureTuple() : std::pair<feature_id, feature_id>(0, 0) {}
 
   FeatureTuple(feature_id first, feature_id second)
-      : std::pair<feature_id, feature_id>(std::min(first, second), std::max(first, second)) {}
+      : std::pair<feature_id, feature_id>(std::min(first, second),
+                                          std::max(first, second)) {}
 
   FeatureTuple(const std::pair<feature_id, feature_id> &p)
       : std::pair<feature_id, feature_id>(p) {
-        this->sort();
-      }
+    this->sort();
+  }
 
   bool operator==(const FeatureTuple &other) const {
     return (this->first == other.first && this->second == other.second) ||
            (this->first == other.second && this->second == other.first);
   }
 
-  bool operator!=(const FeatureTuple &other) const {
-    return !(*this == other);
-  }
+  bool operator!=(const FeatureTuple &other) const { return !(*this == other); }
 
   bool operator<(const FeatureTuple &other) const {
     return this->first < other.first ||
@@ -44,13 +42,9 @@ public:
            (this->first == other.first && this->second > other.second);
   }
 
-  bool operator<=(const FeatureTuple &other) const {
-    return !(*this > other);
-  }
+  bool operator<=(const FeatureTuple &other) const { return !(*this > other); }
 
-  bool operator>=(const FeatureTuple &other) const {
-    return !(*this < other);
-  }
+  bool operator>=(const FeatureTuple &other) const { return !(*this < other); }
 
   void sort() {
     if (this->first > this->second) {
@@ -62,9 +56,6 @@ public:
     return std::make_pair(this->first, this->second);
   }
 };
-
-
-
 
 static_assert(std::is_signed<feature_id>());
 
