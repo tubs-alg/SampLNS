@@ -70,25 +70,4 @@ def parse_sample(archive_path, sample_path):
         return samples
 
 
-def get_results(input_sample_archive, result_folder, max_vars=1500):
-    # Loading the data of the experiment.
-    from aemeasure import read_as_pandas_table
 
-    # Merge the new data with the data of the initial samples
-    data = read_as_pandas_table(result_folder)
-    data_initial = parse_solution_overview(input_sample_archive)
-    data = data.merge(data_initial, left_on="initial_sample_path", right_on="Path")
-
-    # add a good name for 00_baseline algorithms including the settings
-    def baseline_alg_name(row):
-        settings = row["Settings"]
-        if "_m" in settings:
-            m = settings.split("_m")[-1].split("_")[0]
-            return f"{row['Algorithm']}(m={m})"
-        return row["Algorithm"]
-
-    data["baseline_alg"] = data.apply(baseline_alg_name, axis=1)
-    n = len(data)
-    data = data[data["#Variables"] <= max_vars].copy()
-    print(f"Removed {n-len(data)} results because of size constraint.")
-    return data

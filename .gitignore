@@ -205,3 +205,4 @@ examples/01_toybox/profile.html
 examples/01_toybox/profile.json
 examples/02_emb/profile.html
 examples/02_emb/profile.json
+CMakeUserPresets.json
