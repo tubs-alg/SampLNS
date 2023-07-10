@@ -13,8 +13,8 @@ target_sources(
          ../../include/cds/cds_lns.hpp
          ../../include/cds/cds_ip.hpp
          ../../include/cds/cds_heuristic.hpp
-         ../../include/cds/cds_genetic.hpp
          ../../include/mis/mis_ip.hpp
+         ../../include/logger.hpp
          ../../include/graph.hpp
          ../../include/instance.hpp
          ../../include/lns.hpp
