@@ -81,6 +81,8 @@ class MyLnsLogger(LnsObserver):
 
 
 benchmark = Benchmark(RESULT_FOLDER)
+import logging
+benchmark.capture_logger("SampLNS", logging.INFO)
 
 @slurminade.slurmify
 def run_distributed(instance_name: str, initial_sample_path: str):
@@ -151,12 +153,14 @@ def configure_grb_license_path():
     if not os.path.exists(os.environ["GRB_LICENSE_FILE"]):
         msg = "Gurobi License File does not exist."
         raise RuntimeError(msg)
-
+import random
 
 if __name__ == "__main__":
     samples = parse_solution_overview(INPUT_SAMPLE_ARCHIVE)
-    with slurminade.Batch(max_size=1) as batch:
-        for idx in samples.index:
+    indices = list(samples.index)
+    random.shuffle(indices)
+    with slurminade.Batch(max_size=40) as batch:
+        for idx in indices:
             if not samples["Path"][idx]:
                 print("Skipping unsuccessful row", samples.loc[idx])
                 continue
