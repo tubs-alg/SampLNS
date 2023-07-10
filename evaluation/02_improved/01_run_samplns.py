@@ -10,7 +10,7 @@ It will automatically check which samples have already been optimized, such that
 can be restarted without doing repetitive work.
 """
 import os
-
+import logging
 import slurminade
 from _utils import get_instance, parse_sample, parse_solution_overview
 from algbench import Benchmark
@@ -37,7 +37,7 @@ slurminade.set_dispatch_limit(100)
 # ------------------------------------------------
 ITERATIONS = 10000
 ITERATION_TIME_LIMIT = 60.0
-TIME_LIMIT = 900
+TIME_LIMIT = 90
 
 BASE = "900_seconds_5_it"
 INPUT_SAMPLE_ARCHIVE = f"../01_ICSE_2024_0/00_baseline/{BASE}.zip"
@@ -80,24 +80,38 @@ class MyLnsLogger(LnsObserver):
         )
 
 
-benchmark = Benchmark(RESULT_FOLDER)
-import logging
+benchmark = Benchmark(RESULT_FOLDER, save_output=False, hide_output=True)
+
+logging.getLogger("SampLNS").addHandler(logging.StreamHandler())
+logging.getLogger("SampLNS.CPSAT").setLevel(logging.WARNING)
+
 benchmark.capture_logger("SampLNS", logging.INFO)
+
+
 
 @slurminade.slurmify
 def run_distributed(instance_name: str, initial_sample_path: str):
-    benchmark.add(run_samplns, 
-                  instance_name,
-                    initial_sample_path,
-                    instance_archive=INSTANCE_ARCHIVE,
-                    input_sample_archive=INPUT_SAMPLE_ARCHIVE,
-                    iterations=ITERATIONS,
-                    iteration_time_limit=ITERATION_TIME_LIMIT,
-                    time_limit=TIME_LIMIT
-                    )
-    
+    benchmark.add(
+        run_samplns,
+        instance_name,
+        initial_sample_path,
+        instance_archive=INSTANCE_ARCHIVE,
+        input_sample_archive=INPUT_SAMPLE_ARCHIVE,
+        iterations=ITERATIONS,
+        iteration_time_limit=ITERATION_TIME_LIMIT,
+        time_limit=TIME_LIMIT,
+    )
 
-def run_samplns(instance_name: str, initial_sample_path: str, instance_archive, input_sample_archive, iterations, iteration_time_limit, time_limit):
+
+def run_samplns(
+    instance_name: str,
+    initial_sample_path: str,
+    instance_archive,
+    input_sample_archive,
+    iterations,
+    iteration_time_limit,
+    time_limit,
+):
     """
     Running SampLNS on an initial sample.
     """
@@ -106,8 +120,10 @@ def run_samplns(instance_name: str, initial_sample_path: str, instance_archive, 
         instance = get_instance(instance_name, instance_archive)
     except Exception as e:
         print("Skipping due to parser error:", instance_name, str(e))
-        return
-    sample = parse_sample(sample_path=initial_sample_path, archive_path=input_sample_archive)
+        return None
+    sample = parse_sample(
+        sample_path=initial_sample_path, archive_path=input_sample_archive
+    )
 
     # setup (needs time measurement as already involves calculations)
     logger = MyLnsLogger()
@@ -125,11 +141,12 @@ def run_samplns(instance_name: str, initial_sample_path: str, instance_archive, 
     )
     # get optimized sample and verify its correctness (takes some time).
     return {
-    "solution": solver.get_best_solution(verify=False, fast_verify=True),
-    "lower_bound": solver.get_lower_bound(),
-    "upper_bound": len(solver.get_best_solution()),
-    "optimal": solver.get_lower_bound() == len(solver.get_best_solution()),
-    "iteration_info": logger.iterations,}
+        "solution": solver.get_best_solution(verify=False, fast_verify=True),
+        "lower_bound": solver.get_lower_bound(),
+        "upper_bound": len(solver.get_best_solution()),
+        "optimal": solver.get_lower_bound() == len(solver.get_best_solution()),
+        "iteration_info": logger.iterations,
+    }
 
 
 @slurminade.slurmify(mail_type="ALL")
@@ -141,10 +158,12 @@ def pack_after_finish():
 
 
 def configure_grb_license_path():
+    return
     # hack for gurobi license on alg workstations. TODO: Find a nicer way
     import socket
     from pathlib import Path
-    #if "alg" not in socket.gethostname():
+
+    # if "alg" not in socket.gethostname():
     #    return
 
     os.environ["GRB_LICENSE_FILE"] = os.path.join(
@@ -164,7 +183,7 @@ if __name__ == "__main__":
             if not samples["Path"][idx]:
                 print("Skipping unsuccessful row", samples.loc[idx])
                 continue
-            if samples["#Variables"][idx] > 1500:
+            if samples["#Variables"][idx] > 250:
                 print("Skipping", samples["Instance"][idx], "due to its size.")
                 continue
             path = samples["Path"][idx]

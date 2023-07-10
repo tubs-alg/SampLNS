@@ -13,7 +13,9 @@ if __name__ == "__main__":
     data_ = []
     describe(RESULT_FOLDER)
     for entry in data:
-        instance = get_instance(entry["parameters"]["args"]["instance_name"], INSTANCE_ARCHIVE)
+        instance = get_instance(
+            entry["parameters"]["args"]["instance_name"], INSTANCE_ARCHIVE
+        )
         print("Check", entry["parameters"]["args"]["instance_name"])
         lns_sample = entry["result"]["solution"]
         initial_sample = parse_sample(

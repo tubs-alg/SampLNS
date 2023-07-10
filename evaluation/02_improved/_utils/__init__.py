@@ -68,6 +68,3 @@ def parse_sample(archive_path, sample_path):
 
         t.apply(f, axis=1)
         return samples
-
-
-
