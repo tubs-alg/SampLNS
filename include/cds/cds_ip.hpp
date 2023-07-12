@@ -103,7 +103,7 @@ public:
                     1000.0;
         // std::cout << "Building the model took " << dt << " seconds." <<
         // std::endl;
-        auto timelimit_ = timelimit - dt
+        auto timelimit_ = timelimit - dt;
         if (timelimit_<=0) {
           // Out of time
           return initial_solution;
