@@ -103,7 +103,12 @@ public:
                     1000.0;
         // std::cout << "Building the model took " << dt << " seconds." <<
         // std::endl;
-        model.set(GRB_DoubleParam_TimeLimit, timelimit - dt);
+        auto timelimit_ = timelimit - dt
+        if (timelimit_<=0) {
+          // Out of time
+          return initial_solution;
+        }
+        model.set(GRB_DoubleParam_TimeLimit, timelimit_);
       }
 
       // Optimize model
