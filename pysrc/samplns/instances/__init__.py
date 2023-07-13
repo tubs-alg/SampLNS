@@ -11,6 +11,7 @@ instance = parse("../instances/Automotive02/Automotive02_V1.xml")
 """
 # flake8: noqa F401
 from .parser import parse, parse_solutions, parse_source
+from .parse_dimacs import parse_dimacs
 
 # The feature structure elements
 from .feature import (

@@ -154,13 +154,15 @@ class BaseModelCreator:
     ) -> typing.Tuple[cp_model.CpModel, typing.List[cp_model.IntVar]]:
         model = cp_model.CpModel() if model is None else model
         variables = [model.NewBoolVar(f"F{i}") for i in range(instance.n_all)]
-        self._add_structure_constraints(instance.structure, model, variables)
+        if instance.structure is not None:
+            self._add_structure_constraints(instance.structure, model, variables)
         self._add_rule_constraints(instance.rules, model, variables)
         # root node
         # if instance.structure.mandatory:
-        model.Add(
-            self._get_struct_var(variables, instance.structure) == 1
-        )  # enforce root node
+        if instance.structure is not None:
+            model.Add(
+                self._get_struct_var(variables, instance.structure) == 1
+            )  # enforce root node
         return model, variables
 
 

@@ -33,7 +33,9 @@ class EqualityOptimizer:
             else:
                 yield rule
 
-    def _search_ands(self, feature_tree: FeatureNode, eq):
+    def _search_ands(self, feature_tree: typing.Optional[FeatureNode], eq):
+        if feature_tree is None:
+            return
         if isinstance(feature_tree, AndFeature):
             for element in feature_tree.elements:
                 if element.mandatory:
@@ -69,7 +71,7 @@ class EqualityOptimizer:
         for key, val in inverse.items():
             mapping.map(origin_element=key, target_element=val, inverse=True)
         rules = [rule.substitute(direct, inverse) for rule in rules]
-        struct = instance.structure.substitute(direct, inverse)
+        struct = instance.structure.substitute(direct, inverse) if instance.structure else None
         features = self._sub_features(instance.features, direct, inverse)
         instance_ = Instance(features=features, rules=rules, structure=struct)
         instance_.instance_name = instance.instance_name + "|EQ"

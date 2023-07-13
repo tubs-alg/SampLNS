@@ -20,12 +20,12 @@ class Instance:
     def __init__(
         self,
         features: typing.List[FeatureLabel],
-        structure: FeatureNode,
+        structure: typing.Optional[FeatureNode],
         rules: typing.List[SatNode],
     ):
         self.instance_name = "UNNAMED"
         self.features: typing.List[FeatureLabel] = features
-        self.structure: FeatureNode = structure
+        self.structure: typing.Optional[FeatureNode] = structure
         self.rules: typing.List[SatNode] = rules
 
     def __repr__(self):
@@ -35,12 +35,35 @@ class Instance:
             return f"Instance[UNNAMED]<{len(self.features)} features, {len(self.rules)} rules>"
 
     def is_fully_defined(
-        self, conf: typing.Dict[FeatureLabel, bool], exact: bool = False
+        self, conf: typing.Dict[FeatureLabel, bool], exact: bool = False, verbose: bool = False
     ) -> bool:
         """
         Checks if a configuration is fully defined, i.e., exactly defines the concrete
         features.
         """
         if any(f not in conf for f in self.features):
+            if verbose:
+                print("Not all features defined")
+                print("Missing:", set(self.features) - set(conf.keys()))
             return False
         return not exact or len(conf.keys()) == len(self.features)
+    
+    def is_feasible(self, conf: typing.Dict[FeatureLabel, bool], verbose: bool = False) -> bool:
+        """
+        Checks if a configuration is feasible, i.e., satisfies all rules and matches the structure.
+        """
+        if not isinstance(conf, dict):
+            raise ValueError("Configuration must be a dictionary")
+        if not self.is_fully_defined(conf, verbose=verbose):
+            if verbose:
+                print("Not fully defined")
+            return False
+        if not all(rule.evaluate(conf) for rule in self.rules):
+            if verbose:
+                print("Does not satisfy rules")
+            return False
+        if self.structure and not self.structure.is_feasible(conf):
+            if verbose:
+                print("Does not match structure")
+            return False
+        return True
