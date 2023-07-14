@@ -1,38 +1,29 @@
-#include <filesystem>
 #include <iostream>
-#include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <mutex>
+#include <functional>
+#include <fmt/core.h>
 
-namespace fs = std::filesystem;
+/// The LogHandler type represents a callback method that can be registered at a Logger class
+/// object. It takes a single parameter, a constant reference to a `std::string` representing a log
+/// message. The user can define their own implementation of the `LogHandler` callback to react to
+/// log messages and perform actions such as writing or printing them to a desired location.
+typedef std::function<void(const std::string& msg)> LogHandler;
 
-/// @brief A simple, threadsafe logger class, which can be muted, unmuted and configured to write to multiple output streams.
+/// @brief A simple, threadsafe logger class, which can be muted, unmuted and configured to write to multiple output streams and handlers.
 class Logger {
 public:
-    /// @brief Create a new logger, which does not write to any stream. It is essentially mute (but not explicitly muted).
-    Logger() {}
-
-    /// @brief Create a new logger with the single given output stream.
-    /// @param ostream 
-    Logger(std::ostream* ostream) {
-        this->add_ostream(ostream);
+    /// @brief Create a new logger with the given name.
+    Logger(const std::string& name) {
+        this->set_name(name);
     }
 
-    /// @brief Log a value in std::ostream style.
-    /// @tparam T the object type of the value parameter.
-    /// @param value The value to log. Can, but must not be a string.
-    /// @return This logger. Can be used to log multiple values sequentially.
-    template<typename T>
-    Logger& operator<<(const T& value) {
-        if (!muted && !outputs.empty()) {
-            // buffer the value, log the buffered string
-            std::ostringstream buf;
-            buf << value;
-            this->log(buf.str())
-        }
-        return *this;
+    /// @brief Sets the name of the current logger to the specified name.
+    /// @param name The new name of the logger.
+    Logger& set_name(const std::string& name) {
+        this->name = name;
     }
 
     /// @brief Convenience method for adding stdout to the list of output streams.
@@ -46,46 +37,40 @@ public:
     /// @param stream Pointer to the stream to be added. Make sure that the stream does not get out of scope.
     /// @return This logger. Can be used to register multiple streams sequentially.
     Logger& add_ostream(std::ostream* stream) {
+        // Create a LogHandler as "adapter" to the given stream.
+        // The pointer to the stream is copied.
+        LogHandler stream_logger = [=](const std::string& msg) {
+            *stream << msg;
+        };
         std::unique_lock(output_lock);
-        outputs.push_back(stream);
+        handlers.emplace_back(stream_logger);
         return *this;
     }
 
-    /// @brief Adds a file output stream to the list of output streams.
-    /// @param path The file to be written to. 
-    /// @param open_mode The open mode for the file. Default is append (std::ios_base::app).
-    /// @return This logger. Can be used to register multiple streams sequentially.
-    Logger& add_file(const std::string &path, std::ios_base::openmode open_mode = std::ios_base::app) {
-        fs::path fp(path);
-
-        if (fs::is_directory(fp)) {
-            throw std::runtime_error(path + " is a directory!");
-        }
-
-        // open file in append mode
-        std::ofstream* out_file = new std::ofstream();
-        out_file->open(fp, open_mode);
-        if (out_file->fail()) {
-            throw std::runtime_error("Failed to open file " + path + "!");
-        }
-
-        // add file stream to outputs
-        std::unique_lock(output_lock);
-        outputs.push_back(out_file);
-
-        return *this;
+    /// @brief Logs a formatted message using the provided format string and arguments.
+    /// This method takes a format string with placeholder symbols (see fmt) and a variable number of arguments.
+    /// @param fmt_str The format string specifying the log message format.
+    /// @param args The arguments to be inserted into the format string.
+    ///
+    template <typename... T>
+    inline void logf(const std::string& fmt_str, T&&... args) {
+        this->log(fmt::format(fmt_str, args));
     }
 
-    /// @brief Logs a string to all registered output streams.
+    /// @brief Log the provided string to all registered log handlers.
     /// @param str The string to be logged.
     void log(const std::string& str) {
+        if (this->muted) {
+            return;
+        }
+        std::string msg = fmt::format("[{0}]: {1}", this->name, str);
         std::unique_lock(output_lock);
-        for (auto& output : outputs) {
-            *output << str;
+        for (auto& handler : handlers) {
+            handler(msg);
         }
     }
 
-    /// @brief Mutes the logger. All further calls to log() or the << operator will be ignored, until unmuted.
+    /// @brief Mute the logger. All further calls to log() or the << operator will be ignored, until unmuted.
     void mute() {
         muted = true;
     }
@@ -96,7 +81,8 @@ public:
     }
 
 private:
+    std::string name = "Logger-" + std::to_string(reinterpret_cast<std::uintptr_t>(this));
     bool muted = false;
-    std::vector<std::ostream*> outputs;
+    std::vector<LogHandler> handlers;
     std::mutex output_lock;
 };
