@@ -13,7 +13,7 @@ class IndexInstance:
 
     def __init__(
         self,
-        structure: FeatureNode,
+        structure: typing.Optional[FeatureNode],
         rules: typing.List[SatNode],
         n_concrete: int,
         n_all: int,
@@ -42,7 +42,7 @@ class IndexInstance:
             "n_concrete": self.n_concrete,
             "to_original_universe": self._to_original_universe.to_json_data(),
             "rules": [r.to_json_data() for r in self.rules],
-            "structure": self.structure.to_json_data(),
+            "structure": self.structure.to_json_data() if self.structure else None,
         }
 
     @staticmethod
@@ -50,7 +50,7 @@ class IndexInstance:
         umap = UniverseMapping()
         umap.from_json_data(json_data["to_original_universe"])
         result = IndexInstance(
-            structure=FeatureNode.from_json_data(json_data["structure"]),
+            structure=FeatureNode.from_json_data(json_data.get("structure", None)),
             rules=[SatNode.from_json_data(j) for j in json_data["rules"]],
             n_concrete=json_data["n_concrete"],
             n_all=json_data["n_all"],

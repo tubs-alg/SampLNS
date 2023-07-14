@@ -146,6 +146,8 @@ class FeatureNode(abc.ABC):
 
     @staticmethod
     def from_json_data(json_data):
+        if not  json_data:
+            return None
         return _feature_node_from_json(json_data)
 
 

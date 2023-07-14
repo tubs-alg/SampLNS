@@ -152,8 +152,8 @@ class AND(SatNode):
 
 class OR(SatNode):
     def __init__(self, *elements: SatNode):
-        if len(elements) <= 1:
-            msg = "Disjunction should have at least two elements."
+        if len(elements) < 1:
+            msg = "Disjunction should have at least one elements."
             raise ValueError(msg)
         self.elements = []
         for element in elements:

@@ -1,3 +1,15 @@
+/**
+ * @file _coverage_set.cpp
+ * @author Dominik Krupke
+ * @brief This file implements a native implementation for checking which feature tuples are covered by a given sample. This is used to check which
+ * tuples are missing in a given sample for the Large Neighborhood Search. Previously implemented in Python but it was too slower for larger instances.
+ * @version 0.1
+ * @date 2023-07-13
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #include <pybind11/functional.h> // automatic conversion of lambdas/functions?
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // automatic conversion of vectors
@@ -36,9 +48,20 @@ public:
     return this->feasibility_matrix == other.feasibility_matrix;
   }
 
+  bool operator<=(const CoveredTuples &other) const {
+    for (int i = 0; i < 2 * this->num_concrete_features; i++) {
+      for (int j = 0; j < 2 * this->num_concrete_features; j++) {
+        if (this->feasibility_matrix[i][j] && !other.feasibility_matrix[i][j]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   ~CoveredTuples() {}
 
-  bool is_contained(int f1, bool v1, int f2, bool v2) {
+  bool is_contained(int f1, bool v1, int f2, bool v2) const {
     return this->feasibility_matrix[get_index(f1, v1)][get_index(f2, v2)];
   }
 
@@ -64,7 +87,7 @@ private:
     this->num_covered_tuples++;
   }
 
-  int get_index(int f, bool val) { return 2 * f + (val ? 1 : 0); }
+  int get_index(int f, bool val)  const{ return 2 * f + (val ? 1 : 0); }
 
   std::pair<int, bool> get_feature_and_value(int index) {
     return std::make_pair(index / 2, index % 2 == 1);
@@ -83,6 +106,21 @@ public:
 
   void add_configuration(const std::vector<bool> &conf) {
     this->covered_tuples.add_tuples_of_configuration(conf);
+    if(this->is_configuration_contradicting(conf)){
+      throw std::runtime_error("The covered tuples are not a subset of the "
+                               "feasible tuples!");
+    }
+  }
+
+  bool is_configuration_contradicting(const std::vector<bool> &conf) const {
+    for (int i = 0; i < this->feasible_tuples.num_concrete_features; i++) {
+      for (int j = i + 1; j < this->feasible_tuples.num_concrete_features; j++) {
+        if(!this->feasible_tuples.is_contained(i, conf[i], j, conf[j])){
+          return true;  // contradiction found, configuration is invalid
+        }
+      }
+    }
+    return false;
   }
 
   int num_missing_tuples() {
@@ -102,26 +140,15 @@ public:
     for (int i = 0; i < this->feasible_tuples.num_concrete_features; i++) {
       for (int j = i + 1; j < this->feasible_tuples.num_concrete_features;
            j++) {
-        if (this->feasible_tuples.is_contained(i, true, j, true) &&
-            !this->covered_tuples.is_contained(i, true, j, true)) {
-          missing_tuples.push_back(
-              std::make_pair(std::make_pair(i, true), std::make_pair(j, true)));
-        }
-        if (this->feasible_tuples.is_contained(i, true, j, false) &&
-            !this->covered_tuples.is_contained(i, true, j, false)) {
-          missing_tuples.push_back(std::make_pair(std::make_pair(i, true),
-                                                  std::make_pair(j, false)));
-        }
-        if (this->feasible_tuples.is_contained(i, false, j, true) &&
-            !this->covered_tuples.is_contained(i, false, j, true)) {
-          missing_tuples.push_back(std::make_pair(std::make_pair(i, false),
-                                                  std::make_pair(j, true)));
-        }
-        if (this->feasible_tuples.is_contained(i, false, j, false) &&
-            !this->covered_tuples.is_contained(i, false, j, false)) {
-          missing_tuples.push_back(std::make_pair(std::make_pair(i, false),
-                                                  std::make_pair(j, false)));
-        }
+          for (bool i_val: {true, false}){
+            for (bool j_val: {true, false}){
+              if(this->feasible_tuples.is_contained(i, i_val, j, j_val) &&
+                  !this->covered_tuples.is_contained(i, i_val, j, j_val)){
+                missing_tuples.push_back(std::make_pair(std::make_pair(i, i_val),
+                                                        std::make_pair(j, j_val)));
+              }
+            }
+          }
       }
     }
     return missing_tuples;
@@ -138,6 +165,7 @@ PYBIND11_MODULE(_coverage_set, m) {
       .def(py::init<const std::vector<std::vector<bool>> &, int>())
       .def("is_contained", &CoveredTuples::is_contained)
       .def("__eq__", &CoveredTuples::operator==)
+      .def("__le__", &CoveredTuples::operator<=)
       .def_readonly("num_concrete_features",
                     &CoveredTuples::num_concrete_features)
       .def_readonly("num_covered_tuples", &CoveredTuples::num_covered_tuples);
