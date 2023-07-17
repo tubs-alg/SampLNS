@@ -1,3 +1,6 @@
+#ifndef ALG_SCP_LOGGER_HPP
+#define ALG_SCP_LOGGER_HPP
+
 #include <chrono>
 #include <fmt/core.h>
 #include <functional>
@@ -14,6 +17,9 @@
 /// perform actions such as writing or printing them to a desired location.
 typedef std::function<void(const std::string &msg)> LogHandler;
 
+// Keep track of time when the process started.
+static const auto process_time_start = std::chrono::steady_clock::now();
+
 /// @brief A simple, threadsafe logger class, which can be muted, unmuted and
 /// configured to write to multiple output streams and handlers.
 class Logger {
@@ -23,14 +29,17 @@ public:
 
   /// @brief Sets the name of the current logger to the specified name.
   /// @param name The new name of the logger.
-  Logger &set_name(const std::string &name) { this->name = name; }
+  Logger &set_name(const std::string &name) {
+    this->name = name;
+    return *this;
+  }
 
   /// @brief Add a handler function (callback) to this logger, which gets called
   /// whenever a message is logged.
   /// @param handler The LogHandler instance (e.g. a lambda definition)
   /// @return
   Logger &add_handler(LogHandler handler) {
-    std::unique_lock(output_lock);
+    std::unique_lock<std::mutex> lock(this->output_lock);
     handlers.push_back(handler);
     return *this;
   }
@@ -62,7 +71,7 @@ public:
   ///
   template <typename... T>
   inline void logf(const std::string &fmt_str, T &&...args) {
-    this->log(fmt::format(fmt_str, args));
+    this->log(fmt::format(fmt_str, std::forward<T>(args)...));
   }
 
   /// @brief Log the provided string to all registered log handlers.
@@ -72,7 +81,7 @@ public:
       return;
     }
     std::string msg = fmt::format("[{0}]: {1}", this->name, str);
-    std::unique_lock(output_lock);
+    std::unique_lock<std::mutex> lock(this->output_lock);
     for (auto &handler : handlers) {
       handler(msg);
     }
@@ -91,7 +100,6 @@ private:
   bool muted = false;
   std::vector<LogHandler> handlers;
   std::mutex output_lock;
-
-  // Keep track of time when the process started.
-  static const auto process_time_start = chrono::steady_clock::now();
 };
+
+#endif

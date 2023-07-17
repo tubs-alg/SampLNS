@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#include "logger.hpp"
 #include "timer.hpp"
 
 namespace samplns {
@@ -66,7 +67,8 @@ template <typename instance_type, typename solution_type> class ModularLNS {
 public:
   ModularLNS(NeighborhoodSelector<instance_type, solution_type> *nb_selector,
              const solution_type &initial_solution)
-      : nb_selector(nb_selector), best_solution(initial_solution) {}
+      : nb_selector(nb_selector), best_solution(initial_solution),
+        logger(std::make_shared<Logger>(typeid(this).name())) {}
 
   /// @brief Used by the solver to notify you about new solutions. Does not have
   /// to be better solution!
@@ -207,6 +209,7 @@ private:
       nb_selector;
   std::vector<std::function<void(const solution_type &)>>
       better_solution_callbacks;
+  std::shared_ptr<Logger> logger;
   solution_type best_solution;
   Timer timer;
 
