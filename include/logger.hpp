@@ -1,3 +1,4 @@
+#include <chrono>
 #include <fmt/core.h>
 #include <functional>
 #include <iostream>
@@ -24,6 +25,16 @@ public:
   /// @param name The new name of the logger.
   Logger &set_name(const std::string &name) { this->name = name; }
 
+  /// @brief Add a handler function (callback) to this logger, which gets called
+  /// whenever a message is logged.
+  /// @param handler The LogHandler instance (e.g. a lambda definition)
+  /// @return
+  Logger &add_handler(LogHandler handler) {
+    std::unique_lock(output_lock);
+    handlers.push_back(handler);
+    return *this;
+  }
+
   /// @brief Convenience method for adding stdout to the list of output streams.
   /// @return This logger. Can be used to register multiple streams
   /// sequentially.
@@ -40,10 +51,7 @@ public:
   Logger &add_ostream(std::ostream *stream) {
     // Create a LogHandler as "adapter" to the given stream.
     // The pointer to the stream is copied.
-    LogHandler stream_logger = [=](const std::string &msg) { *stream << msg; };
-    std::unique_lock(output_lock);
-    handlers.emplace_back(stream_logger);
-    return *this;
+    return this->add_handler([=](const std::string &msg) { *stream << msg; });
   }
 
   /// @brief Logs a formatted message using the provided format string and
@@ -83,4 +91,7 @@ private:
   bool muted = false;
   std::vector<LogHandler> handlers;
   std::mutex output_lock;
+
+  // Keep track of time when the process started.
+  static const auto process_time_start = chrono::steady_clock::now();
 };
