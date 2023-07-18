@@ -141,7 +141,7 @@ def run_samplns(
     )
     # get optimized sample and verify its correctness (takes some time).
     return {
-        "solution": solver.get_best_solution(verify=False, fast_verify=True),
+        "solution": solver.get_best_solution(verify=True, fast_verify=True),
         "lower_bound": solver.get_lower_bound(),
         "upper_bound": len(solver.get_best_solution()),
         "optimal": solver.get_lower_bound() == len(solver.get_best_solution()),
@@ -158,7 +158,6 @@ def pack_after_finish():
 
 
 def configure_grb_license_path():
-    return
     # hack for gurobi license on alg workstations. TODO: Find a nicer way
     import socket
     from pathlib import Path
