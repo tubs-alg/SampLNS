@@ -47,7 +47,7 @@ public:
         }
         if (!contained) {
           throw std::runtime_error(
-              "The inital solutions contains edges that are not "
+              "The inital solution contains edges that are not "
               "present in the given subgraph!");
         }
       }
@@ -118,6 +118,11 @@ public:
 
       // std::cout << "Stagnation detected: Using pool solution with "
       //           << initial_solution.size() << " edges." << std::endl;
+    }
+
+    if (initial_solution.empty()) {
+      throw std::runtime_error("The neighborhood selector tried to construct a "
+                               "neighborhood from an empty initial solution!");
     }
 
     // shuffle for higher randomness
