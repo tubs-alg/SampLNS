@@ -100,6 +100,8 @@ def run_distributed(instance_name: str, initial_sample_path: str):
         iterations=ITERATIONS,
         iteration_time_limit=ITERATION_TIME_LIMIT,
         time_limit=TIME_LIMIT,
+        verify=True,
+        fast_verify=True,
     )
 
 
@@ -111,6 +113,8 @@ def run_samplns(
     iterations,
     iteration_time_limit,
     time_limit,
+    verify,
+    fast_verify,
 ):
     """
     Running SampLNS on an initial sample.
@@ -141,7 +145,7 @@ def run_samplns(
     )
     # get optimized sample and verify its correctness (takes some time).
     return {
-        "solution": solver.get_best_solution(verify=True, fast_verify=True),
+        "solution": solver.get_best_solution(verify=verify, fast_verify=fast_verify),
         "lower_bound": solver.get_lower_bound(),
         "upper_bound": len(solver.get_best_solution()),
         "optimal": solver.get_lower_bound() == len(solver.get_best_solution()),
