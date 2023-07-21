@@ -58,7 +58,9 @@ public:
                 const std::vector<feature_pair> &solution,
                 double time_utilization, double nb_utilization) override {
 
-    this->add_solution_to_pool(solution);
+    if (!solution.empty()) {
+      this->add_solution_to_pool(solution);
+    }
 
     // std::cout << "Utilized " << std::fixed << std::setprecision(2)
     //           << time_utilization * 100.0 << "% of the CDS-LNS iteration
@@ -211,6 +213,10 @@ public:
 
 private:
   void add_solution_to_pool(const std::vector<feature_pair> &solution) {
+
+    if (solution.empty()) {
+      return;
+    }
 
     for (const auto &sol : solution_pool) {
       if (sol == solution) {
