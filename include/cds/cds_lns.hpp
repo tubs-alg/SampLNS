@@ -111,12 +111,18 @@ public:
 
     std::vector<feature_pair> initial_solution;
 
-    if (stagnation_counter < STAGNATION_THRESHOLD) {
+    if (stagnation_counter < STAGNATION_THRESHOLD || solution_pool.empty()) {
       // copy best known solution
       initial_solution = this->best_solution;
+      if (initial_solution.empty()) {
+        throw std::runtime_error("Best solution is empty!");
+      }
     } else {
       // choose solution by chance
       initial_solution = solution_pool[std::rand() % solution_pool.size()];
+      if (initial_solution.empty()) {
+        throw std::runtime_error("Pool solution is empty!");
+      }
 
       // std::cout << "Stagnation detected: Using pool solution with "
       //           << initial_solution.size() << " edges." << std::endl;
