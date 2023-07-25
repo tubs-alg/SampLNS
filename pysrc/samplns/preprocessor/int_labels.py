@@ -35,12 +35,15 @@ def substitute_with_int_labels(
         rules.append(rule_)
 
     # variables
-    for feature in instance.structure.all_features():
-        if feature not in direct_substitutions:
-            direct_substitutions[feature] = counter
-            mapping.map(origin_element=feature, target_element=counter)
-            counter += 1
-    struct = instance.structure.substitute(direct_substitutions, {})
+    if instance.structure:
+        for feature in instance.structure.all_features():
+            if feature not in direct_substitutions:
+                direct_substitutions[feature] = counter
+                mapping.map(origin_element=feature, target_element=counter)
+                counter += 1
+        struct = instance.structure.substitute(direct_substitutions, {})
+    else:
+        struct = None
 
     iistance = IndexInstance(struct, rules, n_concrete, counter, mapping)
     iistance.instance_name = instance.instance_name

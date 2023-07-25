@@ -70,7 +70,9 @@ def parse_features(dimacs: str, logger: logging.Logger):
     for line in dimacs.split("\n"):
         if line.startswith("c"):
             i = int(line.split(" ")[1].strip())
-            features[i] = line.split(" ")[-1].strip()
+            feasture = line.split(" ")[2].strip()
+            assert feasture not in features.values()
+            features[i] = feasture
     return features
 
 
