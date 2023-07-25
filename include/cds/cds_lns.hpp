@@ -58,7 +58,9 @@ public:
                 const std::vector<feature_pair> &solution,
                 double time_utilization, double nb_utilization) override {
 
-    this->add_solution_to_pool(solution);
+    if (!solution.empty()) {
+      this->add_solution_to_pool(solution);
+    }
 
     // std::cout << "Utilized " << std::fixed << std::setprecision(2)
     //           << time_utilization * 100.0 << "% of the CDS-LNS iteration
@@ -109,12 +111,18 @@ public:
 
     std::vector<feature_pair> initial_solution;
 
-    if (stagnation_counter < STAGNATION_THRESHOLD) {
+    if (stagnation_counter < STAGNATION_THRESHOLD || solution_pool.empty()) {
       // copy best known solution
       initial_solution = this->best_solution;
+      if (initial_solution.empty()) {
+        throw std::runtime_error("Best solution is empty!");
+      }
     } else {
       // choose solution by chance
       initial_solution = solution_pool[std::rand() % solution_pool.size()];
+      if (initial_solution.empty()) {
+        throw std::runtime_error("Pool solution is empty!");
+      }
 
       // std::cout << "Stagnation detected: Using pool solution with "
       //           << initial_solution.size() << " edges." << std::endl;
@@ -211,6 +219,10 @@ public:
 
 private:
   void add_solution_to_pool(const std::vector<feature_pair> &solution) {
+
+    if (solution.empty()) {
+      return;
+    }
 
     for (const auto &sol : solution_pool) {
       if (sol == solution) {
