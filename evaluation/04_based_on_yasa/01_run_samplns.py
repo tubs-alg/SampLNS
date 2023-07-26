@@ -191,16 +191,16 @@ if __name__ == "__main__":
     random.shuffle(indices)
     with slurminade.Batch(max_size=40) as batch:
         for idx in indices:
-            if not samples["Path"][idx]:
-                print("Skipping unsuccessful row", samples.loc[idx])
+            if not yasa_m1["Path"][idx]:
+                print("Skipping unsuccessful row", yasa_m1.loc[idx])
                 continue
-            if samples["#Variables"][idx] > 250:
-                print("Skipping", samples["Instance"][idx], "due to its size.")
+            if yasa_m1["#Variables"][idx] > 1500:
+                print("Skipping", yasa_m1["Instance"][idx], "due to its size.")
                 continue
-            path = samples["Path"][idx]
-            instance = samples["Instance"][idx]
+            path = yasa_m1["Path"][idx]
+            instance = yasa_m1["Instance"][idx]
             if "uclibc" in instance:
                 print("Skipping uclibc instance! They seem to be inconsistent.")
                 continue
-            run_distributed.distribute(instance, path, time_used_by_yasa=samples["Time(s)"][idx])
+            run_distributed.distribute(instance, path, time_used_by_yasa=yasa_m1["Time(s)"][idx])
         pack_after_finish.wait_for(batch.flush()).distribute()
