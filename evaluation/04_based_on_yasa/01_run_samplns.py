@@ -199,8 +199,8 @@ if __name__ == "__main__":
                 continue
             path = yasa_m1["Path"][idx]
             instance = yasa_m1["Instance"][idx]
-            if "uclibc" in instance:
-                print("Skipping uclibc instance! They seem to be inconsistent.")
-                continue
+            #if "uclibc" in instance:
+            #    print("Skipping uclibc instance! They seem to be inconsistent.")
+            #    continue
             run_distributed.distribute(instance, path, time_used_by_yasa=yasa_m1["Time(s)"][idx])
         pack_after_finish.wait_for(batch.flush()).distribute()

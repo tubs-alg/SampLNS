@@ -37,7 +37,7 @@ slurminade.set_dispatch_limit(100)
 # ------------------------------------------------
 ITERATIONS = 10000
 ITERATION_TIME_LIMIT = 60.0
-TIME_LIMIT = 90
+TIME_LIMIT = 900
 
 BASE = "900_seconds_5_it"
 INPUT_SAMPLE_ARCHIVE = f"../01_ICSE_2024_0/00_baseline/{BASE}.zip"
