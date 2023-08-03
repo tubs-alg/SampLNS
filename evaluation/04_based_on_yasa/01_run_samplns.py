@@ -119,8 +119,7 @@ def run_samplns(
         instance = get_instance(instance_name, instance_archive)
     except Exception as e:
         msg = f"Error while parsing instance {instance_name}: {str(e)}"
-        print(msg)
-        return {"error": msg}
+        raise RuntimeError(msg)
     sample = parse_sample(
         sample_path=initial_sample_path, archive_path=input_sample_archive
     )

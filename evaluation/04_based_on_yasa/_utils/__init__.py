@@ -10,12 +10,13 @@ def get_instance(instance_name, archive_path):
     Simple helper to parse instance
     """
     with ZipFile(archive_path) as archive:
-        if archive.getinfo(os.path.join(instance_name, "model.dimacs")).file_size > 0:
+        try:
+            assert archive.getinfo(os.path.join(instance_name, "model.dimacs")).file_size > 0
             with archive.open(os.path.join(instance_name, "model.dimacs")) as f: 
                 print("Parsing DIMACS")
                 instance =  parse_source_dimacs(f, instance_name)
                 return instance
-        else:
+        except KeyError:
             with archive.open(os.path.join(instance_name, "model.xml")) as f:
                 print("Parsing FeatureIDE")
                 return parse_source(f, instance_name)
