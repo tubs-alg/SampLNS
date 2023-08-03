@@ -73,7 +73,7 @@ class MyLnsLogger(LnsObserver):
         )
 
 
-benchmark = Benchmark(RESULT_FOLDER, save_output=False, hide_output=True)
+benchmark = Benchmark(RESULT_FOLDER, save_output=True, hide_output=False)
 
 logging.getLogger("SampLNS").addHandler(logging.StreamHandler())
 logging.getLogger("SampLNS.CPSAT").setLevel(logging.WARNING)
@@ -118,8 +118,9 @@ def run_samplns(
     try:
         instance = get_instance(instance_name, instance_archive)
     except Exception as e:
-        print("Skipping due to parser error:", instance_name, str(e))
-        return None
+        msg = f"Error while parsing instance {instance_name}: {str(e)}"
+        print(msg)
+        return {"error": msg}
     sample = parse_sample(
         sample_path=initial_sample_path, archive_path=input_sample_archive
     )
@@ -154,7 +155,7 @@ def run_samplns(
         "timelimit_for_samplns": remaining_time,
         "solution": solution,
         "lower_bound": solver.get_lower_bound() if solver else 1,
-        "upper_bound": len(sample),
+        "upper_bound": len(solution),
         "optimal": solver.get_lower_bound() == len(solver.get_best_solution()) if solver else False,
         "iteration_info": logger.iterations,
     }
@@ -182,6 +183,7 @@ def configure_grb_license_path():
     if not os.path.exists(os.environ["GRB_LICENSE_FILE"]):
         msg = "Gurobi License File does not exist."
         raise RuntimeError(msg)
+    
 import random
 
 if __name__ == "__main__":
