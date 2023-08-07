@@ -200,6 +200,9 @@ if __name__ == "__main__":
                 continue
             path = yasa_m1["Path"][idx]
             instance = yasa_m1["Instance"][idx]
+            if "soletta_2017-03-09_21-02-40" in instance:
+                print("Skipping soletta_2017-03-09_21-02-40 because it defines a variable name twice.")
+                continue
             #if "uclibc" in instance:
             #    print("Skipping uclibc instance! They seem to be inconsistent.")
             #    continue
