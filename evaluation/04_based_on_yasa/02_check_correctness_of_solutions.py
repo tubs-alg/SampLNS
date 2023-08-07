@@ -2,11 +2,7 @@ from _utils import get_instance, parse_sample
 from algbench import Benchmark, describe
 from samplns.verify import have_equal_coverage
 
-TIME_LIMIT = 900
-BASE = "900_seconds_5_it"
-INPUT_SAMPLE_ARCHIVE = f"../01_ICSE_2024_0/00_baseline/{BASE}.zip"
-INSTANCE_ARCHIVE = "../01_ICSE_2024_0/00_benchmark_instances.zip"
-RESULT_FOLDER = f"01_results/{BASE}_{TIME_LIMIT}"
+from _conf import ITERATIONS, ITERATION_TIME_LIMIT, TIME_LIMIT, BASE, RESULT_FOLDER, INPUT_SAMPLE_ARCHIVE, INSTANCE_ARCHIVE
 
 if __name__ == "__main__":
     data = Benchmark(RESULT_FOLDER)

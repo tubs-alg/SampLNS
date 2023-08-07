@@ -1,2 +1,3 @@
 * *2023-08-07 (DK):* Created changelog to keep track of all changes and problems.
 * *2023-08-07 (DK):* The instance `soletta_2017-03-09_21-02-40` reuses a variable name. It is in dimacs format. This could be solved by using the indices instead of the variable names, as they are actually just comments. However, the solutions uses the variable names, too, and we would have to trust that the order is the same. We should think about this.
+* *2023-08-07 (DK):* Experiments completed on AlgRys. Ready for evaluation. However, the notebooks which just have been copied from the previous evaluations still have to be adapted.
