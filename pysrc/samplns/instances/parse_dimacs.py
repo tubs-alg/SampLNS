@@ -70,9 +70,12 @@ def parse_features(dimacs: str, logger: logging.Logger):
     for line in dimacs.split("\n"):
         if line.startswith("c"):
             i = int(line.split(" ")[1].strip())
-            feasture = line.split(" ")[2].strip()
-            assert feasture not in features.values()
-            features[i] = feasture
+            feature = line.split(" ")[2].strip()
+            if feature in features.values():
+                msg = "Feature name is not unique: " + feature+ " parsed from line: " + line
+                raise ValueError(msg)
+            assert feature not in features.values()
+            features[i] = feature
     return features
 
 
