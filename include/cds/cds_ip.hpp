@@ -105,6 +105,7 @@ public:
         // std::endl;
         auto timelimit_ = timelimit - dt;
         if (timelimit_<=0) {
+          std::cerr << "Bad time"<<std::endl;
           // Out of time
           return initial_solution;
         }

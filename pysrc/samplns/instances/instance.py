@@ -33,6 +33,7 @@ class Instance:
             return f"Instance[{self.instance_name}]<{len(self.features)} features, {len(self.rules)} rules>"
         else:
             return f"Instance[UNNAMED]<{len(self.features)} features, {len(self.rules)} rules>"
+        
 
     def is_fully_defined(
         self, conf: typing.Dict[FeatureLabel, bool], exact: bool = False, verbose: bool = False

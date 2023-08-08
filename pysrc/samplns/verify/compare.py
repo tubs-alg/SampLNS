@@ -23,6 +23,8 @@ def _unique_interaction(f1, f1_val, f2, f2_val):
     else:
         return (f2, f2_val, f1, f1_val)
 
+from ._verify import have_equal_coverage as _have_equal_coverage
+
 
 def have_equal_coverage(
     instance: Instance,
@@ -33,6 +35,7 @@ def have_equal_coverage(
     Check if two samples have the exact same coverage. This is a good technique for
     verifying correctness.
     """
+    return _have_equal_coverage(sample_a, sample_b, instance.features)
     concrete_features = set(instance.features)
     sample_a = _minimize_to_concrete_features(sample_a, concrete_features)
     interactions_a = {

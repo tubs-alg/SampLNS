@@ -12,12 +12,13 @@ can be restarted without doing repetitive work.
 import os
 import logging
 import slurminade
-from _utils import get_instance, parse_sample, parse_solution_overview
 from algbench import Benchmark
 from samplns.lns.lns import LnsObserver
 from samplns.lns.neighborhood import Neighborhood, RandomNeighborhood
 from samplns.simple import SampLns
 from samplns.utils import Timer
+
+from samplns.instances import Instance, parse_dimacs
 
 # ================================================
 # SLURM CONFIGURATION FOR DISTRIBUTED EXECUTION
@@ -35,14 +36,8 @@ slurminade.set_dispatch_limit(100)
 # ================================================
 # EXPERIMENT SETUP
 # ------------------------------------------------
-ITERATIONS = 10000
-ITERATION_TIME_LIMIT = 60.0
-TIME_LIMIT = 900
-
-BASE = "900_seconds_5_it"
-INPUT_SAMPLE_ARCHIVE = f"../01_ICSE_2024_0/00_baseline/{BASE}.zip"
-INSTANCE_ARCHIVE = "../01_ICSE_2024_0//00_benchmark_instances.zip"
-RESULT_FOLDER = f"01_results/{BASE}_{TIME_LIMIT}"
+from _conf import ITERATIONS, ITERATION_TIME_LIMIT, TIME_LIMIT, BASE, RESULT_FOLDER
+from _utils import get_instance, parse_sample
 
 
 # ================================================
@@ -80,6 +75,8 @@ class MyLnsLogger(LnsObserver):
         )
 
 
+
+
 benchmark = Benchmark(RESULT_FOLDER, save_output=False, hide_output=True)
 
 logging.getLogger("SampLNS").addHandler(logging.StreamHandler())
@@ -90,13 +87,11 @@ benchmark.capture_logger("SampLNS", logging.INFO)
 
 
 @slurminade.slurmify
-def run_distributed(instance_name: str, initial_sample_path: str):
+def run_distributed(instance_name: str, method: str):
     benchmark.add(
         run_samplns,
-        instance_name,
-        initial_sample_path,
-        instance_archive=INSTANCE_ARCHIVE,
-        input_sample_archive=INPUT_SAMPLE_ARCHIVE,
+        instance_name = instance_name,
+        sample_method=method,
         iterations=ITERATIONS,
         iteration_time_limit=ITERATION_TIME_LIMIT,
         time_limit=TIME_LIMIT,
@@ -107,9 +102,7 @@ def run_distributed(instance_name: str, initial_sample_path: str):
 
 def run_samplns(
     instance_name: str,
-    initial_sample_path: str,
-    instance_archive,
-    input_sample_archive,
+    sample_method: str,
     iterations,
     iteration_time_limit,
     time_limit,
@@ -121,12 +114,12 @@ def run_samplns(
     """
     configure_grb_license_path()
     try:
-        instance = get_instance(instance_name, instance_archive)
+        instance = get_instance(instance_name)
     except Exception as e:
         print("Skipping due to parser error:", instance_name, str(e))
         return None
     sample = parse_sample(
-        sample_path=initial_sample_path, archive_path=input_sample_archive
+        instance, instance_name,sample_method
     )
 
     # setup (needs time measurement as already involves calculations)
@@ -166,8 +159,8 @@ def configure_grb_license_path():
     import socket
     from pathlib import Path
 
-    # if "alg" not in socket.gethostname():
-    #    return
+    if "alg" not in socket.gethostname():
+        return
 
     os.environ["GRB_LICENSE_FILE"] = os.path.join(
         Path.home(), ".gurobi", socket.gethostname(), "gurobi.lic"
@@ -178,21 +171,16 @@ def configure_grb_license_path():
 import random
 
 if __name__ == "__main__":
-    samples = parse_solution_overview(INPUT_SAMPLE_ARCHIVE)
-    indices = list(samples.index)
-    random.shuffle(indices)
-    with slurminade.Batch(max_size=40) as batch:
-        for idx in indices:
-            if not samples["Path"][idx]:
-                print("Skipping unsuccessful row", samples.loc[idx])
-                continue
-            if samples["#Variables"][idx] > 250:
-                print("Skipping", samples["Instance"][idx], "due to its size.")
-                continue
-            path = samples["Path"][idx]
-            instance = samples["Instance"][idx]
-            if "uclibc" in instance:
-                print("Skipping uclibc instance! They seem to be inconsistent.")
-                continue
-            run_distributed.distribute(instance, path)
-        pack_after_finish.wait_for(batch.flush()).distribute()
+    # go through all the sample files
+    for root, dirs, files in os.walk("00_data/feature_models"):
+        for file in files:
+            if file.endswith(".csv"):
+                instance_name = file.split("_")[0]
+                method = "_".join(file.split("_")[2:]).split(".")[0]
+                #if "YASA" not in method:
+                #    continue  # only run YASA
+                if method.endswith("3"):
+                    continue  # triple sampling is not supported
+                if method:
+                    run_distributed.distribute(instance_name, method)
+

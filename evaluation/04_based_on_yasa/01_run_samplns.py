@@ -35,14 +35,7 @@ slurminade.set_dispatch_limit(100)
 # ================================================
 # EXPERIMENT SETUP
 # ------------------------------------------------
-ITERATIONS = 10000
-ITERATION_TIME_LIMIT = 60.0
-TIME_LIMIT = 900
-
-BASE = "900_seconds_5_it"
-INPUT_SAMPLE_ARCHIVE = f"../01_ICSE_2024_0/00_baseline/{BASE}.zip"
-INSTANCE_ARCHIVE = "../01_ICSE_2024_0//00_benchmark_instances.zip"
-RESULT_FOLDER = f"01_results/{BASE}_{TIME_LIMIT}"
+from _conf import ITERATIONS, ITERATION_TIME_LIMIT, TIME_LIMIT, BASE, RESULT_FOLDER, INPUT_SAMPLE_ARCHIVE, INSTANCE_ARCHIVE
 
 
 # ================================================
@@ -80,7 +73,7 @@ class MyLnsLogger(LnsObserver):
         )
 
 
-benchmark = Benchmark(RESULT_FOLDER, save_output=False, hide_output=True)
+benchmark = Benchmark(RESULT_FOLDER, save_output=True, hide_output=False)
 
 logging.getLogger("SampLNS").addHandler(logging.StreamHandler())
 logging.getLogger("SampLNS.CPSAT").setLevel(logging.WARNING)
@@ -90,7 +83,7 @@ benchmark.capture_logger("SampLNS", logging.INFO)
 
 
 @slurminade.slurmify
-def run_distributed(instance_name: str, initial_sample_path: str):
+def run_distributed(instance_name: str, initial_sample_path: str, time_used_by_yasa: float):
     benchmark.add(
         run_samplns,
         instance_name,
@@ -102,6 +95,7 @@ def run_distributed(instance_name: str, initial_sample_path: str):
         time_limit=TIME_LIMIT,
         verify=True,
         fast_verify=True,
+        _yasa_time_used=time_used_by_yasa,
     )
 
 
@@ -115,6 +109,7 @@ def run_samplns(
     time_limit,
     verify,
     fast_verify,
+    _yasa_time_used,
 ):
     """
     Running SampLNS on an initial sample.
@@ -123,32 +118,44 @@ def run_samplns(
     try:
         instance = get_instance(instance_name, instance_archive)
     except Exception as e:
-        print("Skipping due to parser error:", instance_name, str(e))
-        return None
+        msg = f"Error while parsing instance {instance_name}: {str(e)}"
+        raise RuntimeError(msg)
     sample = parse_sample(
         sample_path=initial_sample_path, archive_path=input_sample_archive
     )
 
-    # setup (needs time measurement as already involves calculations)
+    remaining_time = time_limit - _yasa_time_used
+    solver = None
     logger = MyLnsLogger()
-    solver = SampLns(
-        instance=instance,
-        initial_solution=sample,
-        neighborhood_selector=RandomNeighborhood(),
-        observer=logger,
-    )
+    if remaining_time > 0:
 
-    solver.optimize(
-        iterations=iterations,
-        iteration_timelimit=iteration_time_limit,
-        timelimit=time_limit,
-    )
+        # setup (needs time measurement as already involves calculations)
+        solver = SampLns(
+            instance=instance,
+            initial_solution=sample,
+            neighborhood_selector=RandomNeighborhood(),
+            observer=logger,
+        )
+
+        solver.optimize(
+            iterations=iterations,
+            iteration_timelimit=iteration_time_limit,
+            timelimit=remaining_time,
+        )
+
+        solution = solver.get_best_solution(verify=verify, fast_verify=fast_verify)
+    else:
+        solution = sample
+
     # get optimized sample and verify its correctness (takes some time).
     return {
-        "solution": solver.get_best_solution(verify=verify, fast_verify=fast_verify),
-        "lower_bound": solver.get_lower_bound(),
-        "upper_bound": len(solver.get_best_solution()),
-        "optimal": solver.get_lower_bound() == len(solver.get_best_solution()),
+        "samplns_used": solver is not None,
+        "time_used_by_yasa": _yasa_time_used,
+        "timelimit_for_samplns": remaining_time,
+        "solution": solution,
+        "lower_bound": solver.get_lower_bound() if solver else 1,
+        "upper_bound": len(solution),
+        "optimal": solver.get_lower_bound() == len(solver.get_best_solution()) if solver else False,
         "iteration_info": logger.iterations,
     }
 
@@ -166,8 +173,8 @@ def configure_grb_license_path():
     import socket
     from pathlib import Path
 
-    # if "alg" not in socket.gethostname():
-    #    return
+    if "alg" not in socket.gethostname():
+        return
 
     os.environ["GRB_LICENSE_FILE"] = os.path.join(
         Path.home(), ".gurobi", socket.gethostname(), "gurobi.lic"
@@ -175,24 +182,29 @@ def configure_grb_license_path():
     if not os.path.exists(os.environ["GRB_LICENSE_FILE"]):
         msg = "Gurobi License File does not exist."
         raise RuntimeError(msg)
+    
 import random
 
 if __name__ == "__main__":
     samples = parse_solution_overview(INPUT_SAMPLE_ARCHIVE)
-    indices = list(samples.index)
+    yasa_m1 = samples[(samples["Algorithm"]=="YASA") & (samples["Settings"]=="t2_m1_null")].dropna()
+    indices = list(yasa_m1.index)
     random.shuffle(indices)
     with slurminade.Batch(max_size=40) as batch:
         for idx in indices:
-            if not samples["Path"][idx]:
-                print("Skipping unsuccessful row", samples.loc[idx])
+            if not yasa_m1["Path"][idx]:
+                print("Skipping unsuccessful row", yasa_m1.loc[idx])
                 continue
-            if samples["#Variables"][idx] > 250:
-                print("Skipping", samples["Instance"][idx], "due to its size.")
+            if yasa_m1["#Variables"][idx] > 1500:
+                print("Skipping", yasa_m1["Instance"][idx], "due to its size.")
                 continue
-            path = samples["Path"][idx]
-            instance = samples["Instance"][idx]
-            if "uclibc" in instance:
-                print("Skipping uclibc instance! They seem to be inconsistent.")
+            path = yasa_m1["Path"][idx]
+            instance = yasa_m1["Instance"][idx]
+            if "soletta_2017-03-09_21-02-40" in instance:
+                print("Skipping soletta_2017-03-09_21-02-40 because it defines a variable name twice.")
                 continue
-            run_distributed.distribute(instance, path)
+            #if "uclibc" in instance:
+            #    print("Skipping uclibc instance! They seem to be inconsistent.")
+            #    continue
+            run_distributed.distribute(instance, path, time_used_by_yasa=yasa_m1["Time(s)"][idx])
         pack_after_finish.wait_for(batch.flush()).distribute()

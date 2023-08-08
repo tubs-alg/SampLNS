@@ -51,7 +51,7 @@ def parse_dimacs(path: str, logger: logging.Logger = _logger) -> Instance:
 
 
 def parse_source(source_file, instance_name, logger: logging.Logger = _logger):
-    source = source_file.read().replace("\r=t", " ")
+    source = source_file.read().decode("utf-8")
     features = parse_features(source, logger=logger)
     rules = parse_rules(source, features=features, logger=logger)
     logger.info(
@@ -70,7 +70,12 @@ def parse_features(dimacs: str, logger: logging.Logger):
     for line in dimacs.split("\n"):
         if line.startswith("c"):
             i = int(line.split(" ")[1].strip())
-            features[i] = line.split(" ")[-1].strip()
+            feature = line.split(" ")[2].strip()
+            if feature in features.values():
+                msg = "Feature name is not unique: " + feature+ " parsed from line: " + line
+                raise ValueError(msg)
+            assert feature not in features.values()
+            features[i] = feature
     return features
 
 
@@ -91,6 +96,7 @@ def parse_rules(dimacs: str, features: dict, logger: logging.Logger):
             num_clauses -= 1
             literals = []
             for literal in line.split(" "):
+                literal = literal.strip()
                 if literal == "0":
                     break
                 if literal.startswith("-"):
