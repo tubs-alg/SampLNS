@@ -1,5 +1,6 @@
 import abc
 import typing
+import math
 
 Tuples = typing.Iterable[typing.Tuple[typing.Tuple[int, bool], typing.Tuple[int, bool]]]
 Samples = typing.List[typing.Dict[int, bool]]
@@ -7,9 +8,13 @@ Samples = typing.List[typing.Dict[int, bool]]
 
 class CdsAlgorithm(abc.ABC):
     @abc.abstractmethod
-    def compute_independent_set(self, tuples: typing.Optional[Tuples]) -> Tuples:
+    def compute_independent_set(
+        self, tuples: typing.Optional[Tuples], timelimit: float = math.inf, ub=math.inf
+    ) -> Tuples:
         """
         None refers to all.
+        Default timelimit is "unlimited" (as indicated by math.inf).
+        Can be passed a known upper bound.
         """
         raise NotImplementedError()
 

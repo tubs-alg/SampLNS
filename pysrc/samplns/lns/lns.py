@@ -135,12 +135,17 @@ class ModularLns:
         neighborhood: Neighborhood,
         timelimit: float,
         timer: typing.Optional[Timer] = None,
+        symmetry_breaking_time_frac: float = 0.1,
     ) -> typing.Tuple[int, int, bool]:
         """
         A single iteration of the LNS to optimize one neighborhood.
         Return lower and upper bound. Additional flag indicates whether it
         was not skipped, e.g., because there was no optimization necessary.
         """
+
+        assert symmetry_breaking_time_frac > 0.0
+        assert symmetry_breaking_time_frac < 1.0
+
         if timer is None:
             timer = Timer(timelimit)  # create an empty dummy timer
         self.observer.report_neighborhood_optimization(neighborhood)
@@ -153,7 +158,11 @@ class ModularLns:
         if k <= 1:
             return k, k, False
         independent = list(
-            self._cds.compute_independent_set(neighborhood.missing_tuples)
+            self._cds.compute_independent_set(
+                neighborhood.missing_tuples,
+                timelimit=timer.remaining() * symmetry_breaking_time_frac,
+                ub=k,
+            )
         )
         neighborhood.missing_tuples = [
             (min(t), max(t)) for t in neighborhood.missing_tuples

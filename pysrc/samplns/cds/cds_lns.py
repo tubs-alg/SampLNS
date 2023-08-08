@@ -1,5 +1,6 @@
 import logging
 import typing
+import math
 
 from ..preprocessor import IndexInstance
 from ._cds_bindings import (
@@ -10,6 +11,7 @@ from ._cds_bindings import (
     TransactionGraph,
 )
 from .base import CdsAlgorithm, Samples, Tuples
+from ..utils import Timer
 
 _logger = logging.getLogger("SampLNS.CdsLns")
 
@@ -71,7 +73,12 @@ class CdsLns(CdsAlgorithm):
     def stop(self):
         self.solver.stop()
 
-    def compute_independent_set(self, edges: typing.Optional[Tuples]) -> Tuples:
+    def compute_independent_set(
+        self, edges: typing.Optional[Tuples], timelimit: float = math.inf, ub=math.inf
+    ) -> Tuples:
+        # Stop time
+        timer = Timer(timelimit)
+
         # Filter by the edges passed as an argument
         sol = self.__cpp_to_py_format(self.solver.get_best_solution())
         if edges is not None:
@@ -84,19 +91,50 @@ class CdsLns(CdsAlgorithm):
             for p, q in edges:
                 assert self.graph.has_edge(p, q)
 
-            sol = LnsCds(self.graph, subgraph=edges, use_heur=False).optimize(
-                initial_solution=greedy_sol,
-                max_iterations=5,
-                time_limit=6.0,
-                verbose=False,
-            )
-            # sol = [(sol.first, sol.second) for sol in sol]
+            sol = greedy_sol
+
+            # While time left: call the lns solver
+            lns = LnsCds(self.graph, subgraph=edges, use_heur=False)
+            iter_without_improvement = 0
+            while timer:
+                assert (
+                    len(sol) <= ub
+                ), f"The provided upper bound {ub} is infeasible! A larger lower bound {len(sol)} was found!"
+
+                # Break early if known upper bound is reached
+                if len(sol) == ub:
+                    self._logger.info(
+                        "[Symmetry Breaking]: Optimal solution found (%d)!", len(sol)
+                    )
+                    break
+
+                new_sol = lns.optimize(
+                    initial_solution=sol,
+                    max_iterations=1,
+                    time_limit=timer.remaining(),
+                    verbose=False,
+                )
+
+                # check for improvement. break early if no improvement was made for multiple iterations.
+                if len(new_sol) > len(sol):
+                    sol = new_sol
+                    iter_without_improvement = 0
+                    self._logger.info(
+                        "[Symmetry Breaking]: (%fs left) Independent tuple set with size %d was found!",
+                        timer.remaining(),
+                        len(sol),
+                    )
+                else:
+                    iter_without_improvement += 1
+                    if iter_without_improvement >= 10:
+                        break
+
             assert all(
                 e in edges for e in sol
             ), "The solution contains edges that are not within the specified subgraph edges!"
             sol = self.__cpp_to_py_format(sol)
             self._logger.info(
-                "The greedy solver found %d tuples, the LNS found %d tuples!",
+                "[Symmetry Breaking]: The greedy solver found %d tuples, the LNS found %d tuples!",
                 len(greedy_sol),
                 len(sol),
             )

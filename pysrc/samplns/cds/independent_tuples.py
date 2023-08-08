@@ -1,5 +1,6 @@
 import itertools
 import random
+import math
 
 from .base import CdsAlgorithm, Samples, Tuples
 
@@ -36,8 +37,6 @@ class IndependentTuples(CdsAlgorithm):
             (f, False) for f in self._features
         ]
         self.recompute(initial_solution)
-
-    def recompute(self, initial_solution: Samples):
         """
         If the best solution has significantly changed, it may be beneficial to
         recompute the number of occurrences used for the sorting. This may result
@@ -63,10 +62,19 @@ class IndependentTuples(CdsAlgorithm):
             assert v < w
         return (v, w) in self.coverage_count
 
-    def compute_independent_set(self, tuples: Tuples) -> Tuples:
+    def compute_independent_set(
+        self, tuples: Tuples, timelimit: float = math.inf, ub=math.inf
+    ) -> Tuples:
         """
         Compute an independent set from the given tuples.
+        (Time limit not supported)
         """
+
+        if timelimit != math.inf:
+            raise NotImplementedError(
+                f"This implementation does currently not support time limits!"
+            )
+
         if tuples is None:
             tuples = self.get_feasible_tuples()
         sorted_tuples = list(tuples)
