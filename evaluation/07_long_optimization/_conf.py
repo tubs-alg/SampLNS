@@ -1,0 +1,8 @@
+ITERATIONS = 10000
+ITERATION_TIME_LIMIT = 60.0
+TIME_LIMIT = 60*60
+
+BASE = "900_seconds_5_it"
+RESULT_FOLDER = f"01_results/{BASE}_{TIME_LIMIT}"
+INPUT_SAMPLE_ARCHIVE = f"../01_ICSE_2024_0/00_baseline/{BASE}.zip"
+INSTANCE_ARCHIVE = "../benchmark_models.zip"
