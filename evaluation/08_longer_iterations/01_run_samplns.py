@@ -35,7 +35,7 @@ slurminade.set_dispatch_limit(100)
 # ================================================
 # EXPERIMENT SETUP
 # ------------------------------------------------
-from _conf import ITERATIONS, ITERATION_TIME_LIMIT, TIME_LIMIT, BASE, RESULT_FOLDER, INPUT_SAMPLE_ARCHIVE, INSTANCE_ARCHIVE
+from _conf import ITERATIONS, ITERATION_TIME_LIMIT, TIME_LIMIT, BASE, RESULT_FOLDER, INPUT_SAMPLE_ARCHIVE, INSTANCE_ARCHIVE, CDS_ITERATION_TIME_LIMIT
 
 
 # ================================================
@@ -95,6 +95,7 @@ def run_distributed(instance_name: str, initial_sample_path: str, time_used_by_y
         time_limit=TIME_LIMIT,
         verify=True,
         fast_verify=True,
+        cds_iteration_time_limit=CDS_ITERATION_TIME_LIMIT,
         _yasa_time_used=time_used_by_yasa,
     )
 
@@ -109,6 +110,7 @@ def run_samplns(
     time_limit,
     verify,
     fast_verify,
+    cds_iteration_time_limit,
     _yasa_time_used,
 ):
     """
@@ -135,6 +137,7 @@ def run_samplns(
             initial_solution=sample,
             neighborhood_selector=RandomNeighborhood(),
             observer=logger,
+            cds_iteration_time_limit=cds_iteration_time_limit,
         )
 
         solver.optimize(
