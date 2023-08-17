@@ -1,6 +1,10 @@
-# Evaluating the new CDS improvements
+# Running SampLNS with 60min and 60s iterations.
 
 *Created 2023-08-10 (DK)*
 
-This experiment is a copy of 04 with the new CDS improvements.
-It felt like the CDS has gotten weaker with the new version, this experiment evaluates the countermeasures.
+This experiment solves the benchmark instances with long runtime and short iterations.
+The primary goal is to obtain better lower bounds.
+
+## Useful outputs for external analysis
+
+* `./out/06_best_bounds.csv`: A table with the best bounds for each instance.
