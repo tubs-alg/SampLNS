@@ -32,6 +32,7 @@ class SampLns:
         ] = None,
         observer=LnsObserver(),
         logger: logging.Logger = _logger,
+        cds_iteration_time_limit: float = 60.0,
     ):
         """
         :param instance: The instance we want to find a sample for.
@@ -51,13 +52,14 @@ class SampLns:
         self.neighborhood_selector = neighborhood_selector
         neighborhood_selector.setup(self.index_instance, solution)
 
+        on_new_solution_ = None
         if on_new_solution is not None:
             # callback needs exporting solution to original format
-            def on_new_solution(sol):
+            def on_new_solution_(sol):
                 return on_new_solution(self._export_solution(sol))
 
         cds_algorithm = CdsLns(
-            self.index_instance, solution, logger=self.log.getChild("CDS")
+            self.index_instance, solution, logger=self.log.getChild("CDS"), iteration_timelimit=cds_iteration_time_limit
         )
 
         self._lns = ModularLns(
@@ -65,7 +67,7 @@ class SampLns:
             initial_solution=solution,
             neighborhood_selector=neighborhood_selector,
             cds_algorithm=cds_algorithm,
-            on_new_solution=on_new_solution,
+            on_new_solution=on_new_solution_,
             observer=observer,
             logger=self.log,
         )

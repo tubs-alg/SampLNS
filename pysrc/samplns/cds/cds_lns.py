@@ -22,9 +22,10 @@ class CdsLns(CdsAlgorithm):
         instance: IndexInstance,
         initial_samples: Samples,
         logger: logging.Logger = _logger,
+        iteration_timelimit: float = 60.0,
     ) -> None:
         self.instance = instance
-        self._iteration_timelimit = 60.0
+        self._iteration_timelimit = iteration_timelimit
         self._logger = logger
         self._logger.info(
             "Building transaction graph for %s " "with %s concrete features!",
