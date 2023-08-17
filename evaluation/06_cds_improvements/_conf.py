@@ -5,4 +5,4 @@ TIME_LIMIT = 900
 BASE = "900_seconds_5_it"
 RESULT_FOLDER = f"01_results/{BASE}_{TIME_LIMIT}"
 INPUT_SAMPLE_ARCHIVE = f"../01_ICSE_2024_0/00_baseline/{BASE}.zip"
-INSTANCE_ARCHIVE = "../../benchmark_models.zip"
+INSTANCE_ARCHIVE = "../01_ICSE_2024_0//00_benchmark_instances.zip"
