@@ -9,3 +9,5 @@ The solutions of YASA(m=1) are actually precomputed but the time limits, etc., a
 These experiments also use the improved version of SampLNS, which can optimize larger instances.
 The performance of the lower bound procedure seems to have deteriorated, though.
 We have to check that. This may be due to a bug that was not nicely patched (just returning an empty lb on timeout).
+
+**Outdated. Go for 06_cds_improvments instead.**
