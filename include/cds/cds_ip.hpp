@@ -130,8 +130,10 @@ public:
         }
         return solution;
       }
-
-      return std::vector<feature_pair>();
+      // Gurobi was overwhelmed by the instance and did not find a solution, despite
+      // a given initial solution. This can happen if it already times out during
+      // preprocessing. In this case, we return the initial solution.
+      return initial_solution;
     } catch (GRBException &e) {
       std::cerr << "Error in CDS IP solver (Gurobi):" << std::endl;
       std::cerr << "Error code = " << e.getErrorCode() << std::endl;
