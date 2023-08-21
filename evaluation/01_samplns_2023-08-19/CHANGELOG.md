@@ -2,3 +2,4 @@
 * *2023-08-11 (DK):* Added the results of evaluation.
 * *2023-08-17 (DK):* Adapted 07 and 08 for the new data
 * *2023-08-19 (DK):* Cleaning up and restructuring the evaluation folder.
+* *2023-08-21 (DK):* Changed input to 00_baseline, as it should have the same data. Less room for errors due to forgetting to update all files.

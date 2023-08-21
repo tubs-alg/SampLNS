@@ -74,7 +74,10 @@ class MyLnsLogger(LnsObserver):
 
 
 benchmark = Benchmark(RESULT_FOLDER, save_output=True, hide_output=False)
-
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.WARNING,
+    datefmt='%Y-%m-%d %H:%M:%S')
 logging.getLogger("SampLNS").addHandler(logging.StreamHandler())
 logging.getLogger("SampLNS.CPSAT").setLevel(logging.WARNING)
 
