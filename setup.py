@@ -15,9 +15,9 @@ The setup options are documented here:
 https://scikit-build.readthedocs.io/en/latest/usage.html#setup-options
 """
 
-
 from setuptools import find_packages
 from skbuild_conan import setup
+from glob import glob
 
 
 def readme():
@@ -55,6 +55,11 @@ setup(  # https://scikit-build.readthedocs.io/en/latest/usage.html#setup-options
         "chardet>=4.0.0",
         "requests>=2.25.1",
         "ortools>=9.5.2237",
+    ],
+    data_files=[
+        ('deps/samplns', ['deps/featjar/evaluation-sampling-algorithms-0.1.0-SNAPSHOT-all.jar']),
+        ('deps/samplns/tools/FeatJar', glob('deps/featjar/tools/FeatJAR/*')),
+        ('deps/samplns/tools/FIDE_org', glob('deps/featjar/tools/FIDE_org/*'))
     ],
     # ~~~~~~~~~~~ CRITICAL CMAKE SETUP ~~~~~~~~~~~~~~~~~~~~~
     # Especially LTS systems often have very old CMake version (or none at all).
