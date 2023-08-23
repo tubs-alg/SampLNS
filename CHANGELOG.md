@@ -4,3 +4,4 @@
 * *2023-08-08 (GG):* Removed the experimental, unfinished, and abandoned genetic CDS algorithm.
 * *2023-08-08 (GG):* Merged the new C++ logger from its dev branch into main. (Currently unused, will be used in the future)
 * *2023-08-08 (GG):* Extended the CdsAlgorithm interface: Added option to set a time limit for independent tuple computation. Added option to provide CdsAlgorithm with known upper bound (e.g. for LNS neighborhoods), such that computation can be interrupted when the upper bound is met.
+* *2023-08-20 (DK):* Added CDS iteration time limit to top level interface (was fixed to 60s) and returning the initial set if CDS cannot compute any feasible solution.
