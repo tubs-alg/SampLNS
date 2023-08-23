@@ -163,7 +163,6 @@ def configure_grb_license_path():
         raise RuntimeError(msg)
 
 
-
 if __name__ == "__main__":
     # go through all the sample files
     for _root, _dirs, files in os.walk("00_data/feature_models"):

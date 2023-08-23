@@ -96,9 +96,7 @@ def parse_rules(dimacs: str, features: dict, logger: logging.Logger):
             num_vars = int(line.split(" ")[2].strip())
             if num_vars != len(features):
                 msg = "Number of variables does not match number of features."
-                raise ValueError(
-                    msg
-                )
+                raise ValueError(msg)
             num_clauses = int(line.split(" ")[3].strip())
             continue
         if num_clauses > 0:

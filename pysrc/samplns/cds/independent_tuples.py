@@ -72,9 +72,7 @@ class IndependentTuples(CdsAlgorithm):
 
         if timelimit != math.inf:
             msg = "This implementation does currently not support time limits!"
-            raise NotImplementedError(
-                msg
-            )
+            raise NotImplementedError(msg)
 
         if tuples is None:
             tuples = self.get_feasible_tuples()

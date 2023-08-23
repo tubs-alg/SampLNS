@@ -19,3 +19,5 @@
 - _2023-08-20 (DK):_ Added CDS iteration time limit to top level interface (was
   fixed to 60s) and returning the initial set if CDS cannot compute any feasible
   solution.
+- _2023-08-22 (MP):_ Integration of FeatJar.
+- _2023-08-23 (MP):_ Added CLI interface. Fixed tests and updated README.
