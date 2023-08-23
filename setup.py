@@ -61,6 +61,11 @@ setup(  # https://scikit-build.readthedocs.io/en/latest/usage.html#setup-options
         ('deps/samplns/tools/FeatJar', glob('deps/featjar/tools/FeatJAR/*')),
         ('deps/samplns/tools/FIDE_org', glob('deps/featjar/tools/FIDE_org/*'))
     ],
+    entry_points={
+        'console_scripts': [
+            'samplns=samplns.__main__:main'
+        ]
+    },
     # ~~~~~~~~~~~ CRITICAL CMAKE SETUP ~~~~~~~~~~~~~~~~~~~~~
     # Especially LTS systems often have very old CMake version (or none at all).
     # Defining this will automatically install locally a working version.

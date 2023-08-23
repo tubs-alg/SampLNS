@@ -62,9 +62,9 @@ can get a free license for academic purposes. These academic licenses are fairly
 easy to obtain, as explained in
 [this video](https://www.youtube.com/watch?v=oW6ma8rdZk8):
 
-- Register an academic account.
-- Install Gurobi (very easy with Conda, you only need the tool `grbgetkey`).
-- Use `grbgetkey` to set up a license on your computer. You may have to be
+1. Register an academic account.
+2. Install Gurobi (very easy with Conda, you only need the tool `grbgetkey`).
+3. Use `grbgetkey` to set up a license on your computer. You may have to be
   within the university network for this to work.
 
 After you got your license, move into the folder with `setup.py` and run
@@ -83,6 +83,13 @@ sudo apt install build-essential  # Ubuntu
 sudo pacman -S base-devel         # Arch
 ```
 
+If you don't have initial samples at hand you might want to generate initial samples
+for SampLNS with FeatJAR. This requires you to install Java version 11 or higher.
+
+```shell
+sudo apt-get install openjdk-11-jdk
+```
+
 Generally, the installation will take a while as it has to compile the C++, but
 it should work out of the box. If you encounter any problems, please open an
 issue. Unfortunately, the performance of native code is bought with a more
@@ -90,12 +97,50 @@ complex installation process, and it is difficult to make it work on all
 systems. Windows systems are especially difficult to support. We suggest using a
 Linux system.
 
-> If you got a bad license, the code may just crash without a proper error
-> message. This will be fixed soon.
-
 ## Usage
 
-There is an example in `examples/`.
+We provide a CLI and a Python interface. The CLI is the easiest way to get
+started. If you have an initial sample you can use it as follows:
+
+```shell
+samplns -f <path/to/model> --initial-sample <path/to/intial/sample>
+```
+
+If you do not have an initial sample, you can use the following command to 
+compute one with YASA:
+
+```shell
+samplns -f <path/to/model> --initial-sample-algorithm YASA
+```
+
+For further options see help:
+```shell
+samplns --help
+usage: samplns [-h] -f FILE (--initial-sample INITIAL_SAMPLE | --initial-sample-algorithm {YASA,YASA3,YASA5,YASA10})
+               [--initial-sample-algorithm-timelimit INITIAL_SAMPLE_ALGORITHM_TIMELIMIT] [--samplns-timelimit SAMPLNS_TIMELIMIT] [--samplns-max-iterations SAMPLNS_MAX_ITERATIONS]
+               [--samplns-iteration-timelimit SAMPLNS_ITERATION_TIMELIMIT]
+
+Starts samplns either with a given initial sample or runs another sampling algorithm before.
+
+options:
+  -h, --help            show this help message and exit
+  -f FILE, --file FILE  File path to the instance (either FeatJAR xml or DIMACS format.)
+  --initial-sample INITIAL_SAMPLE
+                        Set this when you already have an initial sample. File path to an initial sample (JSON) that should be used.
+  --initial-sample-algorithm {YASA,YASA3,YASA5,YASA10}
+                        Set this if you want to run a sampling algorithm to generate an initial sample. YASA has several versions for different values of m.
+  --initial-sample-algorithm-timelimit INITIAL_SAMPLE_ALGORITHM_TIMELIMIT
+                        Timelimit of the initial sampling algorithm in seconds.
+  --samplns-timelimit SAMPLNS_TIMELIMIT
+                        Timelimit of samplns in seconds.
+  --samplns-max-iterations SAMPLNS_MAX_ITERATIONS
+                        Maximum number of iterations for samplns.
+  --samplns-iteration-timelimit SAMPLNS_ITERATION_TIMELIMIT
+                        Timelimit for each iteration of samplns in seconds.
+```
+
+If you want to use the Python interface, you can check out the following
+example from `examples/`:
 
 ```python
 import json
@@ -126,8 +171,6 @@ if __name__ == "__main__":
 
 > ! The samples have to be lists of fully defined dictionaries. Otherwise, the
 > results may be wrong. We will add automatic warnings for that soon.
-
-> ! There is no CLI, yet. We will add it with the next version.
 
 ## Logging
 
@@ -194,7 +237,7 @@ your source. The tests should be in functions called `def test_bla()` and use
 
 ```shell
 python3 setup.py develop
-pytest -s python
+pytest -s pysrc
 ```
 
 This will place the compiled binary in your source folder and run only the tests
@@ -209,6 +252,7 @@ baseline.
 
 - `cmake` Should contain all cmake utilities (no cmake package manager, so
   copy&paste)
+- `deps` Should contain all dependencies
 - `include` Public interfaces of C++-libraries you write. Should follow
   `include/libname/header.h`
 - `python` Python packages you write. Should be of the shape

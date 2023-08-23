@@ -1,4 +1,4 @@
-from samplns.universe_mapping import UniverseMapping
+from samplns.preprocessor.universe_mapping import UniverseMapping
 
 
 def test_trivial():
