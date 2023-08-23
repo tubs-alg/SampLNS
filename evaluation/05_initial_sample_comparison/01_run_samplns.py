@@ -9,8 +9,9 @@ Provides:
 It will automatically check which samples have already been optimized, such that it
 can be restarted without doing repetitive work.
 """
-import os
 import logging
+import os
+
 import slurminade
 from _utils import get_instance, parse_sample, parse_solution_overview
 from algbench import Benchmark
@@ -35,8 +36,16 @@ slurminade.set_dispatch_limit(100)
 # ================================================
 # EXPERIMENT SETUP
 # ------------------------------------------------
-from _conf import ITERATIONS, ITERATION_TIME_LIMIT, TIME_LIMIT, BASE, RESULT_FOLDER, INPUT_SAMPLE_ARCHIVE, INSTANCE_ARCHIVE, CDS_ITERATION_TIME_LIMIT, BASELINE_SELECTIONS
-
+from _conf import (
+    BASELINE_SELECTIONS,
+    CDS_ITERATION_TIME_LIMIT,
+    INPUT_SAMPLE_ARCHIVE,
+    INSTANCE_ARCHIVE,
+    ITERATION_TIME_LIMIT,
+    ITERATIONS,
+    RESULT_FOLDER,
+    TIME_LIMIT,
+)
 
 # ================================================
 
@@ -75,14 +84,14 @@ class MyLnsLogger(LnsObserver):
 
 benchmark = Benchmark(RESULT_FOLDER, save_output=True, hide_output=False)
 logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
+    format="%(asctime)s %(levelname)-8s %(message)s",
     level=logging.WARNING,
-    datefmt='%Y-%m-%d %H:%M:%S')
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logging.getLogger("SampLNS").addHandler(logging.StreamHandler())
 logging.getLogger("SampLNS.CPSAT").setLevel(logging.WARNING)
 
 benchmark.capture_logger("SampLNS", logging.INFO)
-
 
 
 @slurminade.slurmify
@@ -121,7 +130,7 @@ def run_samplns(
     try:
         instance = get_instance(instance_name, instance_archive)
     except Exception as e:
-        msg = f"Error while parsing instance {instance_name}: {str(e)}"
+        msg = f"Error while parsing instance {instance_name}: {e!s}"
         raise RuntimeError(msg)
     sample = parse_sample(
         sample_path=initial_sample_path, archive_path=input_sample_archive
@@ -129,7 +138,6 @@ def run_samplns(
 
     solver = None
     logger = MyLnsLogger()
-
 
     # setup (needs time measurement as already involves calculations)
     solver = SampLns(
@@ -148,13 +156,14 @@ def run_samplns(
 
     solution = solver.get_best_solution(verify=verify, fast_verify=fast_verify)
 
-
     # get optimized sample and verify its correctness (takes some time).
     return {
         "solution": solution,
         "lower_bound": solver.get_lower_bound() if solver else 1,
         "upper_bound": len(solution),
-        "optimal": solver.get_lower_bound() == len(solver.get_best_solution()) if solver else False,
+        "optimal": solver.get_lower_bound() == len(solver.get_best_solution())
+        if solver
+        else False,
         "iteration_info": logger.iterations,
     }
 
@@ -181,17 +190,21 @@ def configure_grb_license_path():
     if not os.path.exists(os.environ["GRB_LICENSE_FILE"]):
         msg = "Gurobi License File does not exist."
         raise RuntimeError(msg)
-    
+
+
 import random
 
 if __name__ == "__main__":
     samples = parse_solution_overview(INPUT_SAMPLE_ARCHIVE)
     for selection in BASELINE_SELECTIONS:
-        baseline = samples[(samples["Algorithm"]==selection["Algorithm"])
-                           & (samples["Settings"]==selection["Settings"])].dropna()
+        baseline = samples[
+            (samples["Algorithm"] == selection["Algorithm"])
+            & (samples["Settings"] == selection["Settings"])
+        ].dropna()
         indices = list(baseline.index)
         if not indices:
-            raise RuntimeError("No samples found for selection", selection)
+            msg = "No samples found for selection"
+            raise RuntimeError(msg, selection)
         random.shuffle(indices)
         with slurminade.Batch(max_size=40) as batch:
             for idx in indices:
@@ -204,9 +217,11 @@ if __name__ == "__main__":
                 path = baseline["Path"][idx]
                 instance = baseline["Instance"][idx]
                 if "soletta_2017-03-09_21-02-40" in instance:
-                    print("Skipping soletta_2017-03-09_21-02-40 because it defines a variable name twice.")
+                    print(
+                        "Skipping soletta_2017-03-09_21-02-40 because it defines a variable name twice."
+                    )
                     continue
-                #if "uclibc" in instance:
+                # if "uclibc" in instance:
                 #    print("Skipping uclibc instance! They seem to be inconsistent.")
                 #    continue
                 run_distributed.distribute(instance, path)

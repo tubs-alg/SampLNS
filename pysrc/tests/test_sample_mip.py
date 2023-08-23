@@ -1,5 +1,6 @@
 import itertools
 import logging
+
 from samplns.instances import (
     AndFeature,
     ConcreteFeature,
@@ -25,7 +26,7 @@ def test_sample_mip():
                     ConcreteFeature(FeatureLiteral("2"), mandatory=True),
                 ],
                 mandatory=True,
-                logger=logger
+                logger=logger,
             ),
             OrFeature(
                 FeatureLiteral("Or2"),
@@ -34,11 +35,11 @@ def test_sample_mip():
                     ConcreteFeature(FeatureLiteral("4"), mandatory=True),
                 ],
                 mandatory=True,
-                logger=logger
+                logger=logger,
             ),
         ],
         mandatory=True,
-        logger=logger
+        logger=logger,
     )
     instance = Instance(concrete_features, structure=tree, rules=[])
     sample = []

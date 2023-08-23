@@ -65,7 +65,7 @@ easy to obtain, as explained in
 1. Register an academic account.
 2. Install Gurobi (very easy with Conda, you only need the tool `grbgetkey`).
 3. Use `grbgetkey` to set up a license on your computer. You may have to be
-  within the university network for this to work.
+   within the university network for this to work.
 
 After you got your license, move into the folder with `setup.py` and run
 
@@ -83,8 +83,9 @@ sudo apt install build-essential  # Ubuntu
 sudo pacman -S base-devel         # Arch
 ```
 
-If you don't have initial samples at hand you might want to generate initial samples
-for SampLNS with FeatJAR. This requires you to install Java version 11 or higher.
+If you don't have initial samples at hand you might want to generate initial
+samples for SampLNS with FeatJAR. This requires you to install Java version 11
+or higher.
 
 ```shell
 sudo apt-get install openjdk-11-jdk
@@ -106,7 +107,7 @@ started. If you have an initial sample you can use it as follows:
 samplns -f <path/to/model> --initial-sample <path/to/intial/sample>
 ```
 
-If you do not have an initial sample, you can use the following command to 
+If you do not have an initial sample, you can use the following command to
 compute one with YASA:
 
 ```shell
@@ -114,6 +115,7 @@ samplns -f <path/to/model> --initial-sample-algorithm YASA
 ```
 
 For further options see help:
+
 ```shell
 samplns --help
 usage: samplns [-h] -f FILE (--initial-sample INITIAL_SAMPLE | --initial-sample-algorithm {YASA,YASA3,YASA5,YASA10})
@@ -139,8 +141,8 @@ options:
                         Timelimit for each iteration of samplns in seconds.
 ```
 
-If you want to use the Python interface, you can check out the following
-example from `examples/`:
+If you want to use the Python interface, you can check out the following example
+from `examples/`:
 
 ```python
 import json

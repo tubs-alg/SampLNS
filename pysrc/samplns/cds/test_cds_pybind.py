@@ -1,4 +1,4 @@
-from samplns.cds.cds_lns import LnsCds, TransactionGraph, FeatureTuple
+from samplns.cds.cds_lns import FeatureTuple, LnsCds, TransactionGraph
 
 
 def test_transaction_graph():

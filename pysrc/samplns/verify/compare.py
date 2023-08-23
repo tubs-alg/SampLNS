@@ -23,6 +23,7 @@ def _unique_interaction(f1, f1_val, f2, f2_val):
     else:
         return (f2, f2_val, f1, f1_val)
 
+
 from ._verify import have_equal_coverage as _have_equal_coverage
 
 

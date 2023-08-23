@@ -33,10 +33,12 @@ class Instance:
             return f"Instance[{self.instance_name}]<{len(self.features)} features, {len(self.rules)} rules>"
         else:
             return f"Instance[UNNAMED]<{len(self.features)} features, {len(self.rules)} rules>"
-        
 
     def is_fully_defined(
-        self, conf: typing.Dict[FeatureLabel, bool], exact: bool = False, verbose: bool = False
+        self,
+        conf: typing.Dict[FeatureLabel, bool],
+        exact: bool = False,
+        verbose: bool = False,
     ) -> bool:
         """
         Checks if a configuration is fully defined, i.e., exactly defines the concrete
@@ -48,13 +50,16 @@ class Instance:
                 print("Missing:", set(self.features) - set(conf.keys()))
             return False
         return not exact or len(conf.keys()) == len(self.features)
-    
-    def is_feasible(self, conf: typing.Dict[FeatureLabel, bool], verbose: bool = False) -> bool:
+
+    def is_feasible(
+        self, conf: typing.Dict[FeatureLabel, bool], verbose: bool = False
+    ) -> bool:
         """
         Checks if a configuration is feasible, i.e., satisfies all rules and matches the structure.
         """
         if not isinstance(conf, dict):
-            raise ValueError("Configuration must be a dictionary")
+            msg = "Configuration must be a dictionary"
+            raise ValueError(msg)
         if not self.is_fully_defined(conf, verbose=verbose):
             if verbose:
                 print("Not fully defined")

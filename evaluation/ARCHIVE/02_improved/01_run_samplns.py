@@ -9,8 +9,9 @@ Provides:
 It will automatically check which samples have already been optimized, such that it
 can be restarted without doing repetitive work.
 """
-import os
 import logging
+import os
+
 import slurminade
 from _utils import get_instance, parse_sample, parse_solution_overview
 from algbench import Benchmark
@@ -86,7 +87,6 @@ logging.getLogger("SampLNS").addHandler(logging.StreamHandler())
 logging.getLogger("SampLNS.CPSAT").setLevel(logging.WARNING)
 
 benchmark.capture_logger("SampLNS", logging.INFO)
-
 
 
 @slurminade.slurmify
@@ -175,6 +175,8 @@ def configure_grb_license_path():
     if not os.path.exists(os.environ["GRB_LICENSE_FILE"]):
         msg = "Gurobi License File does not exist."
         raise RuntimeError(msg)
+
+
 import random
 
 if __name__ == "__main__":

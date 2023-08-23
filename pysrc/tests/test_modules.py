@@ -1,10 +1,11 @@
-import logging
 import json
+import logging
+import os
+
 from samplns.instances import parse
 from samplns.lns import RandomNeighborhood
 from samplns.preprocessor import Preprocessor
 from samplns.simple import SampLns
-import os
 
 """
 A module to easily read the benchmark instances and their solutions.
@@ -33,14 +34,14 @@ def test_lns():
 
     instance = parse(path_to_instance("toybox_2006-10-31_23-30-06/model.xml"))
 
-    with open(path_to_solution("toybox_2006-10-31_23-30-06/yasa_sample.json"), "r") as f:
+    with open(path_to_solution("toybox_2006-10-31_23-30-06/yasa_sample.json")) as f:
         best_solution = json.load(f)
 
     lns = SampLns(
         instance=instance,
         initial_solution=best_solution,
         neighborhood_selector=RandomNeighborhood(200),
-        logger=logger
+        logger=logger,
     )
     lns.optimize(10, 60)
     print(len(lns.get_best_solution()))

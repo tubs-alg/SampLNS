@@ -1,47 +1,64 @@
-import logging
 import argparse
 import json
+import logging
 
+from samplns.baseline import BaselineAlgorithm
 from samplns.instances import parse
 from samplns.lns import RandomNeighborhood
 from samplns.simple import SampLns
-from samplns.baseline import BaselineAlgorithm
 
 
 def get_parser():
-    parser = argparse.ArgumentParser("samplns",
-                                     description="Starts samplns either with a given initial sample or runs "
-                                                 "another sampling algorithm before.")
-    parser.add_argument("-f", "--file",
-                        required=True,
-                        help="File path to the instance (either FeatJAR xml or DIMACS format.)")
+    parser = argparse.ArgumentParser(
+        "samplns",
+        description="Starts samplns either with a given initial sample or runs "
+        "another sampling algorithm before.",
+    )
+    parser.add_argument(
+        "-f",
+        "--file",
+        required=True,
+        help="File path to the instance (either FeatJAR xml or DIMACS format.)",
+    )
 
     initial_sample_group = parser.add_mutually_exclusive_group(required=True)
-    initial_sample_group.add_argument("--initial-sample",
-                                      help="Set this when you already have an initial sample. "
-                                           "File path to an initial sample (JSON) that should be used.")
-    initial_sample_group.add_argument("--initial-sample-algorithm",
-                                      choices=["YASA", "YASA3", "YASA5", "YASA10"],
-                                      help="Set this if you want to run a sampling algorithm to "
-                                           "generate an initial sample. YASA has several versions for "
-                                           "different values of m.")
-    parser.add_argument("--initial-sample-algorithm-timelimit",
-                        default=60,
-                        help="Timelimit of the initial sampling algorithm in seconds.",
-                        type=int)
+    initial_sample_group.add_argument(
+        "--initial-sample",
+        help="Set this when you already have an initial sample. "
+        "File path to an initial sample (JSON) that should be used.",
+    )
+    initial_sample_group.add_argument(
+        "--initial-sample-algorithm",
+        choices=["YASA", "YASA3", "YASA5", "YASA10"],
+        help="Set this if you want to run a sampling algorithm to "
+        "generate an initial sample. YASA has several versions for "
+        "different values of m.",
+    )
+    parser.add_argument(
+        "--initial-sample-algorithm-timelimit",
+        default=60,
+        help="Timelimit of the initial sampling algorithm in seconds.",
+        type=int,
+    )
 
-    parser.add_argument("--samplns-timelimit",
-                        default=900,
-                        help="Timelimit of samplns in seconds.",
-                        type=int)
-    parser.add_argument("--samplns-max-iterations",
-                        default=10000,
-                        help="Maximum number of iterations for samplns.",
-                        type=int)
-    parser.add_argument("--samplns-iteration-timelimit",
-                        default=10000,
-                        help="Timelimit for each iteration of samplns in seconds.",
-                        type=int)
+    parser.add_argument(
+        "--samplns-timelimit",
+        default=900,
+        help="Timelimit of samplns in seconds.",
+        type=int,
+    )
+    parser.add_argument(
+        "--samplns-max-iterations",
+        default=10000,
+        help="Maximum number of iterations for samplns.",
+        type=int,
+    )
+    parser.add_argument(
+        "--samplns-iteration-timelimit",
+        default=10000,
+        help="Timelimit for each iteration of samplns in seconds.",
+        type=int,
+    )
     return parser
 
 
@@ -74,7 +91,9 @@ def main():
         with open(args.initial_sample) as f:
             initial_sample = json.load(f)
     else:  # args.baseline
-        baseline = BaselineAlgorithm(instance_path, algorithm=args.initial_sample_algorithm, logger=logger)
+        baseline = BaselineAlgorithm(
+            instance_path, algorithm=args.initial_sample_algorithm, logger=logger
+        )
         initial_sample = baseline.optimize(args.initial_sample_algorithm_timelimit)
 
     if initial_sample is None:
@@ -93,7 +112,7 @@ def main():
     solver.optimize(
         iterations=args.samplns_max_iterations,
         iteration_timelimit=args.samplns_iteration_timelimit,
-        timelimit=args.samplns_timelimit
+        timelimit=args.samplns_timelimit,
     )
     optimized_sample = solver.get_best_solution(verify=True, fast_verify=True)
     print(

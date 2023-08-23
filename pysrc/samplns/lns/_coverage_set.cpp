@@ -5,9 +5,9 @@
  * tuples are missing in a given sample for the Large Neighborhood Search. Previously implemented in Python but it was too slower for larger instances.
  * @version 0.1
  * @date 2023-07-13
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include <pybind11/functional.h> // automatic conversion of lambdas/functions?

@@ -71,7 +71,11 @@ class EqualityOptimizer:
         for key, val in inverse.items():
             mapping.map(origin_element=key, target_element=val, inverse=True)
         rules = [rule.substitute(direct, inverse) for rule in rules]
-        struct = instance.structure.substitute(direct, inverse) if instance.structure else None
+        struct = (
+            instance.structure.substitute(direct, inverse)
+            if instance.structure
+            else None
+        )
         features = self._sub_features(instance.features, direct, inverse)
         instance_ = Instance(features=features, rules=rules, structure=struct)
         instance_.instance_name = instance.instance_name + "|EQ"
