@@ -21,3 +21,4 @@
   solution.
 - _2023-08-22 (MP):_ Integration of FeatJar.
 - _2023-08-23 (MP):_ Added CLI interface. Fixed tests and updated README.
+- _2023-08-23 (DK):_ Bugfixes and improvements for the CLI interface.
