@@ -1,18 +1,24 @@
-import logging
 import argparse
+import logging
 
+from samplns.baseline import BaselineAlgorithm
 from samplns.instances import parse
 from samplns.lns import RandomNeighborhood
 from samplns.simple import SampLns
-from samplns.baseline import BaselineAlgorithm
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", required=True)
-    parser.add_argument("-a", "--baseline-algorithm", choices=["YASA", "YASA3", "YASA5", "YASA10"],
-                        default="YASA",
-                        help="Algorithm to use for the baseline. YASA has several versions for different values of m.")
-    parser.add_argument("--baseline-timeout", default=60, help="Timeout in seconds", type=int)
+    parser.add_argument(
+        "-a",
+        "--baseline-algorithm",
+        choices=["YASA", "YASA3", "YASA5", "YASA10"],
+        default="YASA",
+        help="Algorithm to use for the baseline. YASA has several versions for different values of m.",
+    )
+    parser.add_argument(
+        "--baseline-timeout", default=60, help="Timeout in seconds", type=int
+    )
 
     args = parser.parse_args()
 
@@ -37,12 +43,16 @@ if __name__ == "__main__":
     instance_path = args.file
     feature_model = parse(instance_path, logger=logger)
 
-    baseline = BaselineAlgorithm(instance_path, algorithm=args.baseline_algorithm, logger=logger)
+    baseline = BaselineAlgorithm(
+        instance_path, algorithm=args.baseline_algorithm, logger=logger
+    )
     initial_sample = baseline.optimize(args.baseline_timeout)
 
     if initial_sample is None:
-        print("Could not calculate a valid baseline sample within the given runtime.",
-              "Try setting baseline timeout to a higher value")
+        print(
+            "Could not calculate a valid baseline sample within the given runtime.",
+            "Try setting baseline timeout to a higher value",
+        )
         exit(1)
 
     print("Received a valid sample. Starting Samplns.")

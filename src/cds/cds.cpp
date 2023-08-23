@@ -10,12 +10,12 @@ std::vector<Edge>
 CDSSolverInterface::optimize(std::vector<Edge> initial_solution,
                              unsigned int max_iterations, double time_limit,
                              bool verbose) {
-  
+
   if (this->graph->count_edges() == 0) {
     // WARNING: Transaction Graph is empty
     return std::vector<Edge>();
   }
-  
+
   ensure_threadsafety_mtx.lock();
 
   if (!initial_solution.empty()) {

@@ -1,13 +1,15 @@
 /**
  * @file _coverage_set.cpp
  * @author Dominik Krupke
- * @brief This file implements a native implementation for checking which feature tuples are covered by a given sample. This is used to check which
- * tuples are missing in a given sample for the Large Neighborhood Search. Previously implemented in Python but it was too slower for larger instances.
+ * @brief This file implements a native implementation for checking which
+ * feature tuples are covered by a given sample. This is used to check which
+ * tuples are missing in a given sample for the Large Neighborhood Search.
+ * Previously implemented in Python but it was too slower for larger instances.
  * @version 0.1
  * @date 2023-07-13
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include <pybind11/functional.h> // automatic conversion of lambdas/functions?
@@ -87,7 +89,7 @@ private:
     this->num_covered_tuples++;
   }
 
-  int get_index(int f, bool val)  const{ return 2 * f + (val ? 1 : 0); }
+  int get_index(int f, bool val) const { return 2 * f + (val ? 1 : 0); }
 
   std::pair<int, bool> get_feature_and_value(int index) {
     return std::make_pair(index / 2, index % 2 == 1);
@@ -106,7 +108,7 @@ public:
 
   void add_configuration(const std::vector<bool> &conf) {
     this->covered_tuples.add_tuples_of_configuration(conf);
-    if(this->is_configuration_contradicting(conf)){
+    if (this->is_configuration_contradicting(conf)) {
       throw std::runtime_error("The covered tuples are not a subset of the "
                                "feasible tuples!");
     }
@@ -114,9 +116,10 @@ public:
 
   bool is_configuration_contradicting(const std::vector<bool> &conf) const {
     for (int i = 0; i < this->feasible_tuples.num_concrete_features; i++) {
-      for (int j = i + 1; j < this->feasible_tuples.num_concrete_features; j++) {
-        if(!this->feasible_tuples.is_contained(i, conf[i], j, conf[j])){
-          return true;  // contradiction found, configuration is invalid
+      for (int j = i + 1; j < this->feasible_tuples.num_concrete_features;
+           j++) {
+        if (!this->feasible_tuples.is_contained(i, conf[i], j, conf[j])) {
+          return true; // contradiction found, configuration is invalid
         }
       }
     }
@@ -140,15 +143,15 @@ public:
     for (int i = 0; i < this->feasible_tuples.num_concrete_features; i++) {
       for (int j = i + 1; j < this->feasible_tuples.num_concrete_features;
            j++) {
-          for (bool i_val: {true, false}){
-            for (bool j_val: {true, false}){
-              if(this->feasible_tuples.is_contained(i, i_val, j, j_val) &&
-                  !this->covered_tuples.is_contained(i, i_val, j, j_val)){
-                missing_tuples.push_back(std::make_pair(std::make_pair(i, i_val),
-                                                        std::make_pair(j, j_val)));
-              }
+        for (bool i_val : {true, false}) {
+          for (bool j_val : {true, false}) {
+            if (this->feasible_tuples.is_contained(i, i_val, j, j_val) &&
+                !this->covered_tuples.is_contained(i, i_val, j, j_val)) {
+              missing_tuples.push_back(std::make_pair(
+                  std::make_pair(i, i_val), std::make_pair(j, j_val)));
             }
           }
+        }
       }
     }
     return missing_tuples;

@@ -10,4 +10,5 @@ cd FeatJAR
 ```
 
 This will build and download all dependencies and output the sampling JARs into
-`FeatJAR/evaluation-sampling-algorithms/build/libs/` and `FeatJAR/evaluation-sampling-algorithms/tools`.
+`FeatJAR/evaluation-sampling-algorithms/build/libs/` and
+`FeatJAR/evaluation-sampling-algorithms/tools`.

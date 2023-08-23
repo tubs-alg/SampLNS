@@ -1,14 +1,16 @@
+import os
 import subprocess
 import tempfile
-import os
 
 from samplns.baseline import BaselineAlgorithm
 
 
 def test_java():
     runner = subprocess.run("java --version", capture_output=True, shell=True)
-    assert runner.returncode == 0, ("It seems like Java was not installed on your system. "
-                                    "FeatJAR requires at least Java 11.")
+    assert runner.returncode == 0, (
+        "It seems like Java was not installed on your system. "
+        "FeatJAR requires at least Java 11."
+    )
 
 
 def test_yasa():

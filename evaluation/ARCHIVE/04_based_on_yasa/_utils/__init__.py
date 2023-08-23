@@ -5,16 +5,20 @@ import pandas as pd
 from samplns.instances import parse_source
 from samplns.instances.parse_dimacs import parse_source as parse_source_dimacs
 
+
 def get_instance(instance_name, archive_path):
     """
     Simple helper to parse instance
     """
     with ZipFile(archive_path) as archive:
         try:
-            assert archive.getinfo(os.path.join(instance_name, "model.dimacs")).file_size > 0
-            with archive.open(os.path.join(instance_name, "model.dimacs")) as f: 
+            assert (
+                archive.getinfo(os.path.join(instance_name, "model.dimacs")).file_size
+                > 0
+            )
+            with archive.open(os.path.join(instance_name, "model.dimacs")) as f:
                 print("Parsing DIMACS")
-                instance =  parse_source_dimacs(f, instance_name)
+                instance = parse_source_dimacs(f, instance_name)
                 return instance
         except KeyError:
             with archive.open(os.path.join(instance_name, "model.xml")) as f:

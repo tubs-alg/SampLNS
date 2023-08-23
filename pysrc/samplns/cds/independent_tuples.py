@@ -1,6 +1,6 @@
 import itertools
-import random
 import math
+import random
 
 from .base import CdsAlgorithm, Samples, Tuples
 
@@ -71,8 +71,9 @@ class IndependentTuples(CdsAlgorithm):
         """
 
         if timelimit != math.inf:
+            msg = "This implementation does currently not support time limits!"
             raise NotImplementedError(
-                f"This implementation does currently not support time limits!"
+                msg
             )
 
         if tuples is None:

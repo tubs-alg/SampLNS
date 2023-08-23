@@ -9,16 +9,15 @@ Provides:
 It will automatically check which samples have already been optimized, such that it
 can be restarted without doing repetitive work.
 """
-import os
 import logging
+import os
+
 import slurminade
 from algbench import Benchmark
 from samplns.lns.lns import LnsObserver
 from samplns.lns.neighborhood import Neighborhood, RandomNeighborhood
 from samplns.simple import SampLns
 from samplns.utils import Timer
-
-from samplns.instances import Instance, parse_dimacs
 
 # ================================================
 # SLURM CONFIGURATION FOR DISTRIBUTED EXECUTION
@@ -36,9 +35,8 @@ slurminade.set_dispatch_limit(100)
 # ================================================
 # EXPERIMENT SETUP
 # ------------------------------------------------
-from _conf import ITERATIONS, ITERATION_TIME_LIMIT, TIME_LIMIT, BASE, RESULT_FOLDER
+from _conf import ITERATION_TIME_LIMIT, ITERATIONS, RESULT_FOLDER, TIME_LIMIT
 from _utils import get_instance, parse_sample
-
 
 # ================================================
 
@@ -75,8 +73,6 @@ class MyLnsLogger(LnsObserver):
         )
 
 
-
-
 benchmark = Benchmark(RESULT_FOLDER, save_output=False, hide_output=True)
 
 logging.getLogger("SampLNS").addHandler(logging.StreamHandler())
@@ -85,12 +81,11 @@ logging.getLogger("SampLNS.CPSAT").setLevel(logging.WARNING)
 benchmark.capture_logger("SampLNS", logging.INFO)
 
 
-
 @slurminade.slurmify
 def run_distributed(instance_name: str, method: str):
     benchmark.add(
         run_samplns,
-        instance_name = instance_name,
+        instance_name=instance_name,
         sample_method=method,
         iterations=ITERATIONS,
         iteration_time_limit=ITERATION_TIME_LIMIT,
@@ -118,9 +113,7 @@ def run_samplns(
     except Exception as e:
         print("Skipping due to parser error:", instance_name, str(e))
         return None
-    sample = parse_sample(
-        instance, instance_name,sample_method
-    )
+    sample = parse_sample(instance, instance_name, sample_method)
 
     # setup (needs time measurement as already involves calculations)
     logger = MyLnsLogger()
@@ -168,19 +161,19 @@ def configure_grb_license_path():
     if not os.path.exists(os.environ["GRB_LICENSE_FILE"]):
         msg = "Gurobi License File does not exist."
         raise RuntimeError(msg)
-import random
+
+
 
 if __name__ == "__main__":
     # go through all the sample files
-    for root, dirs, files in os.walk("00_data/feature_models"):
+    for _root, _dirs, files in os.walk("00_data/feature_models"):
         for file in files:
             if file.endswith(".csv"):
                 instance_name = file.split("_")[0]
                 method = "_".join(file.split("_")[2:]).split(".")[0]
-                #if "YASA" not in method:
+                # if "YASA" not in method:
                 #    continue  # only run YASA
                 if method.endswith("3"):
                     continue  # triple sampling is not supported
                 if method:
                     run_distributed.distribute(instance_name, method)
-

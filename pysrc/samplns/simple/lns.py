@@ -59,7 +59,10 @@ class SampLns:
                 return on_new_solution(self._export_solution(sol))
 
         cds_algorithm = CdsLns(
-            self.index_instance, solution, logger=self.log.getChild("CDS"), iteration_timelimit=cds_iteration_time_limit
+            self.index_instance,
+            solution,
+            logger=self.log.getChild("CDS"),
+            iteration_timelimit=cds_iteration_time_limit,
         )
 
         self._lns = ModularLns(

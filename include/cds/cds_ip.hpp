@@ -104,8 +104,8 @@ public:
         // std::cout << "Building the model took " << dt << " seconds." <<
         // std::endl;
         auto timelimit_ = timelimit - dt;
-        if (timelimit_<=0) {
-          std::cerr << "Bad time"<<std::endl;
+        if (timelimit_ <= 0) {
+          std::cerr << "Bad time" << std::endl;
           // Out of time
           return initial_solution;
         }
@@ -130,9 +130,9 @@ public:
         }
         return solution;
       }
-      // Gurobi was overwhelmed by the instance and did not find a solution, despite
-      // a given initial solution. This can happen if it already times out during
-      // preprocessing. In this case, we return the initial solution.
+      // Gurobi was overwhelmed by the instance and did not find a solution,
+      // despite a given initial solution. This can happen if it already times
+      // out during preprocessing. In this case, we return the initial solution.
       return initial_solution;
     } catch (GRBException &e) {
       std::cerr << "Error in CDS IP solver (Gurobi):" << std::endl;

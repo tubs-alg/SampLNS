@@ -1,6 +1,6 @@
 import abc
-import typing
 import math
+import typing
 
 Tuples = typing.Iterable[typing.Tuple[typing.Tuple[int, bool], typing.Tuple[int, bool]]]
 Samples = typing.List[typing.Dict[int, bool]]

@@ -13,7 +13,7 @@ import zipfile
 from collections import defaultdict
 
 from .instance import Instance
-from .sat_formula import AND, EQ, IMPL, NOT, OR, VAR, SatNode
+from .sat_formula import OR, VAR
 
 _logger = logging.getLogger("SampLNS")
 
@@ -66,13 +66,18 @@ def parse_source(source_file, instance_name, logger: logging.Logger = _logger):
 
 
 def parse_features(dimacs: str, logger: logging.Logger):
-    features = dict()
+    features = {}
     for line in dimacs.split("\n"):
         if line.startswith("c"):
             i = int(line.split(" ")[1].strip())
             feature = line.split(" ")[2].strip()
             if feature in features.values():
-                msg = "Feature name is not unique: " + feature+ " parsed from line: " + line
+                msg = (
+                    "Feature name is not unique: "
+                    + feature
+                    + " parsed from line: "
+                    + line
+                )
                 raise ValueError(msg)
             assert feature not in features.values()
             features[i] = feature
@@ -86,10 +91,14 @@ def parse_rules(dimacs: str, features: dict, logger: logging.Logger):
     for line in dimacs.split("\n"):
         if line.startswith("p"):
             if line.split(" ")[1].strip() != "cnf":
-                raise ValueError("Only cnf is supported as format.")
+                msg = "Only cnf is supported as format."
+                raise ValueError(msg)
             num_vars = int(line.split(" ")[2].strip())
             if num_vars != len(features):
-                raise ValueError("Number of variables does not match number of features.")
+                msg = "Number of variables does not match number of features."
+                raise ValueError(
+                    msg
+                )
             num_clauses = int(line.split(" ")[3].strip())
             continue
         if num_clauses > 0:
@@ -107,7 +116,6 @@ def parse_rules(dimacs: str, features: dict, logger: logging.Logger):
                 raise ValueError("Empty clause: " + line)
             rules.append(OR(*literals))
     return rules
-
 
 
 def parse_solutions(path, algorithms: typing.List[str] = None):

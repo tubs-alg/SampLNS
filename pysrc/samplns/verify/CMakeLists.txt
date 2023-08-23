@@ -8,11 +8,11 @@ cpmaddpackage("gh:pybind/pybind11@2.10.0") # pybind11, essential
 # Create a new Python-module ~~~~~~~~~~~~~~~~~~~~~
 pybind11_add_module(
   _verify # target name with leading `_` as this will be a protected
-                # module.
+  # module.
   _verify.cpp) # the file with the API.
 # enable compilation warnings
 target_compile_options(
-    _verify PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>")
+  _verify PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>")
 # This definition is important for skbuild to copy the binary to the right
 # position in the package. !!! This part is critical and a wrong configuration
 # leads to bad packages !!! without an error. Use a path relative to the project

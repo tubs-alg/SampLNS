@@ -13,7 +13,7 @@
 #include <iostream>
 #include <pybind11/functional.h> // automatic conversion of lambdas/functions?
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>        // automatic conversion of vectors
+#include <pybind11/stl.h> // automatic conversion of vectors
 
 using Sample = std::vector<std::unordered_map<std::string, bool>>;
 using IntSample = std::vector<std::vector<bool>>;

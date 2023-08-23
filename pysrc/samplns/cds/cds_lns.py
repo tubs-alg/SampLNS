@@ -1,8 +1,9 @@
 import logging
-import typing
 import math
+import typing
 
 from ..preprocessor import IndexInstance
+from ..utils import Timer
 from ._cds_bindings import (
     AsyncLnsCds,
     FeatureTuple,
@@ -11,7 +12,6 @@ from ._cds_bindings import (
     TransactionGraph,
 )
 from .base import CdsAlgorithm, Samples, Tuples
-from ..utils import Timer
 
 _logger = logging.getLogger("SampLNS.CdsLns")
 
