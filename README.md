@@ -118,15 +118,15 @@ For further options see help:
 
 ```shell
 samplns --help
-usage: samplns [-h] -f FILE (--initial-sample INITIAL_SAMPLE | --initial-sample-algorithm {YASA,YASA3,YASA5,YASA10})
-               [--initial-sample-algorithm-timelimit INITIAL_SAMPLE_ALGORITHM_TIMELIMIT] [--samplns-timelimit SAMPLNS_TIMELIMIT] [--samplns-max-iterations SAMPLNS_MAX_ITERATIONS]
-               [--samplns-iteration-timelimit SAMPLNS_ITERATION_TIMELIMIT]
+usage: samplns [-h] -f FILE [-o OUTPUT] (--initial-sample INITIAL_SAMPLE | --initial-sample-algorithm {YASA,YASA3,YASA5,YASA10}) [--initial-sample-algorithm-timelimit INITIAL_SAMPLE_ALGORITHM_TIMELIMIT] [--samplns-timelimit SAMPLNS_TIMELIMIT] [--samplns-max-iterations SAMPLNS_MAX_ITERATIONS] [--samplns-iteration-timelimit SAMPLNS_ITERATION_TIMELIMIT] [--cds-iteration-timelimit CDS_ITERATION_TIMELIMIT]
 
 Starts samplns either with a given initial sample or runs another sampling algorithm before.
 
 options:
   -h, --help            show this help message and exit
   -f FILE, --file FILE  File path to the instance (either FeatJAR xml or DIMACS format.)
+  -o OUTPUT, --output OUTPUT
+                        File path to the output file. Default: sample.json
   --initial-sample INITIAL_SAMPLE
                         Set this when you already have an initial sample. File path to an initial sample (JSON) that should be used.
   --initial-sample-algorithm {YASA,YASA3,YASA5,YASA10}
@@ -139,6 +139,8 @@ options:
                         Maximum number of iterations for samplns.
   --samplns-iteration-timelimit SAMPLNS_ITERATION_TIMELIMIT
                         Timelimit for each iteration of samplns in seconds.
+  --cds-iteration-timelimit CDS_ITERATION_TIMELIMIT
+                        Timelimit for each iteration of the lower bound computation in seconds.
 ```
 
 If you want to use the Python interface, you can check out the following example
