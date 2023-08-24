@@ -80,9 +80,7 @@ class IndexInstance:
             return False
         return not exact or len(conf.keys()) == self.n_concrete
 
-    def is_feasible(
-        self, conf: typing.Dict[int, bool], verbose: bool = False
-    ) -> bool:
+    def is_feasible(self, conf: typing.Dict[int, bool], verbose: bool = False) -> bool:
         """
         Checks if a configuration is feasible, i.e., satisfies all rules and matches the structure.
         """

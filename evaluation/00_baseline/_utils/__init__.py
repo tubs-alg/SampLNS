@@ -5,6 +5,7 @@ import pandas as pd
 from samplns.instances import parse_source
 from samplns.instances.parse_dimacs import parse_source as parse_source_dimacs
 
+
 def get_instance(instance_name, archive_path):
     """
     Simple helper to parse instance

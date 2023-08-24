@@ -33,7 +33,7 @@ Structure:
 - neighborhood.py: Abstract neighborhood and implementation of random neighborhood.
 """
 # flake8: noqa F401
-from .lns import ModularLns, LnsObserver
+from .lns import LnsObserver, ModularLns
 from .neighborhood import RandomNeighborhood
 
 __all__ = ["ModularLns", "LnsObserver", "RandomNeighborhood"]

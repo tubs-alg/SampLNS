@@ -69,8 +69,7 @@ def parse_solution_overview(path, subpath=None):
         t["Path"] = t.apply(f, axis=1)
         t["Time(s)"] = t["Time"] / 1000
         print("Deleting YASA entries")
-        t = t[t["Algorithm"]!="YASA"]
-        return t
+        return t[t["Algorithm"] != "YASA"]
 
 
 def parse_sample(archive_path, sample_path):
