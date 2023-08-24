@@ -10,23 +10,25 @@ instance = parse("../instances/Automotive02/Automotive02_V1.xml")
 ```
 """
 # flake8: noqa F401
-from .parser import parse, parse_solutions, parse_source
-from .parse_dimacs import parse_dimacs
 # The feature structure elements
 from .feature import (
-    FeatureLabel,
-    FeatureLiteral,
     AltFeature,
     AndFeature,
-    OrFeature,
-    ConcreteFeature,
     CompositeFeature,
+    ConcreteFeature,
+    FeatureLabel,
+    FeatureLiteral,
     FeatureNode,
+    OrFeature,
 )
-# The rule elements
-from .sat_formula import AND, OR, VAR, EQ, IMPL, SatNode, VariableLabel
+
 # Container for instance
 from .instance import Instance
+from .parse_dimacs import parse_dimacs
+from .parser import parse, parse_solutions, parse_source
+
+# The rule elements
+from .sat_formula import AND, EQ, IMPL, OR, VAR, SatNode, VariableLabel
 
 __all__ = [
     "parse",

@@ -5,8 +5,15 @@ Clique Disjoint Sets represent lower bounds on the instances. Each element, i.e.
   'feature 1 is active' and a tuple that contains 'feature 1 is deactivated'.
 """
 # flake8: noqa F401
+from ._cds_bindings import CDSNodeHeuristic, GreedyCds, LnsCds, TransactionGraph
 from .base import CdsAlgorithm
 from .cds_lns import CdsLns
-from ._cds_bindings import CDSNodeHeuristic, LnsCds, TransactionGraph, GreedyCds
 
-__all__ = ["CdsAlgorithm", "CdsLns", "CDSNodeHeuristic", "LnsCds", "TransactionGraph", "GreedyCds"]
+__all__ = [
+    "CdsAlgorithm",
+    "CdsLns",
+    "CDSNodeHeuristic",
+    "LnsCds",
+    "TransactionGraph",
+    "GreedyCds",
+]

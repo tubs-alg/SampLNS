@@ -35,3 +35,5 @@ Structure:
 # flake8: noqa F401
 from .lns import ModularLns, LnsObserver
 from .neighborhood import RandomNeighborhood
+
+__all__ = ["ModularLns", "LnsObserver", "RandomNeighborhood"]
