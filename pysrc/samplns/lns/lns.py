@@ -193,7 +193,10 @@ class ModularLns:
                 samples = list(model.get_solution())
                 assert all(
                     self.index_instance.is_fully_defined(conf) for conf in samples
-                )
+                ), "Solution should be fully defined."
+                assert all(
+                    self.index_instance.is_feasible(conf) for conf in samples
+                ), "Solution should be feasible. If this fails, there probably is a bug in the parser or CP-SAT model."
                 solution = neighborhood.fixed_samples + samples
                 self._add_new_solution(solution)
                 return model.get_lb(), len(samples), True

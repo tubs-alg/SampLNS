@@ -202,7 +202,7 @@ import random
 if __name__ == "__main__":
     samples = parse_solution_overview(INPUT_SAMPLE_ARCHIVE)
     yasa_m1 = samples[
-        (samples["Algorithm"] == "YASA") & (samples["Settings"] == "t2_m1_null")
+        (samples["Algorithm"] == "FIDE-YASA") & (samples["Settings"] == "t2_m1_null")
     ].dropna()
     indices = list(yasa_m1.index)
     random.shuffle(indices)

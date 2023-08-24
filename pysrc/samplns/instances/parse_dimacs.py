@@ -71,6 +71,9 @@ def parse_features(dimacs: str, logger: logging.Logger):
         if line.startswith("c"):
             i = int(line.split(" ")[1].strip())
             feature = line.split(" ")[2].strip()
+            if len(line.split(" ")) != 3:
+                msg = "Feature name must not contain spaces: " + line
+                raise ValueError(msg)
             if feature in features.values():
                 msg = (
                     "Feature name is not unique: "

@@ -80,6 +80,29 @@ class IndexInstance:
             return False
         return not exact or len(conf.keys()) == self.n_concrete
 
+    def is_feasible(
+        self, conf: typing.Dict[int, bool], verbose: bool = False
+    ) -> bool:
+        """
+        Checks if a configuration is feasible, i.e., satisfies all rules and matches the structure.
+        """
+        if not isinstance(conf, dict):
+            msg = "Configuration must be a dictionary"
+            raise ValueError(msg)
+        if not self.is_fully_defined(conf):
+            if verbose:
+                print("Not fully defined")
+            return False
+        if not all(rule.evaluate(conf) for rule in self.rules):
+            if verbose:
+                print("Does not satisfy rules")
+            return False
+        if self.structure and not self.structure.is_feasible(conf):
+            if verbose:
+                print("Does not match structure")
+            return False
+        return True
+
     def __repr__(self):
         if self.instance_name:
             return f"Instance[{self.instance_name}]<{self.n_concrete} features, {len(self.rules)} rules>"

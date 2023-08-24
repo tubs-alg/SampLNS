@@ -3,15 +3,26 @@ from zipfile import ZipFile
 
 import pandas as pd
 from samplns.instances import parse_source
-
+from samplns.instances.parse_dimacs import parse_source as parse_source_dimacs
 
 def get_instance(instance_name, archive_path):
     """
     Simple helper to parse instance
     """
+    instance_name = os.path.join("models", instance_name)
     with ZipFile(archive_path) as archive:
-        with archive.open(os.path.join(instance_name, "model.xml")) as f:
-            return parse_source(f, instance_name)
+        try:
+            assert (
+                archive.getinfo(os.path.join(instance_name, "model.dimacs")).file_size
+                > 0
+            )
+            with archive.open(os.path.join(instance_name, "model.dimacs")) as f:
+                print("Parsing DIMACS")
+                return parse_source_dimacs(f, instance_name)
+        except KeyError:
+            with archive.open(os.path.join(instance_name, "model.xml")) as f:
+                print("Parsing FeatureIDE")
+                return parse_source(f, instance_name)
 
 
 def parse_solution_overview(path, subpath=None):

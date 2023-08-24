@@ -14,7 +14,7 @@ EXTERNAL_BOUNDS = [
 ]
 
 BASELINE_SELECTIONS = [
-    {"Algorithm": "YASA", "Settings": "t2_m1_null"},
-    {"Algorithm": "YASA", "Settings": "t2_m10_null"},
+    {"Algorithm": "FIDE-YASA", "Settings": "t2_m1_null"},
+    {"Algorithm": "FIDE-YASA", "Settings": "t2_m10_null"},
     {"Algorithm": "Incling", "Settings": "t2"},
 ]
