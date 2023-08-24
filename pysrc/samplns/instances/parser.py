@@ -147,7 +147,7 @@ def parse_rules(xmltree: ET, logger: logging.Logger) -> typing.List[SatNode]:
     return rules
 
 
-def parse_solutions(path, algorithms: typing.List[str] = None):
+def parse_solutions(path, algorithms: typing.Optional[typing.List[str]] = None):
     if algorithms is None:
         algorithms = ["random", "incling", "icpl", "chvatal", "yasa", "phillip"]
     solutions = {a: defaultdict(list) for a in algorithms}

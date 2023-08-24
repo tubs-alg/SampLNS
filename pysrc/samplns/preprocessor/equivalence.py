@@ -1,6 +1,8 @@
 import typing
 import unittest
 
+import pytest
+
 
 class EquivalenceClasses:
     """
@@ -91,7 +93,7 @@ class EquTest(unittest.TestCase):
     def test_bad(self):
         ec = EquivalenceClasses()
         ec.mark_equivalent("a", "b")
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             ec.mark_equivalent("a", "b", inverse=True)
 
     def test_two_inv(self):

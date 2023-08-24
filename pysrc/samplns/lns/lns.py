@@ -91,8 +91,7 @@ class ModularLns:
         """
         Returns the best solution.
         """
-        best = min(self._solution_pool, key=len)
-        return best
+        return min(self._solution_pool, key=len)
 
     def get_solution_pool(self) -> typing.List[InternalSolution]:
         """

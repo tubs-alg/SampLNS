@@ -6,4 +6,3 @@ lns: Contains the LNS code for improving upper bounds
 cds: Lower bound
 """
 # flake8: noqa F401
-from .simple.lns import SampLns

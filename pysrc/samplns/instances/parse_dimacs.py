@@ -116,7 +116,7 @@ def parse_rules(dimacs: str, features: dict, logger: logging.Logger):
     return rules
 
 
-def parse_solutions(path, algorithms: typing.List[str] = None):
+def parse_solutions(path, algorithms: typing.Optional[typing.List[str]] = None):
     if algorithms is None:
         algorithms = ["random", "incling", "icpl", "chvatal", "yasa", "phillip"]
     solutions = {a: defaultdict(list) for a in algorithms}

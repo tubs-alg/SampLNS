@@ -28,7 +28,7 @@ class CdsLns(CdsAlgorithm):
         self._iteration_timelimit = iteration_timelimit
         self._logger = logger
         self._logger.info(
-            "Building transaction graph for %s " "with %s concrete features!",
+            "Building transaction graph for %s with %s concrete features!",
             instance.instance_name,
             instance.n_concrete,
         )

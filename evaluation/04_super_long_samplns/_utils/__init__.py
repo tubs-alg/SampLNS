@@ -19,8 +19,7 @@ def get_instance(instance_name, archive_path):
             )
             with archive.open(os.path.join(instance_name, "model.dimacs")) as f:
                 print("Parsing DIMACS")
-                instance = parse_source_dimacs(f, instance_name)
-                return instance
+                return parse_source_dimacs(f, instance_name)
         except KeyError:
             with archive.open(os.path.join(instance_name, "model.xml")) as f:
                 print("Parsing FeatureIDE")
