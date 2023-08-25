@@ -207,9 +207,9 @@ if __name__ == "__main__":
             if not yasa_m1["Path"][idx]:
                 print("Skipping unsuccessful row", yasa_m1.loc[idx])
                 continue
-            if yasa_m1["#Variables"][idx] > 1500:
-                print("Skipping", yasa_m1["Instance"][idx], "due to its size.")
-                continue
+            #if yasa_m1["#Variables"][idx] > 1500:
+            #    print("Skipping", yasa_m1["Instance"][idx], "due to its size.")
+            #    continue
             path = yasa_m1["Path"][idx]
             instance = yasa_m1["Instance"][idx]
             if "soletta_2017-03-09_21-02-40" in instance:

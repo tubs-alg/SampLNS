@@ -3,7 +3,7 @@ ITERATION_TIME_LIMIT = 60.0
 TIME_LIMIT = 60 * 60
 
 BASE = "900_seconds_5_it"
-RESULT_FOLDER = f"01_results/{BASE}_{TIME_LIMIT}"
+RESULT_FOLDER = f"DATA/01_results/{BASE}_{TIME_LIMIT}"
 INPUT_SAMPLE_ARCHIVE = f"../00_baseline/EXTERNAL_INPUT/{BASE}.zip"
 INSTANCE_ARCHIVE = "../benchmark_models.zip"
 
