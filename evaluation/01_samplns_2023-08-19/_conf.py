@@ -1,4 +1,7 @@
-# All general properties and dependencies of this experiment and evaluation should be defined here.
+# = Experiment Configuration File =
+# Centralizing all properties and paths within this configuration file simplifies management.
+# By decoupling these elements from the code, adjustments can be made effortlessly.
+# Consequently, replicating and customizing this experiment becomes a seamless process.
 
 ITERATIONS = 10000
 ITERATION_TIME_LIMIT = 60.0
@@ -13,3 +16,5 @@ EXTERNAL_BOUNDS = [
     "../02_60min_samplns_2023-08-19/out/06_best_bounds.csv",
     "../03_60min_samplns_long_iterations_2023-08-19/out/06_best_bounds.csv",
 ]
+PREPROCESSED_DATA = "./OUTPUT/04_preprocessed_data.json.zip"
+LOWER_BOUNDS = "./OUTPUT/04_lower_bounds.json.zip"

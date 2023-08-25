@@ -1,3 +1,8 @@
+# = Experiment Configuration File =
+# Centralizing all properties and paths within this configuration file simplifies management.
+# By decoupling these elements from the code, adjustments can be made effortlessly.
+# Consequently, replicating and customizing this experiment becomes a seamless process.
+
 ITERATIONS = 10000
 ITERATION_TIME_LIMIT = 60.0
 CDS_ITERATION_TIME_LIMIT = 60.0
@@ -22,4 +27,4 @@ BASELINE_SELECTIONS = [
 
 # DATA
 
-PREPROCESSED_RESULTS = "./OUTPUT/04_clean_data.json.zip"
+PREPROCESSED_RESULTS = "./OUTPUT/04_preprocessed_data.json.zip"
