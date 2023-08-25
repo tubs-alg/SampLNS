@@ -21,6 +21,7 @@ class CdsAlgorithm(abc.ABC):
     def get_lb(self) -> int:
         return len(list(self.compute_independent_set(None)))
 
+    @abc.abstractmethod
     def __call__(self, *args, **kwargs):
         pass
 
