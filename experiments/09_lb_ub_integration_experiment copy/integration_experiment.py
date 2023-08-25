@@ -1,22 +1,19 @@
-from aemeasure import MeasurementSeries, read_as_pandas_table, Database
-from samplns.cds import CdsLns
-from samplns.preprocessor import index_instance
-from samplns.preprocessor.preprocessing import Preprocessor, IndexInstance
-from samplns.instances import parse, parse_solutions, Instance
-from samplns.cds import CdsLns
-from samplns.lns import ModularLns
-from samplns.lns.neighborhood import RandomNeighborhood
-from os.path import abspath, expanduser
-from random import shuffle
-from collections import defaultdict, namedtuple
-from typing import List, Tuple, Dict
-from time import time
-import slurminade
-import itertools
 import argparse
 import json
 import os
 from abc import ABC, abstractmethod
+from collections import defaultdict, namedtuple
+from os.path import abspath, expanduser
+from time import time
+from typing import Dict, List
+
+import slurminade
+from aemeasure import Database, MeasurementSeries, read_as_pandas_table
+from samplns.cds import CdsLns
+from samplns.instances import Instance, parse, parse_solutions
+from samplns.lns import ModularLns
+from samplns.lns.neighborhood import RandomNeighborhood
+from samplns.preprocessor.preprocessing import IndexInstance, Preprocessor
 
 slurminade.update_default_configuration(partition="alg", constraint="alggen03")
 
@@ -26,6 +23,7 @@ ITERATIONS = 5
 TIME_LIMIT = 60.0
 
 InstanceTuple = namedtuple("Instance", ["name", "model_path", "solution_path"])
+
 
 class InstanceLoader(ABC):
     @abstractmethod
@@ -40,26 +38,27 @@ class InstanceLoader(ABC):
     def load_sample(self, instance: InstanceTuple) -> List[Dict[int, bool]]:
         pass
 
+
 class StandardInstanceLoader(InstanceLoader):
     def get_instances(self) -> List[InstanceTuple]:
         """
         Walk through all instance directories, find matching model and solution files,
         return them as tuples.
         """
-        model_paths = list()
-        instances = list()
+        model_paths = []
+        instances = []
 
         for path in EXPERIMENT_INSTANCE_FOLDERS:
             print(path)
-            for root, dirs, files in os.walk(os.path.join(path, "010_models")):
+            for root, _dirs, files in os.walk(os.path.join(path, "010_models")):
                 for file in files:
                     model_paths.append(os.path.join(root, file))
 
         for path in EXPERIMENT_INSTANCE_FOLDERS:
             print(path)
-            for root, dirs, files in os.walk(os.path.join(path, "020_samples")):
+            for root, _dirs, files in os.walk(os.path.join(path, "020_samples")):
                 for file in files:
-                    for (i, model) in enumerate(model_paths):
+                    for i, model in enumerate(model_paths):
                         if (
                             model.split("/")[-1] == file
                             or model.split("/")[-1].split(".")[0] == file.split(".")[0]
@@ -71,17 +70,18 @@ class StandardInstanceLoader(InstanceLoader):
                             break
 
         return instances
-        
+
     def load_model(self, instance: InstanceTuple) -> Instance:
         return parse(instance.model_path)
-    
+
     def load_sample(self, instance: InstanceTuple) -> List[Dict[int, bool]]:
         def sol_generator():
             for algo, solutions in parse_solutions(instance.solution_path).items():
                 for sol in solutions.values():
                     yield (algo, sol)
-        sample = min((sol for alg, sol in sol_generator()), key=len)
-        return sample
+
+        return min((sol for alg, sol in sol_generator()), key=len)
+
 
 class FinancialServicesInstanceLoader(InstanceLoader):
     def get_instances(self) -> List[InstanceTuple]:
@@ -89,11 +89,11 @@ class FinancialServicesInstanceLoader(InstanceLoader):
         Walk through all instance directories, find matching model and solution files,
         return them as tuples.
         """
-        model_path = list()
-        sol_path = list()
+        model_path = []
+        sol_path = []
 
         print(EXPERIMENT_INSTANCE_ROOT)
-        for root, dirs, files in os.walk(os.join(EXPERIMENT_INSTANCE_ROOT)):
+        for root, dirs, _files in os.walk(os.join(EXPERIMENT_INSTANCE_ROOT)):
             for instance in dirs:
                 # load best solution
                 sol_path.append(os.path.join(root, instance))
@@ -102,8 +102,6 @@ class FinancialServicesInstanceLoader(InstanceLoader):
                 )
 
         return [generate_instance_tuple(m, s) for (m, s) in zip(model_path, sol_path)]
-    
-
 
 
 RESULT_FOLDER = abspath(f"results/integration_{ITERATIONS}it_{round(TIME_LIMIT)}sec")
@@ -173,64 +171,64 @@ def optimize(instance_name, model_path, solution_path):
             print(f"Could not use {algo} solution of size {len(sol)}: {e}")
 
     if not sample:
-        raise Exception("No usable solution found!")
+        msg = "No usable solution found!"
+        raise Exception(msg)
 
     print(f"Using {sample_algo} solution with {len(sample)} configurations!")
 
-    with MeasurementSeries(RESULT_FOLDER) as ms:
-        with ms.measurement() as m:
-            m["instance"] = instance_name
-            m["time_limit"] = TIME_LIMIT
+    with MeasurementSeries(RESULT_FOLDER) as ms, ms.measurement() as m:
+        m["instance"] = instance_name
+        m["time_limit"] = TIME_LIMIT
 
-            lbs = list()
-            ubs = list()
+        lbs = []
+        ubs = []
 
-            # setup (needs time measurement as already involves calculations)
-            cds = CdsLns(instance=instance, initial_samples=sample)
-            solver = ModularLns(
-                instance=instance,
-                initial_solution=sample,
-                neighborhood_selector=RandomNeighborhood(),
-                cds_algorithm=cds,
+        # setup (needs time measurement as already involves calculations)
+        cds = CdsLns(instance=instance, initial_samples=sample)
+        solver = ModularLns(
+            instance=instance,
+            initial_solution=sample,
+            neighborhood_selector=RandomNeighborhood(),
+            cds_algorithm=cds,
+        )
+
+        for _ in range(ITERATIONS):
+            t = time()
+            sol_optimal = solver.optimize(
+                iterations=1, iteration_timelimit=TIME_LIMIT
             )
 
-            for _ in range(ITERATIONS):
-                t = time()
-                sol_optimal = solver.optimize(
-                    iterations=1, iteration_timelimit=TIME_LIMIT
-                )
+            iter_info = cds.solver.get_iteration_statistics()
+            assert type(iter_info) == list
+            assert type(iter_info[0]) == dict
+            assert len(iter_info) > 0
 
-                iter_info = cds.solver.get_iteration_statistics()
-                assert type(iter_info) == list
-                assert type(iter_info[0]) == dict
-                assert len(iter_info) > 0
+            lbs.append(solver.lb)
+            ubs.append(len(solver.get_best_solution()))
+            if sol_optimal:
+                print("Solution is optimal!")
+                break
 
-                lbs.append(solver.lb)
-                ubs.append(len(solver.get_best_solution()))
-                if sol_optimal:
-                    print("Solution is optimal!")
-                    break
+        cds.stop()
 
-            cds.stop()
+        m["iterations"] = ITERATIONS
+        m["solution"] = solver.get_best_solution()
+        m["lb_solution"] = cds.solver.get_best_solution()
+        m["score"] = len(solver.get_best_solution())
+        m["optimal"] = lbs[-1] == ubs[-1]
+        m["runtime"] = m.time().total_seconds()
+        m["iteration_lb_values"] = lbs
+        m["iteration_ub_values"] = ubs
 
-            m["iterations"] = ITERATIONS
-            m["solution"] = solver.get_best_solution()
-            m["lb_solution"] = cds.solver.get_best_solution()
-            m["score"] = len(solver.get_best_solution())
-            m["optimal"] = lbs[-1] == ubs[-1]
-            m["runtime"] = m.time().total_seconds()
-            m["iteration_lb_values"] = lbs
-            m["iteration_ub_values"] = ubs
-
-            # unpack iteration stats
-            stats = cds.solver.get_iteration_statistics()
-            for iteration_stats in stats:
-                for key, value in iteration_stats.items():
-                    key = "cds_" + key
-                    if not key in m.keys():
-                        m[key] = list()
-                    else:
-                        m[key].append(value)
+        # unpack iteration stats
+        stats = cds.solver.get_iteration_statistics()
+        for iteration_stats in stats:
+            for key, value in iteration_stats.items():
+                key = "cds_" + key
+                if key not in m:
+                    m[key] = []
+                else:
+                    m[key].append(value)
 
 
 @slurminade.slurmify
@@ -257,13 +255,12 @@ def convert_sample_list_to_dicts(
     return sample_dicts
 
 
-
 def configure_grb_license_path():
     # hack for gurobi license on alg workstations. TODO: Find a nicer way
     import socket
     from pathlib import Path
 
-    if not "alg" in socket.gethostname():
+    if "alg" not in socket.gethostname():
         return
 
     os.environ["GRB_LICENSE_FILE"] = os.path.join(
@@ -286,7 +283,7 @@ if __name__ == "__main__":
     for instance in instances:
         key = instance[0][:5]
         groups[key].append(instance)
-    for category, entries in groups.items():
+    for _category, entries in groups.items():
         entries.sort(key=lambda t: t[0])
     instances = sum(
         (
@@ -296,7 +293,7 @@ if __name__ == "__main__":
             ]
             for _, entries in groups.items()
         ),
-        start=list(),
+        start=[],
     )
     print(json.dumps(instances, indent=4))
 

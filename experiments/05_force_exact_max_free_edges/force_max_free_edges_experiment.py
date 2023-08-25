@@ -1,19 +1,16 @@
-from aemeasure import MeasurementSeries, read_as_pandas_table, Database
-from samplns.preprocessor import index_instance
-from samplns.preprocessor.preprocessing import Preprocessor, IndexInstance
-from samplns.instances import parse, parse_solutions
-from samplns.cds.cds_lns import LnsCds, TransactionGraph
-from samplns.lns.neighborhood import RandomNeighborhood
-from os.path import abspath, expanduser
-from random import shuffle
-from collections import defaultdict, namedtuple
-from typing import List, Tuple, Dict
-from time import time
-from multiprocessing.pool import Pool
-import slurminade
 import argparse
 import json
 import os
+from collections import defaultdict, namedtuple
+from os.path import abspath, expanduser
+from random import shuffle
+from typing import Dict, List
+
+import slurminade
+from aemeasure import Database, MeasurementSeries, read_as_pandas_table
+from samplns.cds.cds_lns import LnsCds, TransactionGraph
+from samplns.instances import parse, parse_solutions
+from samplns.preprocessor.preprocessing import IndexInstance, Preprocessor
 
 slurminade.update_default_configuration(
     partition="alg",
@@ -96,7 +93,8 @@ def optimize(instance_name, model_path, solution_path, smart):
             print(f"Could not use {algo} solution of size {len(sol)}: {e}")
 
     if not sample:
-        raise Exception("No usable solution found!")
+        msg = "No usable solution found!"
+        raise Exception(msg)
 
     graph = TransactionGraph(instance.n_concrete)
     for config in sample:
@@ -109,28 +107,27 @@ def optimize(instance_name, model_path, solution_path, smart):
         )
     solver = LnsCds(graph, use_heur=False, be_smart=smart)
 
-    with MeasurementSeries(RESULT_FOLDER) as ms:
-        with ms.measurement() as m:
-            m["increase_added_edges_per_iter"] = smart
-            m["instance"] = instance_name
-            m["time_limit"] = TIME_LIMIT
-            m["iterations"] = ITERATIONS
+    with MeasurementSeries(RESULT_FOLDER) as ms, ms.measurement() as m:
+        m["increase_added_edges_per_iter"] = smart
+        m["instance"] = instance_name
+        m["time_limit"] = TIME_LIMIT
+        m["iterations"] = ITERATIONS
 
-            solver.optimize(
-                list(), max_iterations=ITERATIONS, time_limit=TIME_LIMIT, verbose=True
-            )
+        solver.optimize(
+            [], max_iterations=ITERATIONS, time_limit=TIME_LIMIT, verbose=True
+        )
 
-            # unpack iteration stats
-            stats = solver.get_iteration_statistics()
-            for iteration_stats in stats:
-                for key, value in iteration_stats.items():
-                    key = "cds_" + key
-                    if not key in m.keys():
-                        m[key] = list()
-                    else:
-                        m[key].append(value)
+        # unpack iteration stats
+        stats = solver.get_iteration_statistics()
+        for iteration_stats in stats:
+            for key, value in iteration_stats.items():
+                key = "cds_" + key
+                if key not in m:
+                    m[key] = []
+                else:
+                    m[key].append(value)
 
-            m["runtime"] = m.time().total_seconds()
+        m["runtime"] = m.time().total_seconds()
 
 
 @slurminade.slurmify
@@ -162,18 +159,18 @@ def get_instances() -> List[Instance]:
     Walk through all instance directories, find matching model and solution files,
     return them as tuples.
     """
-    model_paths = list()
-    instances = list()
+    model_paths = []
+    instances = []
 
     for path in EXPERIMENT_INSTANCE_FOLDERS:
-        for root, dirs, files in os.walk(os.path.join(path, "010_models")):
+        for root, _dirs, files in os.walk(os.path.join(path, "010_models")):
             for file in files:
                 model_paths.append(os.path.join(root, file))
 
     for path in EXPERIMENT_INSTANCE_FOLDERS:
-        for root, dirs, files in os.walk(os.path.join(path, "020_samples")):
+        for root, _dirs, files in os.walk(os.path.join(path, "020_samples")):
             for file in files:
-                for (i, model) in enumerate(model_paths):
+                for i, model in enumerate(model_paths):
                     if model.split("/")[-1] == file:
                         instances.append(
                             generate_instance_tuple(model, os.path.join(root, file))
@@ -190,7 +187,7 @@ def configure_grb_license_path():
     from pathlib import Path
 
     # Only configure on workstations
-    if not "alg" in socket.gethostname():
+    if "alg" not in socket.gethostname():
         return
 
     os.environ["GRB_LICENSE_FILE"] = os.path.join(
@@ -217,7 +214,7 @@ if __name__ == "__main__":
     for instance in instances:
         key = instance[0][:5]
         groups[key].append(instance)
-    for category, entries in groups.items():
+    for _category, entries in groups.items():
         entries.sort(key=lambda t: t[0])
     instances = sum(
         (
@@ -228,16 +225,16 @@ if __name__ == "__main__":
             ]
             for _, entries in groups.items()
         ),
-        start=list(),
+        start=[],
     )
     print(json.dumps(instances, indent=4))
     shuffle(instances)
 
     with slurminade.Batch(max_size=4) as batch:
         for instance in instances:
-            instance_a = list(instance) + [False]
+            instance_a = [*list(instance), False]
             batch.add(optimize, *instance_a)
-            instance_b = list(instance) + [True]
+            instance_b = [*list(instance), True]
             batch.add(optimize, *instance_b)
         if not args.debug:
             pack_after_finish.wait_for(batch.flush()).distribute()

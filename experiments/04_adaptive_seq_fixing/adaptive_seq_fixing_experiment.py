@@ -1,19 +1,16 @@
-from aemeasure import MeasurementSeries, read_as_pandas_table, Database
-from samplns.preprocessor import index_instance
-from samplns.preprocessor.preprocessing import Preprocessor, IndexInstance
-from samplns.instances import parse, parse_solutions
-from samplns.cds.cds_lns import LnsCds, TransactionGraph
-from samplns.lns.neighborhood import RandomNeighborhood
-from os.path import abspath, expanduser
-from random import shuffle
-from collections import defaultdict, namedtuple
-from typing import List, Tuple, Dict
-from time import time
-from multiprocessing.pool import Pool
-import slurminade
 import argparse
 import json
 import os
+from collections import namedtuple
+from multiprocessing.pool import Pool
+from os.path import abspath, expanduser
+from typing import Dict, List
+
+import slurminade
+from aemeasure import Database, MeasurementSeries, read_as_pandas_table
+from samplns.cds.cds_lns import LnsCds, TransactionGraph
+from samplns.instances import parse
+from samplns.preprocessor.preprocessing import IndexInstance, Preprocessor
 
 slurminade.update_default_configuration(
     partition="alg",
@@ -95,28 +92,27 @@ def optimize(instance_name, model_path, solution_path, smart: bool):
         )
     solver = LnsCds(graph, use_heur=False, be_smart=smart)
 
-    with MeasurementSeries(RESULT_FOLDER) as ms:
-        with ms.measurement() as m:
-            m["increase_added_edges_per_iter"] = smart
-            m["instance"] = instance_name
-            m["time_limit"] = TIME_LIMIT
-            m["iterations"] = ITERATIONS
+    with MeasurementSeries(RESULT_FOLDER) as ms, ms.measurement() as m:
+        m["increase_added_edges_per_iter"] = smart
+        m["instance"] = instance_name
+        m["time_limit"] = TIME_LIMIT
+        m["iterations"] = ITERATIONS
 
-            solver.optimize(
-                list(), max_iterations=ITERATIONS, time_limit=TIME_LIMIT, verbose=True
-            )
+        solver.optimize(
+            [], max_iterations=ITERATIONS, time_limit=TIME_LIMIT, verbose=True
+        )
 
-            # unpack iteration stats
-            stats = solver.get_iteration_statistics()
-            for iteration_stats in stats:
-                for key, value in iteration_stats.items():
-                    key = "cds_" + key
-                    if not key in m.keys():
-                        m[key] = list()
-                    else:
-                        m[key].append(value)
+        # unpack iteration stats
+        stats = solver.get_iteration_statistics()
+        for iteration_stats in stats:
+            for key, value in iteration_stats.items():
+                key = "cds_" + key
+                if key not in m:
+                    m[key] = []
+                else:
+                    m[key].append(value)
 
-            m["runtime"] = m.time().total_seconds()
+        m["runtime"] = m.time().total_seconds()
 
 
 @slurminade.slurmify
@@ -148,11 +144,11 @@ def get_instances() -> List[Instance]:
     Walk through all instance directories, find matching model and solution files,
     return them as tuples.
     """
-    model_path = list()
-    sol_path = list()
+    model_path = []
+    sol_path = []
 
     print(EXPERIMENT_INSTANCE_ROOT)
-    for root, dirs, files in os.walk(EXPERIMENT_INSTANCE_FOLDER):
+    for root, dirs, _files in os.walk(EXPERIMENT_INSTANCE_FOLDER):
         for instance in dirs:
             # load best solution
             sol_path.append(os.path.join(root, instance))
@@ -169,7 +165,7 @@ def configure_grb_license_path():
     from pathlib import Path
 
     # Only configure on workstations
-    if not "alg" in socket.gethostname():
+    if "alg" not in socket.gethostname():
         return
 
     os.environ["GRB_LICENSE_FILE"] = os.path.join(
@@ -197,9 +193,9 @@ if __name__ == "__main__":
 
     with slurminade.Batch(max_size=4) as batch:
         for instance in instances:
-            instance_a = list(instance) + [True]
+            instance_a = [*list(instance), True]
             batch.add(optimize, *instance_a)
-            instance_b = list(instance) + [False]
+            instance_b = [*list(instance), False]
             batch.add(optimize, *instance_b)
         if not args.debug:
             pack_after_finish.wait_for(batch.flush()).distribute()

@@ -1,22 +1,20 @@
-from aemeasure import MeasurementSeries, Measurement, read_as_pandas_table, Database
-from samplns.cds import CdsLns
-from samplns.preprocessor import index_instance
-from samplns.preprocessor.preprocessing import Preprocessor, IndexInstance
-from samplns.instances import parse, parse_solutions
-from samplns.cds import CdsLns
-from samplns.lns import ModularLns, LnsLogger
-from samplns.lns.neighborhood import RandomNeighborhood
-from os.path import abspath, expanduser
-import random
-from collections import defaultdict, namedtuple
-from typing import List, Tuple, Dict
-from time import time
-import slurminade
-import itertools
 import argparse
 import json
-import os
 import multiprocessing
+import os
+import random
+from collections import defaultdict, namedtuple
+from os.path import abspath, expanduser
+from time import time
+from typing import Dict, List
+
+import slurminade
+from aemeasure import Database, Measurement, MeasurementSeries, read_as_pandas_table
+from samplns.cds import CdsLns
+from samplns.instances import parse, parse_solutions
+from samplns.lns import LnsLogger, ModularLns
+from samplns.lns.neighborhood import RandomNeighborhood
+from samplns.preprocessor.preprocessing import IndexInstance, Preprocessor
 
 slurminade.update_default_configuration(partition="alg", constraint="alggen03")
 
@@ -53,10 +51,10 @@ class MyLnsLogger(LnsLogger):
     def __init__(self, measurement: Measurement) -> None:
         self.tstart = time()
         self.measurement = measurement
-        self.measurement["iter_lb"] = list()
-        self.measurement["iter_ub"] = list()
-        self.measurement["iter_stop"] = list()
-        self.measurement["iter_ub_events"] = list()
+        self.measurement["iter_lb"] = []
+        self.measurement["iter_ub"] = []
+        self.measurement["iter_stop"] = []
+        self.measurement["iter_ub_events"] = []
 
     def report_iteration_end(
         self,
@@ -74,7 +72,7 @@ class MyLnsLogger(LnsLogger):
         self.measurement["iter_stop"].append(time() - self.tstart)
         self.measurement["optimal"] = lb == len(solution)
         self.measurement["iter_ub_events"].append(
-            events if events is not None else dict()
+            events if events is not None else {}
         )
 
         # with open("bobo.json", "w") as f:
@@ -125,43 +123,43 @@ def optimize(instance_name, model_path, solution_path, use_lns_in_ub: bool):
             print(f"Could not use {algo} solution of size {len(sol)}: {e}")
 
     if not sample:
-        raise Exception("No usable solution found!")
+        msg = "No usable solution found!"
+        raise Exception(msg)
 
     print(f"Using {sample_algo} solution with {len(sample)} configurations!")
 
-    with MeasurementSeries(RESULT_FOLDER) as ms:
-        with ms.measurement() as m:
-            m["instance"] = instance_name
-            m["n_concrete"] = instance.n_concrete
-            m["n_all"] = instance.n_all
-            m["iter_time_limit"] = TIME_LIMIT
-            m["iterations"] = ITERATIONS
-            m["lns_symmetry_breaking"] = use_lns_in_ub
+    with MeasurementSeries(RESULT_FOLDER) as ms, ms.measurement() as m:
+        m["instance"] = instance_name
+        m["n_concrete"] = instance.n_concrete
+        m["n_all"] = instance.n_all
+        m["iter_time_limit"] = TIME_LIMIT
+        m["iterations"] = ITERATIONS
+        m["lns_symmetry_breaking"] = use_lns_in_ub
 
-            print(f"STARTING EXPERIMENT. USE LNS IN SYMMETRY BREAKING: {use_lns_in_ub}")
+        print(f"STARTING EXPERIMENT. USE LNS IN SYMMETRY BREAKING: {use_lns_in_ub}")
 
-            # setup (needs time measurement as already involves calculations)
-            cds = CdsLns(
-                instance=instance, initial_samples=sample, be_smart=use_lns_in_ub
-            )
-            solver = ModularLns(
-                instance=instance,
-                initial_solution=sample,
-                neighborhood_selector=RandomNeighborhood(),
-                cds_algorithm=cds,
-                logger=MyLnsLogger(m),
-            )
+        # setup (needs time measurement as already involves calculations)
+        cds = CdsLns(
+            instance=instance, initial_samples=sample, be_smart=use_lns_in_ub
+        )
+        solver = ModularLns(
+            instance=instance,
+            initial_solution=sample,
+            neighborhood_selector=RandomNeighborhood(),
+            cds_algorithm=cds,
+            logger=MyLnsLogger(m),
+        )
 
-            sol_optimal = solver.optimize(
-                iterations=ITERATIONS, iteration_timelimit=TIME_LIMIT
-            )
+        sol_optimal = solver.optimize(
+            iterations=ITERATIONS, iteration_timelimit=TIME_LIMIT
+        )
 
-            cds.stop()
+        cds.stop()
 
-            m["solution"] = solver.get_best_solution()
-            m["lb_solution"] = cds.solver.get_best_solution()
-            m["score"] = len(solver.get_best_solution())
-            m["runtime"] = m.time().total_seconds()
+        m["solution"] = solver.get_best_solution()
+        m["lb_solution"] = cds.solver.get_best_solution()
+        m["score"] = len(solver.get_best_solution())
+        m["runtime"] = m.time().total_seconds()
 
             # unpack iteration stats
             # stats = cds.solver.get_iteration_statistics()
@@ -203,18 +201,18 @@ def get_instances() -> List[Instance]:
     Walk through all instance directories, find matching model and solution files,
     return them as tuples.
     """
-    model_paths = list()
-    instances = list()
+    model_paths = []
+    instances = []
 
     for path in EXPERIMENT_INSTANCE_FOLDERS:
-        for root, dirs, files in os.walk(os.path.join(path, "010_models")):
+        for root, _dirs, files in os.walk(os.path.join(path, "010_models")):
             for file in files:
                 model_paths.append(os.path.join(root, file))
 
     for path in EXPERIMENT_INSTANCE_FOLDERS:
-        for root, dirs, files in os.walk(os.path.join(path, "020_samples")):
+        for root, _dirs, files in os.walk(os.path.join(path, "020_samples")):
             for file in files:
-                for (i, model) in enumerate(model_paths):
+                for i, model in enumerate(model_paths):
                     if (
                         model.split("/")[-1] == file
                         or model.split("/")[-1].split(".")[0] == file.split(".")[0]
@@ -233,7 +231,7 @@ def configure_grb_license_path():
     import socket
     from pathlib import Path
 
-    if not "alg" in socket.gethostname():
+    if "alg" not in socket.gethostname():
         return
 
     os.environ["GRB_LICENSE_FILE"] = os.path.join(
@@ -257,11 +255,11 @@ if __name__ == "__main__":
     for instance in instances:
         key = instance[0][:5]
         groups[key].append(instance)
-    for category, entries in groups.items():
+    for _category, entries in groups.items():
         entries.sort(key=lambda t: t[0])
     instances = sum(
         (random.sample(entries, 6) for _, entries in groups.items()),
-        start=list(),
+        start=[],
     )
     print(json.dumps(instances, indent=4))
 
@@ -275,7 +273,7 @@ if __name__ == "__main__":
     with slurminade.Batch(max_size=len(instances) // 6) as batch:
         for instance in instances:
             for b in (False, True):
-                instance_ = list(instance) + [b]
+                instance_ = [*list(instance), b]
                 batch.add(optimize, *instance_)
             break
         if not args.debug:

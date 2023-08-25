@@ -1,22 +1,18 @@
-from aemeasure import MeasurementSeries, read_as_pandas_table, Database
-from samplns.preprocessor import index_instance
-from samplns.preprocessor.preprocessing import Preprocessor, IndexInstance
-from samplns.instances import parse, parse_solutions
-from samplns.cds import CdsLns
-from samplns.lns import ModularLns
-from samplns.lns.neighborhood import RandomNeighborhood
-from os.path import abspath, expanduser
-from random import shuffle
-from collections import defaultdict, namedtuple
-from typing import List, Tuple, Dict
-from time import time
-from multiprocessing.pool import Pool
-import tarfile
-import slurminade
-import argparse
 import json
 import os
-import subprocess
+from collections import namedtuple
+from multiprocessing.pool import Pool
+from os.path import abspath, expanduser
+from time import time
+from typing import Dict, List
+
+import slurminade
+from aemeasure import Database, MeasurementSeries
+from samplns.cds import CdsLns
+from samplns.instances import parse
+from samplns.lns import ModularLns
+from samplns.lns.neighborhood import RandomNeighborhood
+from samplns.preprocessor.preprocessing import IndexInstance, Preprocessor
 
 slurminade.update_default_configuration(partition="alg", constraint="alggen03")
 
@@ -80,48 +76,47 @@ def optimize(instance_name, model_path, solution_path):
             assert len(c) == instance.n_concrete
         # print(sample)
 
-    with MeasurementSeries(RESULT_FOLDER) as ms:
-        with ms.measurement() as m:
-            m["instance"] = instance_name
-            m["time_limit"] = TIME_LIMIT
+    with MeasurementSeries(RESULT_FOLDER) as ms, ms.measurement() as m:
+        m["instance"] = instance_name
+        m["time_limit"] = TIME_LIMIT
 
-            lbs = list()
-            ubs = list()
-            times = list()
+        lbs = []
+        ubs = []
+        times = []
 
-            # setup (needs time measurement as already involves calculations)
-            cds = CdsLns(
-                instance=instance, initial_samples=sample, time_lim=TIME_LIMIT / 2
+        # setup (needs time measurement as already involves calculations)
+        cds = CdsLns(
+            instance=instance, initial_samples=sample, time_lim=TIME_LIMIT / 2
+        )
+        solver = ModularLns(
+            instance=instance,
+            initial_solution=sample,
+            neighborhood_selector=RandomNeighborhood(),
+            cds_algorithm=cds,
+        )
+
+        for _ in range(ITERATIONS):
+            t = time()
+            sol_optimal = solver.optimize(
+                iterations=1, iteration_timelimit=TIME_LIMIT
             )
-            solver = ModularLns(
-                instance=instance,
-                initial_solution=sample,
-                neighborhood_selector=RandomNeighborhood(),
-                cds_algorithm=cds,
-            )
+            lbs.append(solver.lb)
+            ubs.append(len(solver.get_best_solution()))
+            times.append(time() - t)
+            if sol_optimal:
+                break
 
-            for _ in range(ITERATIONS):
-                t = time()
-                sol_optimal = solver.optimize(
-                    iterations=1, iteration_timelimit=TIME_LIMIT
-                )
-                lbs.append(solver.lb)
-                ubs.append(len(solver.get_best_solution()))
-                times.append(time() - t)
-                if sol_optimal:
-                    break
+        m["iterations"] = ITERATIONS
+        m["solution"] = solver.get_best_solution()
+        m["lb_solution"] = cds.solver.get_best_solution()
+        m["score"] = len(solver.get_best_solution())
+        m["optimal"] = lbs[-1] == ubs[-1]
+        m["runtime"] = m.time().total_seconds()
+        m["iteration_runtimes"] = times
+        m["iteration_lb_values"] = lbs
+        m["iteration_ub_values"] = ubs
 
-            m["iterations"] = ITERATIONS
-            m["solution"] = solver.get_best_solution()
-            m["lb_solution"] = cds.solver.get_best_solution()
-            m["score"] = len(solver.get_best_solution())
-            m["optimal"] = lbs[-1] == ubs[-1]
-            m["runtime"] = m.time().total_seconds()
-            m["iteration_runtimes"] = times
-            m["iteration_lb_values"] = lbs
-            m["iteration_ub_values"] = ubs
-
-            cds.stop()
+        cds.stop()
 
 
 @slurminade.slurmify
@@ -153,11 +148,11 @@ def get_instances() -> List[Instance]:
     Walk through all instance directories, find matching model and solution files,
     return them as tuples.
     """
-    model_path = list()
-    sol_path = list()
+    model_path = []
+    sol_path = []
 
     print(EXPERIMENT_INSTANCE_ROOT)
-    for root, dirs, files in os.walk(EXPERIMENT_INSTANCE_FOLDER):
+    for root, dirs, _files in os.walk(EXPERIMENT_INSTANCE_FOLDER):
         for instance in dirs:
             if "financial" not in instance:
                 continue
@@ -177,7 +172,7 @@ def configure_grb_license_path():
     from pathlib import Path
 
     # Only configure on workstations
-    if not "alg" in socket.gethostname():
+    if "alg" not in socket.gethostname():
         return
 
     os.environ["GRB_LICENSE_FILE"] = os.path.join(
@@ -186,12 +181,11 @@ def configure_grb_license_path():
 
 
 if __name__ == "__main__":
-
     instances: List[Instance] = get_instances()
     instances = [t for t in instances if "financial" in t[0]]
     print(json.dumps(instances, indent=4))
 
-    for (name, model_path, solution_path) in instances:
+    for name, model_path, solution_path in instances:
         instance = Preprocessor().preprocess(parse(model_path))
         assert type(instance) == IndexInstance
         # sample = convert_sample_list_to_dicts(
