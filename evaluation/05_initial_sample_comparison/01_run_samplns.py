@@ -212,9 +212,9 @@ if __name__ == "__main__":
                 if not baseline["Path"][idx]:
                     print("Skipping unsuccessful row", baseline.loc[idx])
                     continue
-                if baseline["#Variables"][idx] > 1500:
-                    print("Skipping", baseline["Instance"][idx], "due to its size.")
-                    continue
+                #if baseline["#Variables"][idx] > 1500:
+                #    print("Skipping", baseline["Instance"][idx], "due to its size.")
+                #    continue
                 path = baseline["Path"][idx]
                 instance = baseline["Instance"][idx]
                 if "soletta_2017-03-09_21-02-40" in instance:
