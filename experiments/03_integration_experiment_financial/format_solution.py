@@ -85,9 +85,7 @@ def optimize(instance_name, model_path, solution_path):
         times = []
 
         # setup (needs time measurement as already involves calculations)
-        cds = CdsLns(
-            instance=instance, initial_samples=sample, time_lim=TIME_LIMIT / 2
-        )
+        cds = CdsLns(instance=instance, initial_samples=sample, time_lim=TIME_LIMIT / 2)
         solver = ModularLns(
             instance=instance,
             initial_solution=sample,
@@ -97,9 +95,7 @@ def optimize(instance_name, model_path, solution_path):
 
         for _ in range(ITERATIONS):
             t = time()
-            sol_optimal = solver.optimize(
-                iterations=1, iteration_timelimit=TIME_LIMIT
-            )
+            sol_optimal = solver.optimize(iterations=1, iteration_timelimit=TIME_LIMIT)
             lbs.append(solver.lb)
             ubs.append(len(solver.get_best_solution()))
             times.append(time() - t)

@@ -71,9 +71,7 @@ class MyLnsLogger(LnsLogger):
         self.measurement["iter_lb"].append(lb)
         self.measurement["iter_stop"].append(time() - self.tstart)
         self.measurement["optimal"] = lb == len(solution)
-        self.measurement["iter_ub_events"].append(
-            events if events is not None else {}
-        )
+        self.measurement["iter_ub_events"].append(events if events is not None else {})
 
         # with open("bobo.json", "w") as f:
         #     json.dump(self.measurement, f)
@@ -139,9 +137,7 @@ def optimize(instance_name, model_path, solution_path, use_lns_in_ub: bool):
         print(f"STARTING EXPERIMENT. USE LNS IN SYMMETRY BREAKING: {use_lns_in_ub}")
 
         # setup (needs time measurement as already involves calculations)
-        cds = CdsLns(
-            instance=instance, initial_samples=sample, be_smart=use_lns_in_ub
-        )
+        cds = CdsLns(instance=instance, initial_samples=sample, be_smart=use_lns_in_ub)
         solver = ModularLns(
             instance=instance,
             initial_solution=sample,
@@ -161,15 +157,15 @@ def optimize(instance_name, model_path, solution_path, use_lns_in_ub: bool):
         m["score"] = len(solver.get_best_solution())
         m["runtime"] = m.time().total_seconds()
 
-            # unpack iteration stats
-            # stats = cds.solver.get_iteration_statistics()
-            # for iteration_stats in stats:
-            #     for key, value in iteration_stats.items():
-            #         key = "cds_" + key
-            #         if not key in m.keys():
-            #             m[key] = list()
-            #         else:
-            #             m[key].append(value)
+        # unpack iteration stats
+        # stats = cds.solver.get_iteration_statistics()
+        # for iteration_stats in stats:
+        #     for key, value in iteration_stats.items():
+        #         key = "cds_" + key
+        #         if not key in m.keys():
+        #             m[key] = list()
+        #         else:
+        #             m[key].append(value)
 
 
 @slurminade.slurmify

@@ -194,9 +194,7 @@ def optimize(instance_name, model_path, solution_path):
 
         for _ in range(ITERATIONS):
             t = time()
-            sol_optimal = solver.optimize(
-                iterations=1, iteration_timelimit=TIME_LIMIT
-            )
+            sol_optimal = solver.optimize(iterations=1, iteration_timelimit=TIME_LIMIT)
 
             iter_info = cds.solver.get_iteration_statistics()
             assert type(iter_info) == list

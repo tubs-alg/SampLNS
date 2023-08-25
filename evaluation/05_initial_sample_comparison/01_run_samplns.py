@@ -196,17 +196,18 @@ import random
 
 if __name__ == "__main__":
     samples = parse_solution_overview(INPUT_SAMPLE_ARCHIVE)
-    for selection in BASELINE_SELECTIONS:
-        baseline = samples[
-            (samples["Algorithm"] == selection["Algorithm"])
-            & (samples["Settings"] == selection["Settings"])
-        ].dropna()
-        indices = list(baseline.index)
-        if not indices:
-            msg = "No samples found for selection"
-            raise RuntimeError(msg, selection)
-        random.shuffle(indices)
-        with slurminade.Batch(max_size=40) as batch:
+    with slurminade.Batch(max_size=40) as batch:
+        for selection in BASELINE_SELECTIONS:
+            baseline = samples[
+                (samples["Algorithm"] == selection["Algorithm"])
+                & (samples["Settings"] == selection["Settings"])
+            ].dropna()
+            indices = list(baseline.index)
+            if not indices:
+                msg = "No samples found for selection"
+                raise RuntimeError(msg, selection)
+            random.shuffle(indices)
+
             for idx in indices:
                 if not baseline["Path"][idx]:
                     print("Skipping unsuccessful row", baseline.loc[idx])
