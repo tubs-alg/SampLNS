@@ -18,3 +18,7 @@ BASELINE_SELECTIONS = [
     {"Algorithm": "FIDE-YASA", "Settings": "t2_m10_null"},
     {"Algorithm": "Incling", "Settings": "t2"},
 ]
+
+# DATA
+
+PREPROCESSED_RESULTS = "./OUTPUT/04_clean_data.json.zip"
