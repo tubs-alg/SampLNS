@@ -225,4 +225,4 @@ if __name__ == "__main__":
                 #    print("Skipping uclibc instance! They seem to be inconsistent.")
                 #    continue
                 run_distributed.distribute(instance, path)
-            pack_after_finish.wait_for(batch.flush()).distribute()
+        pack_after_finish.wait_for(batch.flush()).distribute()
