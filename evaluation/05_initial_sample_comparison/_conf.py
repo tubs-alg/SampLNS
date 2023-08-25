@@ -12,7 +12,7 @@ EXTERNAL_BOUNDS = [
     "../02_60min_samplns_2023-08-19/out/06_best_bounds.csv",
     "../03_60min_samplns_long_iterations_2023-08-19/out/06_best_bounds.csv",
 ]
-
+EXTENDED_BASELINE_DATA = "../00_baseline/OUTPUT/01_simple_baseline_data.json.zip"
 BASELINE_SELECTIONS = [
     {"Algorithm": "FIDE-YASA", "Settings": "t2_m1_null"},
     {"Algorithm": "FIDE-YASA", "Settings": "t2_m10_null"},

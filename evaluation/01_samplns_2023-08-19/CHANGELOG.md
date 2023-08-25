@@ -5,3 +5,4 @@
 - _2023-08-19 (DK):_ Cleaning up and restructuring the evaluation folder.
 - _2023-08-21 (DK):_ Changed input to 00_baseline, as it should have the same
   data. Less room for errors due to forgetting to update all files.
+- _2023-08-25 (DK):_ As it turned out, samples by YASA can be invalid. Using FIDE-YASA instead. Rerunning all experiments. Using DATA folder for intermediate data.
