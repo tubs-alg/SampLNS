@@ -17,6 +17,7 @@ BASELINE_SELECTIONS = [
     {"Algorithm": "FIDE-YASA", "Settings": "t2_m1_null"},
     {"Algorithm": "FIDE-YASA", "Settings": "t2_m10_null"},
     {"Algorithm": "Incling", "Settings": "t2"},
+    {"Algorithm": "ICPL", "Settings": "t2"},
 ]
 
 # DATA
