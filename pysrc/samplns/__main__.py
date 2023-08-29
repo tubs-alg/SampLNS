@@ -10,13 +10,14 @@ from samplns.baseline import BaselineAlgorithm
 from samplns.instances import parse
 from samplns.lns import RandomNeighborhood
 from samplns.simple import SampLns
+from importlib.metadata import version
 
 
 def get_parser():
     parser = argparse.ArgumentParser(
         "samplns",
         description="Starts samplns either with a given initial sample or runs "
-        "another sampling algorithm before.",
+                    "another sampling algorithm before.",
     )
     parser.add_argument(
         "-f",
@@ -35,14 +36,14 @@ def get_parser():
     initial_sample_group.add_argument(
         "--initial-sample",
         help="Set this when you already have an initial sample. "
-        "File path to an initial sample (JSON) that should be used.",
+             "File path to an initial sample (JSON) that should be used.",
     )
     initial_sample_group.add_argument(
         "--initial-sample-algorithm",
         choices=["YASA", "YASA3", "YASA5", "YASA10"],
         help="Set this if you want to run a sampling algorithm to "
-        "generate an initial sample. YASA has several versions for "
-        "different values of m.",
+             "generate an initial sample. YASA has several versions for "
+             "different values of m.",
     )
     parser.add_argument(
         "--initial-sample-algorithm-timelimit",
@@ -75,6 +76,10 @@ def get_parser():
         help="Timelimit for each iteration of the lower bound computation in seconds.",
         type=int,
     )
+
+    parser.add_argument('-v', '--version', action='version',
+                        version=f"samplns {version('samplns')}")
+
     return parser
 
 
