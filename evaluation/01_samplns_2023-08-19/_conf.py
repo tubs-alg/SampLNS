@@ -13,8 +13,11 @@ INPUT_SAMPLE_ARCHIVE = f"../00_baseline/EXTERNAL_INPUT/{BASE}.zip"
 INSTANCE_ARCHIVE = "../benchmark_models.zip"
 EXTENDED_BASELINE_DATA = "../00_baseline/OUTPUT/01_simple_baseline_data.json.zip"
 EXTERNAL_BOUNDS = [
-    "../02_60min_samplns_2023-08-19/out/06_best_bounds.csv",
-    "../03_60min_samplns_long_iterations_2023-08-19/out/06_best_bounds.csv",
+  #  "../02_60min_samplns_2023-08-19/out/06_best_bounds.csv",
+  #  "../03_60min_samplns_long_iterations_2023-08-19/out/06_best_bounds.csv",
+    "../04_super_long_samplns/out/06_best_bounds.csv",
 ]
 PREPROCESSED_DATA = "./OUTPUT/04_preprocessed_data.json.zip"
 LOWER_BOUNDS = "./OUTPUT/04_lower_bounds.json.zip"
+UPPER_LOWER_BOUNDS = "./OUTPUT/07_upper_lower_bounds.pdf"
+EXPORT_BEST_BOUNDS = "./OUTPUT/06_best_bounds.csv"
