@@ -10,18 +10,16 @@ class Instance:
     It may be the product of multiple preprocessing steps.
 
     There are three fundamental containers:
-    1. features: A list with all concrete features to build the universe on. It can be
-                redundant to the structure, but due to optimization, it may be necessary.
+    1. features: A list with all concrete features to build the universe on. It can be redundant to the structure, but due to optimization, it may be necessary.
     2. structure: The tree of features, or the structure of the configuration.
-    3. rules: A list with additional rules that have to be satisfied by all elements in
-            the universe.
+    3. rules: A list with additional rules that have to be satisfied by all elements in the universe.
     """
 
     def __init__(
-        self,
-        features: typing.List[FeatureLabel],
-        structure: typing.Optional[FeatureNode],
-        rules: typing.List[SatNode],
+            self,
+            features: typing.List[FeatureLabel],
+            structure: typing.Optional[FeatureNode],
+            rules: typing.List[SatNode],
     ):
         self.instance_name = "UNNAMED"
         self.features: typing.List[FeatureLabel] = features
@@ -35,10 +33,10 @@ class Instance:
             return f"Instance[UNNAMED]<{len(self.features)} features, {len(self.rules)} rules>"
 
     def is_fully_defined(
-        self,
-        conf: typing.Dict[FeatureLabel, bool],
-        exact: bool = False,
-        verbose: bool = False,
+            self,
+            conf: typing.Dict[FeatureLabel, bool],
+            exact: bool = False,
+            verbose: bool = False,
     ) -> bool:
         """
         Checks if a configuration is fully defined, i.e., exactly defines the concrete
@@ -52,7 +50,7 @@ class Instance:
         return not exact or len(conf.keys()) == len(self.features)
 
     def is_feasible(
-        self, conf: typing.Dict[FeatureLabel, bool], verbose: bool = False
+            self, conf: typing.Dict[FeatureLabel, bool], verbose: bool = False
     ) -> bool:
         """
         Checks if a configuration is feasible, i.e., satisfies all rules and matches the structure.

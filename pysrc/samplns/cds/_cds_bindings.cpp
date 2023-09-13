@@ -23,6 +23,29 @@ PYBIND11_MODULE(_cds_bindings, m) {
   // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html#capturing-standard-output-from-ostream
   py::add_ostream_redirect(m, "ostream_redirect");
 
+  // FeatureTuple
+  py::class_<FeatureTuple>(m, "FeatureTuple", "A tuple of two features.")
+      .def(py::init<feature_id, feature_id>())
+      .def_readonly("first", &FeatureTuple::first)
+      .def_readonly("second", &FeatureTuple::second)
+      .def("__eq__",
+           [](const FeatureTuple &t1, const FeatureTuple &t2) {
+             return t1.first == t2.first && t1.second == t2.second;
+           })
+      .def("__len__", [](const FeatureTuple &t) { return 2; })
+      .def("__getitem__",
+           [](const FeatureTuple &t, int i) {
+             if (i == 0)
+               return t.first;
+             else if (i == 1)
+               return t.second;
+             else
+               throw py::index_error();
+           })
+      .def("__repr__", [](const FeatureTuple &t) {
+        return fmt::format("({}, {})", t.first, t.second);
+      });
+
   // Transaction Graph
   py::class_<TransactionGraph>(m, "TransactionGraph",
                                "Graph of feasible feature literal pairs.")
@@ -81,30 +104,7 @@ PYBIND11_MODULE(_cds_bindings, m) {
                         "A greedy search algorithm for computing a CDS")
       .def(py::init<const TransactionGraph &,
                     const std::vector<std::vector<feature_id>> &>())
-      .def("optimize", &GreedyCDS::optimize);
-
-  // FeatureTuple
-  py::class_<FeatureTuple>(m, "FeatureTuple")
-      .def(py::init<feature_id, feature_id>())
-      .def_readonly("first", &FeatureTuple::first)
-      .def_readonly("second", &FeatureTuple::second)
-      .def("__eq__",
-           [](const FeatureTuple &t1, const FeatureTuple &t2) {
-             return t1.first == t2.first && t1.second == t2.second;
-           })
-      .def("__len__", [](const FeatureTuple &t) { return 2; })
-      .def("__getitem__",
-           [](const FeatureTuple &t, int i) {
-             if (i == 0)
-               return t.first;
-             else if (i == 1)
-               return t.second;
-             else
-               throw py::index_error();
-           })
-      .def("__repr__", [](const FeatureTuple &t) {
-        return fmt::format("({}, {})", t.first, t.second);
-      });
+      .def("optimize", &GreedyCDS::optimize, py::arg("feature_pairs"));
 
   // gurobi exception
   static py::exception<GRBException> exc(m, "GRBException");

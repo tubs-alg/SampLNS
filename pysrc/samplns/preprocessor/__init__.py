@@ -1,7 +1,7 @@
 """
+This package provides a preprocessor for instances.
 ```
 from preprocessor import Preprocessor
-
 index_instance = Preprocessor().preprocess(instance)
 ```
 """

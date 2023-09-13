@@ -43,8 +43,7 @@ class ModularLns:
     """
     The Large Neighborhood Search algorithm.
     - It converts and simplifies the problem internally.
-    - There shouldn't be much need to adapt this algorithm. All important parameters are
-        in the neighborhood selection.
+    - There shouldn't be much need to adapt this algorithm. All important parameters are in the neighborhood selection.
     """
 
     def __init__(

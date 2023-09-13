@@ -20,12 +20,14 @@ _logger = logging.getLogger("SampLNS")
 
 def parse_dimacs(path: str, logger: logging.Logger = _logger) -> Instance:
     """
-    Parse an instance. An exception is thrown when the instance does not look as we
-    expect. In this case: tell us!
-
+    Parse an instance.
+    An exception is thrown when the instance does not look as we expect. In this case: tell us!
     Supports .tar.gz and .zip archives.
 
-    :param path: The path to the instance.
+    :return: The parsed instance.
+
+    :param path: The path to the instance
+    :param logger: The logger.
     """
     if path.endswith(".tar.gz"):
         with tarfile.open(path, "r:gz") as tar:
