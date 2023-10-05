@@ -34,3 +34,4 @@ PREPROCESSED_RESULTS = "./OUTPUT/04_preprocessed_data.json.zip"
 # Plots
 PLOT_WIDTH = 6.0
 PLOT_INITIAL_SAMPLE_COMPARISON = "./OUTPUT/05_initial_sample_comparison.pdf"
+PLOT_INITIAL_SAMPLE_COMPARISON_BOXPLOT = "./OUTPUT/05_initial_sample_comparison_boxplot.pdf"
