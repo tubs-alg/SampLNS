@@ -1,5 +1,7 @@
 # SampLNS: A Large Neighborhood Search to compute near minimal samples for feature models
 
+*Authors: [Dominik Krupke](https://github.com/d-krupke), Ahmad Moradi, Michael Perk, Phillip Keldenich, Gabriel Gehrke, Sebastian Krieter, Thomas Thüm, and Sándor P. Fekete*
+
 SampLNS is an LNS-based optimizer for pairwise configuration sampling that comes
 with a lower bound proving technique. On many of the instances we tested, it is
 able to compute smaller samples than YASA and frequently to even prove

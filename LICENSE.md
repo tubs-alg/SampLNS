@@ -23,6 +23,6 @@ accordingly, and you will be required to adhere to the terms specified in the
 official license agreement.
 
 For questions or concerns related to the licensing of the Code, please contact
-us at [krupke@ibr.cs.tu-bs.de]].
+us via krupke@ibr.cs.tu-bs.de.
 
 TU Braunschweig, IBR, Algorithm Lab 2023
