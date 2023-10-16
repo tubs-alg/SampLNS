@@ -1,5 +1,7 @@
 # SampLNS: A Large Neighborhood Search to compute near minimal samples for feature models
 
+*Authors: [Dominik Krupke](https://github.com/d-krupke), Ahmad Moradi, Michael Perk, Phillip Keldenich, Gabriel Gehrke, Sebastian Krieter, Thomas Thüm, and Sándor P. Fekete*
+
 SampLNS is an LNS-based optimizer for pairwise configuration sampling that comes
 with a lower bound proving technique. On many of the instances we tested, it is
 able to compute smaller samples than YASA and frequently to even prove
@@ -301,38 +303,6 @@ baseline.
 
 Please report any further issues you encounter.
 
-### `RuntimeError: Caught an unknown exception!`
-
-Probably, you have a bad Gurobi-license. We currently do not have a good way of
-checking that.
-
-### glibcxx problems:
-
-If you get an error such as
-
-```
-ImportError: /home/krupke/anaconda3/envs/mo310/bin/../lib/libstdc++.so.6: version `GLIBCXX_3.4.30' not found (required by /home/krupke/anaconda3/envs/mo310/lib/python3.10/site-packages/samplns/cds/_cds_bindings.cpython-310-x86_64-linux-gnu.so)
-```
-
-you are probably using conda (good!) but need to update glibcxx. Install the
-latest version by
-
-```sh
-conda install -c conda-forge libstdcxx-ng
-```
-
-### ABI problems: Undefined symbol `...__cxx1112basic_stringIcSt11char_...`
-
-This problem should be automatically fixed. Please open an issue if you still
-encounter it.
-
-See
-[https://docs.conan.io/1/howtos/manage_gcc_abi.html](https://docs.conan.io/1/howtos/manage_gcc_abi.html)
-for more details.
-
-## Changelog
-
-- 0.7.0: Adding zip support for instances.
-- 0.6.0: Newly packed version for GitHub. More stable build and stuff.
-- 0.4.0: Timeout for model building for UB. There seem to be some cases in which
-  this takes forever.
+The package will build C++-code during installation using skbuild-conan.
+If you encounter any problems during the installation, please check the
+[skbuild-conan documentation](https://github.com/d-krupke/skbuild-conan#common-problems).
