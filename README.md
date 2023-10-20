@@ -114,6 +114,11 @@ In parenthesis are the best values computed with extended time limits of up to t
 
 ## Installation
 
+> It is highly recommended to use [(ana)conda](https://www.anaconda.com/download). It not only makes the installation
+> of [Gurobi](https://www.gurobi.com/documentation/current/quickstart_windows/cs_anaconda_and_grb_conda_.html)
+> much easier, but also prevents your system from being polluted with
+> dependencies.
+
 This package requires a valid license of the commercial MIP-solver Gurobi. You
 can get a free license for academic purposes. These academic licenses are fairly
 easy to obtain, as explained in
@@ -127,7 +132,7 @@ easy to obtain, as explained in
 After you got your license, move into the folder with `setup.py` and run
 
 ```shell
-pip install .
+pip install -v .
 ```
 
 This command should automatically install all dependencies and build the
@@ -154,6 +159,9 @@ issue. Unfortunately, the performance of native code is bought with a more
 complex installation process, and it is difficult to make it work on all
 systems. Windows systems are especially difficult to support. We suggest using a
 Linux system.
+
+If there are problems with the C++-compilation, you can also check out
+[these common problems](https://github.com/d-krupke/skbuild-conan#common-problems).
 
 ## Usage
 
