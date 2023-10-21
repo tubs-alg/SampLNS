@@ -59,8 +59,9 @@ public:
 
 static_assert(std::is_signed<feature_id>());
 
-using feature_pair = FeatureTuple; // used for encoding pairs of literals. May represent
-                           // an edge in a literal graph or just "coordinates"
+using feature_pair =
+    FeatureTuple; // used for encoding pairs of literals. May represent
+                  // an edge in a literal graph or just "coordinates"
 using configuration = std::vector<feature_id>; // a list of feature id's can be
                                                // considered a configuration
 using clause = std::vector<feature_id>;        // a vector of literals can be

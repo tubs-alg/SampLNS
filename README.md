@@ -1,6 +1,8 @@
 # SampLNS: A Large Neighborhood Search to compute near minimal samples for feature models
 
-*Authors: [Dominik Krupke](https://github.com/d-krupke), Ahmad Moradi, Michael Perk, Phillip Keldenich, Gabriel Gehrke, Sebastian Krieter, Thomas Thüm, and Sándor P. Fekete*
+_Authors: [Dominik Krupke](https://github.com/d-krupke), Ahmad Moradi, Michael
+Perk, Phillip Keldenich, Gabriel Gehrke, Sebastian Krieter, Thomas Thüm, and
+Sándor P. Fekete_
 
 SampLNS is an LNS-based optimizer for pairwise configuration sampling that comes
 with a lower bound proving technique. On many of the instances we tested, it is
@@ -11,14 +13,14 @@ optimality. A paper describing the approach is currently in progress.
 > for production. Please contact us if you want to use it in production.
 
 The general idea of SampLNS is as follows: Theoretically, the problem of finding
-a minimal sample can be expressed as a SAT-problem. However, this is not feasible in
-practice as the formula is way too large. If we have an initial sample, we can
-use it to fix a part of the formula and then solve the remaining, much smaller,
-formula. If we repeat this process multiple times, we have a good chance of
-finding a minimal sample. This is essentially a Large Neighborhood Search (LNS).
-To break symmetries in the formula and supply the LNS with a lower bound, we
-have an additional optimizer that searches for a large set of mutually exclusive
-pairs of features.
+a minimal sample can be expressed as a SAT-problem. However, this is not
+feasible in practice as the formula is way too large. If we have an initial
+sample, we can use it to fix a part of the formula and then solve the remaining,
+much smaller, formula. If we repeat this process multiple times, we have a good
+chance of finding a minimal sample. This is essentially a Large Neighborhood
+Search (LNS). To break symmetries in the formula and supply the LNS with a lower
+bound, we have an additional optimizer that searches for a large set of mutually
+exclusive pairs of features.
 
 **What is a Large Neighborhood Search (LNS)?** It is a metaheuristic for
 optimization problems that works as follows: You start with a feasible solution.
@@ -59,63 +61,79 @@ compute one.
 
 ## Benchmark
 
-Sample sizes and lower bounds (mean over five runs) obtained by SampLNS with a time limit of 900 sec compared to the best sample found by any of the other algorithms (each run five times).
-Bold values are proved to be optimal, but the lower bound to prove optimality may have been obtained by a separate run.
-In parenthesis are the best values computed with extended time limits of up to three hours.
+Sample sizes and lower bounds (mean over five runs) obtained by SampLNS with a
+time limit of 900 sec compared to the best sample found by any of the other
+algorithms (each run five times). Bold values are proved to be optimal, but the
+lower bound to prove optimality may have been obtained by a separate run. In
+parenthesis are the best values computed with extended time limits of up to
+three hours.
 
-| Feature Model | $F$ | $C$ | Best previous alg. | SampLNS | Lower Bound | Savings by SampLNS |
-|--- | --- | --- | --- | --- | --- | ---|
-| calculate | 9 | 15 | 9 | **5** (**5**) | **5** (**5**) | 44% (44%) |
-| lcm | 9 | 16 | 8 | **6** (**6**) | **6** (**6**) | 25% (25%) |
-| email | 10 | 17 | **6** | **6** (**6**) | **6** (**6**) | 0% (0%) |
-| ChatClient | 14 | 20 | 8 | **7** (**7**) | **7** (**7**) | 12% (12%) |
-| toybox\_2006-10-3... | 16 | 13 | 10 | **8** (**8**) | **8** (**8**) | 20% (20%) |
-| car | 16 | 33 | 6 | **5** (**5**) | **5** (**5**) | 17% (17%) |
-| FeatureIDE | 19 | 27 | 11 | 8 (8) | 7 (7) | 27% (27%) |
-| FameDB | 22 | 40 | 9 | **8** (**8**) | **8** (**8**) | 11% (11%) |
-| APL | 23 | 35 | 9 | **7** (**7**) | **7** (**7**) | 22% (22%) |
-| SafeBali | 24 | 45 | **11** | **11** (**11**) | 10 (**11**) | 0% (0%) |
-| TightVNC | 28 | 39 | 12 | **8** (**8**) | **8** (**8**) | 33% (33%) |
-| APL-Model | 28 | 40 | 11 | **8** (**8**) | **8** (**8**) | 27% (27%) |
-| gpl | 38 | 99 | 19 | **16** (**16**) | **16** (**16**) | 16% (16%) |
-| SortingLine | 39 | 77 | 12 | **9** (**9**) | **9** (**9**) | 25% (25%) |
-| dell | 46 | 244 | 35 | **31** (**31**) | **31** (**31**) | 11% (11%) |
-| PPU | 52 | 109 | **12** | **12** (**12**) | **12** (**12**) | 0% (0%) |
-| berkeleyDB1 | 76 | 147 | 20 | **15** (**15**) | **15** (**15**) | 25% (25%) |
-| axTLS | 96 | 183 | 17 | 11 (11) | 10 (10) | 35% (35%) |
-| Violet | 101 | 203 | 23 | 17 (17) | 14 (16) | 26% (26%) |
-| berkeleyDB2 | 119 | 346 | 21 | **12** (**12**) | 11 (**12**) | 43% (43%) |
-| soletta\_2015-06-... | 129 | 192 | 30 | **24** (**24**) | **24** (**24**) | 20% (20%) |
-| BattleofTanks | 144 | 769 | 453 | 344 (314) | 256 (256) | 24% (31%) |
-| BankingSoftware | 176 | 280 | 40 | **29** (**29**) | 28 (**29**) | 28% (28%) |
-| fiasco\_2017-09-2... | 230 | 1181 | 240 | 226 (**225**) | 223 (**225**) | 5.8% (6.2%) |
-| fiasco\_2020-12-0... | 258 | 1542 | 214 | 198 (**196**) | 196 (**196**) | 7.5% (8.4%) |
-| uclibc\_2008-06-0... | 263 | 1699 | 506 | **505** (**505**) | **505** (**505**) | 0.2% (0.2%) |
-| uclibc\_2020-12-2... | 272 | 1670 | **365** | **365** (**365**) | **365** (**365**) | 0% (0%) |
-| E-Shop | 326 | 499 | 20 | 12 (12) | 8 (9) | 39% (40%) |
-| toybox\_2020-12-0... | 334 | 92 | 18 | 14 (13) | 7 (8) | 23% (28%) |
-| DMIE | 366 | 627 | 26 | **16** (**16**) | **16** (**16**) | 38% (38%) |
-| busybox\_2007-01-... | 540 | 429 | 36 | 22 (**21**) | 19 (**21**) | 39% (42%) |
-| fs\_2017-05-22 | 557 | 4992 | 398 | **396** (**396**) | **396** (**396**) | 0.5% (0.5%) |
-| WaterlooGenerated | 580 | 879 | 144 | **82** (**82**) | **82** (**82**) | 43% (43%) |
-| financial\_services | 771 | 7238 | 4396 | 4386 (4343) | 4132 (4336) | 0.22% (1.2%) |
-| busybox-1\_18\_0 | 854 | 1164 | 29 | 18 (17) | 12 (13) | 37% (41%) |
-| busybox-1\_29\_2 | 1018 | 997 | 37 | 25 (23) | 16 (20) | 33% (38%) |
-| busybox\_2020-12-... | 1050 | 996 | 34 | 23 (21) | 13 (19) | 32% (38%) |
-| am31\_sim | 1178 | 2747 | 63 | 41 (37) | 24 (26) | 34% (41%) |
-| EMBToolkit | 1179 | 5414 | 1886 | 1889 (**1872**) | 1593 (**1872**) | -0.16% (0.74%) |
-| atlas\_mips32\_4kc | 1229 | 2875 | 66 | 45 (38) | 29 (33) | 32% (42%) |
-| eCos-3-0\_i386pc | 1245 | 3723 | 66 | 55 (43) | 30 (33) | 17% (35%) |
-| integrator\_arm7 | 1272 | 2980 | 66 | 45 (39) | 30 (33) | 32% (41%) |
-| XSEngine | 1273 | 2942 | 63 | 44 (39) | 27 (32) | 30% (38%) |
-| aaed2000 | 1298 | 3036 | 89 | 68 (54) | 46 (51) | 23% (39%) |
-| FreeBSD-8\_0\_0 | 1397 | 15692 | 76 | 66 (47) | 27 (29) | 13% (38%) |
-| ea2468 | 1408 | 3319 | 67 | 46 (40) | 29 (32) | 32% (40%) |
+| Feature Model       | $F$  | $C$   | Best previous alg. | SampLNS           | Lower Bound       | Savings by SampLNS |
+| ------------------- | ---- | ----- | ------------------ | ----------------- | ----------------- | ------------------ |
+| calculate           | 9    | 15    | 9                  | **5** (**5**)     | **5** (**5**)     | 44% (44%)          |
+| lcm                 | 9    | 16    | 8                  | **6** (**6**)     | **6** (**6**)     | 25% (25%)          |
+| email               | 10   | 17    | **6**              | **6** (**6**)     | **6** (**6**)     | 0% (0%)            |
+| ChatClient          | 14   | 20    | 8                  | **7** (**7**)     | **7** (**7**)     | 12% (12%)          |
+| toybox_2006-10-3... | 16   | 13    | 10                 | **8** (**8**)     | **8** (**8**)     | 20% (20%)          |
+| car                 | 16   | 33    | 6                  | **5** (**5**)     | **5** (**5**)     | 17% (17%)          |
+| FeatureIDE          | 19   | 27    | 11                 | 8 (8)             | 7 (7)             | 27% (27%)          |
+| FameDB              | 22   | 40    | 9                  | **8** (**8**)     | **8** (**8**)     | 11% (11%)          |
+| APL                 | 23   | 35    | 9                  | **7** (**7**)     | **7** (**7**)     | 22% (22%)          |
+| SafeBali            | 24   | 45    | **11**             | **11** (**11**)   | 10 (**11**)       | 0% (0%)            |
+| TightVNC            | 28   | 39    | 12                 | **8** (**8**)     | **8** (**8**)     | 33% (33%)          |
+| APL-Model           | 28   | 40    | 11                 | **8** (**8**)     | **8** (**8**)     | 27% (27%)          |
+| gpl                 | 38   | 99    | 19                 | **16** (**16**)   | **16** (**16**)   | 16% (16%)          |
+| SortingLine         | 39   | 77    | 12                 | **9** (**9**)     | **9** (**9**)     | 25% (25%)          |
+| dell                | 46   | 244   | 35                 | **31** (**31**)   | **31** (**31**)   | 11% (11%)          |
+| PPU                 | 52   | 109   | **12**             | **12** (**12**)   | **12** (**12**)   | 0% (0%)            |
+| berkeleyDB1         | 76   | 147   | 20                 | **15** (**15**)   | **15** (**15**)   | 25% (25%)          |
+| axTLS               | 96   | 183   | 17                 | 11 (11)           | 10 (10)           | 35% (35%)          |
+| Violet              | 101  | 203   | 23                 | 17 (17)           | 14 (16)           | 26% (26%)          |
+| berkeleyDB2         | 119  | 346   | 21                 | **12** (**12**)   | 11 (**12**)       | 43% (43%)          |
+| soletta_2015-06-... | 129  | 192   | 30                 | **24** (**24**)   | **24** (**24**)   | 20% (20%)          |
+| BattleofTanks       | 144  | 769   | 453                | 344 (314)         | 256 (256)         | 24% (31%)          |
+| BankingSoftware     | 176  | 280   | 40                 | **29** (**29**)   | 28 (**29**)       | 28% (28%)          |
+| fiasco_2017-09-2... | 230  | 1181  | 240                | 226 (**225**)     | 223 (**225**)     | 5.8% (6.2%)        |
+| fiasco_2020-12-0... | 258  | 1542  | 214                | 198 (**196**)     | 196 (**196**)     | 7.5% (8.4%)        |
+| uclibc_2008-06-0... | 263  | 1699  | 506                | **505** (**505**) | **505** (**505**) | 0.2% (0.2%)        |
+| uclibc_2020-12-2... | 272  | 1670  | **365**            | **365** (**365**) | **365** (**365**) | 0% (0%)            |
+| E-Shop              | 326  | 499   | 20                 | 12 (12)           | 8 (9)             | 39% (40%)          |
+| toybox_2020-12-0... | 334  | 92    | 18                 | 14 (13)           | 7 (8)             | 23% (28%)          |
+| DMIE                | 366  | 627   | 26                 | **16** (**16**)   | **16** (**16**)   | 38% (38%)          |
+| busybox_2007-01-... | 540  | 429   | 36                 | 22 (**21**)       | 19 (**21**)       | 39% (42%)          |
+| fs_2017-05-22       | 557  | 4992  | 398                | **396** (**396**) | **396** (**396**) | 0.5% (0.5%)        |
+| WaterlooGenerated   | 580  | 879   | 144                | **82** (**82**)   | **82** (**82**)   | 43% (43%)          |
+| financial_services  | 771  | 7238  | 4396               | 4386 (4343)       | 4132 (4336)       | 0.22% (1.2%)       |
+| busybox-1_18_0      | 854  | 1164  | 29                 | 18 (17)           | 12 (13)           | 37% (41%)          |
+| busybox-1_29_2      | 1018 | 997   | 37                 | 25 (23)           | 16 (20)           | 33% (38%)          |
+| busybox_2020-12-... | 1050 | 996   | 34                 | 23 (21)           | 13 (19)           | 32% (38%)          |
+| am31_sim            | 1178 | 2747  | 63                 | 41 (37)           | 24 (26)           | 34% (41%)          |
+| EMBToolkit          | 1179 | 5414  | 1886               | 1889 (**1872**)   | 1593 (**1872**)   | -0.16% (0.74%)     |
+| atlas_mips32_4kc    | 1229 | 2875  | 66                 | 45 (38)           | 29 (33)           | 32% (42%)          |
+| eCos-3-0_i386pc     | 1245 | 3723  | 66                 | 55 (43)           | 30 (33)           | 17% (35%)          |
+| integrator_arm7     | 1272 | 2980  | 66                 | 45 (39)           | 30 (33)           | 32% (41%)          |
+| XSEngine            | 1273 | 2942  | 63                 | 44 (39)           | 27 (32)           | 30% (38%)          |
+| aaed2000            | 1298 | 3036  | 89                 | 68 (54)           | 46 (51)           | 23% (39%)          |
+| FreeBSD-8_0_0       | 1397 | 15692 | 76                 | 66 (47)           | 27 (29)           | 13% (38%)          |
+| ea2468              | 1408 | 3319  | 67                 | 46 (40)           | 29 (32)           | 32% (40%)          |
 
 ## Installation
 
-> It is highly recommended to use [(ana)conda](https://www.anaconda.com/download). It not only makes the installation
-> of [Gurobi](https://www.gurobi.com/documentation/current/quickstart_windows/cs_anaconda_and_grb_conda_.html)
+SampLNS is a Python-library that comes with a CLI. It can be easily installed
+with the Python package manager `pip`, which also handles most of the
+dependencies (except for a C++-compiler and a Java runtime environment). All C++
+and Java dependencies are compiled automatically during installation for most
+systems. If you already have an activated Gurobi-license, the installation
+should be done with a simple `pip install .` (we consider a simple installation
+of scientific projects important to allow verifying reproducibility). We
+recommend a Linux system, but it should also work on Windows and Mac.
+After installation, we recommend to check out the examples in `examples/` to get
+started.
+
+> It is highly recommended to use
+> [(ana)conda](https://www.anaconda.com/download). It not only makes the
+> installation of
+> [Gurobi](https://www.gurobi.com/documentation/current/quickstart_windows/cs_anaconda_and_grb_conda_.html)
 > much easier, but also prevents your system from being polluted with
 > dependencies.
 
@@ -366,6 +384,6 @@ baseline.
 
 Please report any further issues you encounter.
 
-The package will build C++-code during installation using skbuild-conan.
-If you encounter any problems during the installation, please check the
+The package will build C++-code during installation using skbuild-conan. If you
+encounter any problems during the installation, please check the
 [skbuild-conan documentation](https://github.com/d-krupke/skbuild-conan#common-problems).
