@@ -245,6 +245,8 @@ class ModularLns:
                 lb, ub, not_skipped = self.optimize_neighborhood(
                     nbrhd, iter_timer.remaining(), iter_timer
                 )
+                self.add_lower_bound(lb)
+
                 self.log.info("Optimized neighborhood, lb=%d, ub=%d.", lb, ub)
                 iter_timer.lap("neighborhood_optimized")
 
