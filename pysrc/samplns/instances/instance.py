@@ -16,10 +16,10 @@ class Instance:
     """
 
     def __init__(
-            self,
-            features: typing.List[FeatureLabel],
-            structure: typing.Optional[FeatureNode],
-            rules: typing.List[SatNode],
+        self,
+        features: typing.List[FeatureLabel],
+        structure: typing.Optional[FeatureNode],
+        rules: typing.List[SatNode],
     ):
         self.instance_name = "UNNAMED"
         self.features: typing.List[FeatureLabel] = features
@@ -33,10 +33,10 @@ class Instance:
             return f"Instance[UNNAMED]<{len(self.features)} features, {len(self.rules)} rules>"
 
     def is_fully_defined(
-            self,
-            conf: typing.Dict[FeatureLabel, bool],
-            exact: bool = False,
-            verbose: bool = False,
+        self,
+        conf: typing.Dict[FeatureLabel, bool],
+        exact: bool = False,
+        verbose: bool = False,
     ) -> bool:
         """
         Checks if a configuration is fully defined, i.e., exactly defines the concrete
@@ -50,7 +50,7 @@ class Instance:
         return not exact or len(conf.keys()) == len(self.features)
 
     def is_feasible(
-            self, conf: typing.Dict[FeatureLabel, bool], verbose: bool = False
+        self, conf: typing.Dict[FeatureLabel, bool], verbose: bool = False
     ) -> bool:
         """
         Checks if a configuration is feasible, i.e., satisfies all rules and matches the structure.

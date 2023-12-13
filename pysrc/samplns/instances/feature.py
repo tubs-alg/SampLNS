@@ -26,18 +26,18 @@ class FeatureLiteral:
 
     def __eq__(self, other):
         return (
-                isinstance(other, FeatureLiteral)
-                and self.var_name == other.var_name
-                and self.negated == other.negated
+            isinstance(other, FeatureLiteral)
+            and self.var_name == other.var_name
+            and self.negated == other.negated
         )
 
     def __hash__(self):
         return hash((self.var_name, self.negated))
 
     def sub(
-            self,
-            direct: typing.Dict[FeatureLabel, FeatureLabel],
-            inverse: typing.Dict[FeatureLabel, FeatureLabel],
+        self,
+        direct: typing.Dict[FeatureLabel, FeatureLabel],
+        inverse: typing.Dict[FeatureLabel, FeatureLabel],
     ):
         if self.var_name in direct:
             return FeatureLiteral(direct[self.var_name], self.negated)
@@ -71,7 +71,7 @@ class FeatureNode(abc.ABC):
     __counter = 0
 
     def __init__(
-            self, feature_literal: FeatureLiteral, mandatory: bool = False
+        self, feature_literal: FeatureLiteral, mandatory: bool = False
     ) -> None:
         self.feature_literal = feature_literal
         self.mandatory = mandatory
@@ -98,9 +98,9 @@ class FeatureNode(abc.ABC):
 
     @abc.abstractmethod
     def substitute(
-            self,
-            direct: typing.Dict[FeatureLabel, FeatureLabel],
-            inverse: typing.Dict[FeatureLabel, FeatureLabel],
+        self,
+        direct: typing.Dict[FeatureLabel, FeatureLabel],
+        inverse: typing.Dict[FeatureLabel, FeatureLabel],
     ) -> "FeatureNode":
         """
         Return a feature tree that substituted all entries in
@@ -162,9 +162,9 @@ class ConcreteFeature(FeatureNode):
         yield self.feature_literal.var_name
 
     def substitute(
-            self,
-            direct: typing.Dict[FeatureLabel, FeatureLabel],
-            inverse: typing.Dict[FeatureLabel, FeatureLabel],
+        self,
+        direct: typing.Dict[FeatureLabel, FeatureLabel],
+        inverse: typing.Dict[FeatureLabel, FeatureLabel],
     ) -> FeatureNode:
         x = self.feature_literal
         if x.var_name in direct:
@@ -199,10 +199,10 @@ class ConcreteFeature(FeatureNode):
 
 class CompositeFeature(FeatureNode, abc.ABC):
     def __init__(
-            self,
-            feature_literal: FeatureLiteral,
-            elements: typing.List[FeatureNode],
-            mandatory: bool,
+        self,
+        feature_literal: FeatureLiteral,
+        elements: typing.List[FeatureNode],
+        mandatory: bool,
     ) -> None:
         super().__init__(feature_literal, mandatory)
         self.elements = elements
@@ -248,19 +248,19 @@ class AndFeature(CompositeFeature):
     """
 
     def __init__(
-            self,
-            feature_literal: FeatureLiteral,
-            elements: typing.List[FeatureNode],
-            mandatory: bool,
-            logger: logging.Logger,
+        self,
+        feature_literal: FeatureLiteral,
+        elements: typing.List[FeatureNode],
+        mandatory: bool,
+        logger: logging.Logger,
     ) -> None:
         super().__init__(feature_literal, elements, mandatory)
         self.logger = logger
 
     def substitute(
-            self,
-            direct: typing.Dict[FeatureLabel, FeatureLabel],
-            inverse: typing.Dict[FeatureLabel, FeatureLabel],
+        self,
+        direct: typing.Dict[FeatureLabel, FeatureLabel],
+        inverse: typing.Dict[FeatureLabel, FeatureLabel],
     ) -> FeatureNode:
         elements = [e.substitute(direct, inverse) for e in self.elements]
         x = self.feature_literal.sub(direct, inverse)
@@ -303,11 +303,11 @@ class OrFeature(CompositeFeature):
     """
 
     def __init__(
-            self,
-            feature_literal: FeatureLiteral,
-            elements: typing.List[FeatureNode],
-            mandatory: bool,
-            logger: logging.Logger,
+        self,
+        feature_literal: FeatureLiteral,
+        elements: typing.List[FeatureNode],
+        mandatory: bool,
+        logger: logging.Logger,
     ) -> None:
         super().__init__(feature_literal, elements, mandatory)
         self.logger = logger
@@ -318,9 +318,9 @@ class OrFeature(CompositeFeature):
         assert not self.mandatory_elements()
 
     def substitute(
-            self,
-            direct: typing.Dict[FeatureLabel, FeatureLabel],
-            inverse: typing.Dict[FeatureLabel, FeatureLabel],
+        self,
+        direct: typing.Dict[FeatureLabel, FeatureLabel],
+        inverse: typing.Dict[FeatureLabel, FeatureLabel],
     ) -> FeatureNode:
         elements = [e.substitute(direct, inverse) for e in self.elements]
         x = self.feature_literal.sub(direct, inverse)
@@ -361,11 +361,11 @@ class AltFeature(CompositeFeature):
     """
 
     def __init__(
-            self,
-            feature_literal: FeatureLiteral,
-            elements: typing.List[FeatureNode],
-            mandatory: bool,
-            logger: logging.Logger,
+        self,
+        feature_literal: FeatureLiteral,
+        elements: typing.List[FeatureNode],
+        mandatory: bool,
+        logger: logging.Logger,
     ) -> None:
         super().__init__(feature_literal, elements, mandatory)
         self.logger = logger
@@ -376,9 +376,9 @@ class AltFeature(CompositeFeature):
         assert not self.mandatory_elements()
 
     def substitute(
-            self,
-            direct: typing.Dict[FeatureLabel, FeatureLabel],
-            inverse: typing.Dict[FeatureLabel, FeatureLabel],
+        self,
+        direct: typing.Dict[FeatureLabel, FeatureLabel],
+        inverse: typing.Dict[FeatureLabel, FeatureLabel],
     ) -> FeatureNode:
         elements = [e.substitute(direct, inverse) for e in self.elements]
         x = self.feature_literal.sub(direct, inverse)

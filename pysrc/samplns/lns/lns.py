@@ -187,7 +187,6 @@ class ModularLns:
             timer.lap("model_optimized")
 
             # update solution
-            self.add_lower_bound(model.get_lb())
             if model.is_feasible():  # can a new solution be constructed?
                 samples = list(model.get_solution())
                 assert all(
@@ -245,6 +244,8 @@ class ModularLns:
                 lb, ub, not_skipped = self.optimize_neighborhood(
                     nbrhd, iter_timer.remaining(), iter_timer
                 )
+                self.add_lower_bound(lb)
+
                 self.log.info("Optimized neighborhood, lb=%d, ub=%d.", lb, ub)
                 iter_timer.lap("neighborhood_optimized")
 
