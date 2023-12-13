@@ -1,5 +1,7 @@
 import io
+
 from samplns.instances.parser import parse_source
+
 
 def test_hello_world_with_descriptions():
     xml_string = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -50,6 +52,7 @@ def test_hello_world_with_descriptions():
 """
     xml_file = io.StringIO(xml_string)
     instance = parse_source(xml_file, "hello_world")
+
 
 def test_sandwich_with_attributes():
     xml_string = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>

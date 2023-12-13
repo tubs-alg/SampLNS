@@ -126,8 +126,8 @@ and Java dependencies are compiled automatically during installation for most
 systems. If you already have an activated Gurobi-license, the installation
 should be done with a simple `pip install .` (we consider a simple installation
 of scientific projects important to allow verifying reproducibility). We
-recommend a Linux system, but it should also work on Windows and Mac.
-After installation, we recommend to check out the examples in `examples/` to get
+recommend a Linux system, but it should also work on Windows and Mac. After
+installation, we recommend to check out the examples in `examples/` to get
 started.
 
 > It is highly recommended to use
