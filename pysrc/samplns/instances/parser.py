@@ -103,7 +103,11 @@ def parse_feature(feature_node, logger: logging.Logger):
         return elements[0]
     elif feature_node.tag == "description":
         return None
-    error_msg = f"Don't know tag {feature_node.tag}"
+    elif feature_node.tag == "graphics":
+        return None
+    elif feature_node.tag == "attribute":
+        return None
+    error_msg = f"Don't know tag '{feature_node.tag}'"
     raise ValueError(error_msg)
 
 
@@ -138,10 +142,15 @@ def parse_rule(rule_node, logger: logging.Logger):
 
 def parse_rules(xmltree: ET, logger: logging.Logger) -> typing.List[SatNode]:
     rules_node = xmltree.find("constraints")
+    if rules_node is None:
+        logger.warning("No constraints found in the instance.")
+        return []
     rules = []
     for rule in rules_node.findall("rule"):
-        children = tuple(rule)
-        assert len(children) == 1
+        children = tuple(
+            r for r in rule if r.tag in ("conj", "disj", "not", "var", "imp", "eq")
+        )
+        assert len(children) == 1, "Expecting exactly one logical expression per rule."
         r = parse_rule(children[0], logger=logger)
         rules.append(r)
     return rules
