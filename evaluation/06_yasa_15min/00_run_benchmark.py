@@ -236,6 +236,7 @@ def run_yasa(instance_name: str, output: str, timeout: int) -> None:
 if __name__ == "__main__":
     Path("./results").mkdir(exist_ok=True)
     for instance in INSTANCES:
+        Path(f"./results/{instance}").mkdir(exist_ok=True)
         for rep in range(0, 5):
-            run_yasa.distribute(instance, f"./results/{instance}_{rep}.csv", 900)
+            run_yasa.distribute(instance, f"./results/{instance}/sample_{rep}.csv", 900)
 
