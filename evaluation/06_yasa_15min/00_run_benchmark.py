@@ -208,6 +208,9 @@ def run_yasa(instance_name: str, output: str, timeout: int) -> None:
 
     java -jar formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar --command de.featjar.formula.analysis.cli.TWiseCommand --input model.xml --output sample.csv --t 2 --i -1 --timeout 100
     """
+    if Path(output).exists():
+        print(f"Skipping {instance_name} because {output} exists")
+        return
     instance_path = prepare_instance(instance_name)
     runner = subprocess.run(
         [
