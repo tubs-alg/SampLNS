@@ -157,4 +157,4 @@ if __name__ == "__main__":
             if result_path.exists():
                 print(f"Skipping {instance} because {result_path} exists")
                 continue
-            run_yasa.distribute(instance, str(result_path), 900, seed)
+            run_yasa.distribute(instance, str(result_path), 900, rep)
