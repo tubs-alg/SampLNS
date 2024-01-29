@@ -108,7 +108,7 @@ def prepare_instance(instance_name: str) -> Path:
 
 
 @slurminade.slurmify
-def run_yasa(instance_name: str, output: str, timeout: int) -> None:
+def run_yasa(instance_name: str, output: str, timeout: int, seed: int) -> None:
     """
     Run YASA on an instance and return the time used.
 
@@ -135,6 +135,8 @@ def run_yasa(instance_name: str, output: str, timeout: int) -> None:
             "-1",
             "--timeout",
             str(timeout),
+            "--seed",
+            str(see)
         ],
         capture_output=False,
         check=True,
@@ -148,11 +150,11 @@ if __name__ == "__main__":
             "Please put formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar in this folder."
         )
     Path("./results").mkdir(exist_ok=True)
-    for instance in INSTANCES:
-        Path(f"./results/{instance}").mkdir(exist_ok=True)
-        for rep in range(0, 5):
+    for rep in range(0, 5):
+        for instance in INSTANCES:
+            Path(f"./results/{instance}").mkdir(exist_ok=True)
             result_path = Path(f"./results/{instance}/sample_{rep}.csv")
             if result_path.exists():
                 print(f"Skipping {instance} because {result_path} exists")
                 continue
-            run_yasa.distribute(instance, str(result_path), 900)
+            run_yasa.distribute(instance, str(result_path), 900, seed)
