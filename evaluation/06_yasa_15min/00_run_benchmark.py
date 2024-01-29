@@ -136,7 +136,7 @@ def run_yasa(instance_name: str, output: str, timeout: int, seed: int) -> None:
             "--timeout",
             str(timeout),
             "--seed",
-            str(see)
+            str(seed)
         ],
         capture_output=False,
         check=True,
