@@ -1,47 +1,47 @@
-,instance_name,best_lower_bound,best_upper_bound
-0,APL,7,7
-1,APL-Model,8,8
-2,BankingSoftware,29,29
-3,BattleofTanks,256,314
-4,ChatClient,7,7
-5,DMIE,16,16
-6,E-Shop,9,12
-7,EMBToolkit,1872,1872
-8,FameDB,8,8
-9,FeatureIDE,7,8
-10,FreeBSD-8_0_0,29,47
-11,PPU,12,12
-12,SafeBali,11,11
-13,SortingLine,9,9
-14,TightVNC,8,8
-15,Violet,16,17
-16,WaterlooGenerated,82,82
-17,XSEngine,32,39
-18,aaed2000,51,54
-19,am31_sim,26,37
-20,atlas_mips32_4kc,33,38
-21,axTLS,10,11
-22,berkeleyDB1,15,15
-23,berkeleyDB2,12,12
-24,busybox-1_18_0,13,17
-25,busybox-1_29_2,20,23
-26,busybox_2007-01-24_09-14-09,21,21
-27,busybox_2020-12-16_21-53-05,19,21
-28,calculate,5,5
-29,car,5,5
-30,dell,31,31
-31,eCos-3-0_i386pc,33,43
-32,ea2468,32,40
-33,email,6,6
-34,fiasco_2017-09-26_11-30-56,225,225
-35,fiasco_2020-12-01_14-09-14,196,196
-36,financial_services,4336,4343
-37,fs_2017-05-22,396,396
-38,gpl,16,16
-39,integrator_arm7,33,39
-40,lcm,6,6
-41,soletta_2015-06-26_18-38-56,24,24
-42,toybox_2006-10-31_23-30-06,8,8
-43,toybox_2020-12-06_00-02-46,8,13
-44,uclibc_2008-06-05_13-46-47,505,505
-45,uclibc_2020-12-24_11-54-53,365,365
+instance_name,best_lower_bound,best_upper_bound,note
+APL,7,7,"60min runtime, 120s iterations"
+APL-Model,8,8,"60min runtime, 120s iterations"
+BankingSoftware,29,29,"60min runtime, 120s iterations"
+BattleofTanks,256,307,"60min runtime, 120s iterations"
+ChatClient,7,7,"60min runtime, 120s iterations"
+DMIE,16,16,"60min runtime, 120s iterations"
+E-Shop,9,12,"60min runtime, 120s iterations"
+EMBToolkit,1872,1872,"60min runtime, 120s iterations"
+FameDB,8,8,"60min runtime, 120s iterations"
+FeatureIDE,7,8,"60min runtime, 120s iterations"
+FreeBSD-8_0_0,29,45,"60min runtime, 120s iterations"
+PPU,12,12,"60min runtime, 120s iterations"
+SafeBali,11,11,"60min runtime, 120s iterations"
+SortingLine,9,9,"60min runtime, 120s iterations"
+TightVNC,8,8,"60min runtime, 120s iterations"
+Violet,16,17,"60min runtime, 120s iterations"
+WaterlooGenerated,82,82,"60min runtime, 120s iterations"
+XSEngine,32,38,"60min runtime, 120s iterations"
+aaed2000,51,53,"60min runtime, 120s iterations"
+am31_sim,26,36,"60min runtime, 120s iterations"
+atlas_mips32_4kc,33,38,"60min runtime, 120s iterations"
+axTLS,10,11,"60min runtime, 120s iterations"
+berkeleyDB1,15,15,"60min runtime, 120s iterations"
+berkeleyDB2,12,12,"60min runtime, 120s iterations"
+busybox-1_18_0,13,17,"60min runtime, 120s iterations"
+busybox-1_29_2,20,22,"60min runtime, 120s iterations"
+busybox_2007-01-24_09-14-09,21,21,"60min runtime, 120s iterations"
+busybox_2020-12-16_21-53-05,19,21,"60min runtime, 120s iterations"
+calculate,5,5,"60min runtime, 120s iterations"
+car,5,5,"60min runtime, 120s iterations"
+dell,31,31,"60min runtime, 120s iterations"
+eCos-3-0_i386pc,33,42,"60min runtime, 120s iterations"
+ea2468,32,39,"60min runtime, 120s iterations"
+email,6,6,"60min runtime, 120s iterations"
+fiasco_2017-09-26_11-30-56,225,225,"60min runtime, 120s iterations"
+fiasco_2020-12-01_14-09-14,196,196,"60min runtime, 120s iterations"
+financial_services,4336,4340,"60min runtime, 120s iterations"
+fs_2017-05-22,396,396,"60min runtime, 120s iterations"
+gpl,16,16,"60min runtime, 120s iterations"
+integrator_arm7,33,38,"60min runtime, 120s iterations"
+lcm,6,6,"60min runtime, 120s iterations"
+soletta_2015-06-26_18-38-56,24,24,"60min runtime, 120s iterations"
+toybox_2006-10-31_23-30-06,8,8,"60min runtime, 120s iterations"
+toybox_2020-12-06_00-02-46,8,13,"60min runtime, 120s iterations"
+uclibc_2008-06-05_13-46-47,505,505,"60min runtime, 120s iterations"
+uclibc_2020-12-24_11-54-53,365,365,"60min runtime, 120s iterations"
