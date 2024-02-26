@@ -6,6 +6,5 @@
 INSTANCE_ARCHIVE = "../benchmark_models.zip"
 BASELINE_ARCHIVES = [
     "./EXTERNAL_INPUT/baseline.zip",
-    "./EXTERNAL_INPUT/900_seconds_5_it.zip",
 ]
 YASA_15MIN_DATA = "../06_yasa_15min/simplified_data.json.xz"
