@@ -8,7 +8,7 @@ ITERATION_TIME_LIMIT = 60.0
 CDS_ITERATION_TIME_LIMIT = 60.0
 TIME_LIMIT = 15 * 60
 
-BASE = "900_seconds_5_it"
+BASE = "baseline"
 RESULT_FOLDER = f"DATA/samplns_results/{BASE}_{TIME_LIMIT}"
 INPUT_SAMPLE_ARCHIVE = f"../00_baseline/EXTERNAL_INPUT/{BASE}.zip"
 INSTANCE_ARCHIVE = "../benchmark_models.zip"

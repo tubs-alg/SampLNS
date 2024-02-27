@@ -26,6 +26,7 @@ from samplns.utils import Timer
 slurminade.update_default_configuration(
     partition="alg",
     constraint="alggen03",
+    exclusive=True,
     mail_user="krupke@ibr.cs.tu-bs.de",
     mail_type="FAIL",
 )
