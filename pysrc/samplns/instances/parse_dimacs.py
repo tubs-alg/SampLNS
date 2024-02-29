@@ -53,7 +53,9 @@ def parse_dimacs(path: str, logger: logging.Logger = _logger) -> Instance:
 
 
 def parse_source(source_file, instance_name, logger: logging.Logger = _logger):
-    source = source_file.read().decode("utf-8")
+    source = source_file.read()
+    if isinstance(source, bytes):
+        source = source.decode("utf-8")
     features = parse_features(source, logger=logger)
     rules = parse_rules(source, features=features, logger=logger)
     logger.info(

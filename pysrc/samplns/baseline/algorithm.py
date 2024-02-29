@@ -5,9 +5,9 @@ import subprocess
 import sys
 import tempfile
 from glob import glob
-
+from typing import Optional
 import pandas as pd
-
+import random
 _logger = logging.getLogger("SampLNS")
 
 
@@ -30,13 +30,19 @@ class BaselineAlgorithm:
     }
 
     def __init__(
-        self, file_path: str, algorithm="YASA", logger: logging.Logger = _logger
+        self, file_path: str, algorithm="YASA", logger: logging.Logger = _logger, seed: Optional[int] = None
     ):
         self._configuration = self.DEFAULT_CONFIGURATION.copy()
+        if seed is not None:
+            self._configuration["seed"] = seed
+        else:
+            self._configuration["seed"] = random.randint(0, 2 ** 31 - 1)
+        
         self._configuration_dir = "config"
         self._model_path = file_path
         self._jars_dir = os.path.join(sys.prefix, "deps/samplns")
         self._log = logger.getChild("Baseline")
+        self._log.info("Using seed %d for FeatureIDE", self._configuration["seed"])
 
         if algorithm == "YASA":
             self._configuration["algorithm"] = "YA"
