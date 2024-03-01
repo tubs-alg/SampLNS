@@ -272,3 +272,5 @@ if __name__ == "__main__":
     for rep in range(0, 5):
         for instance in INSTANCES:
             run_distributed.distribute(instance, rep)
+    slurminade.join()
+    pack_after_finish.distribute()
