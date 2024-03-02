@@ -63,7 +63,7 @@ import slurminade
 # ------------------------------------------------
 slurminade.update_default_configuration(
     partition="alg",
-    constraint="alggen03",
+    constraint="alggen05",
     mail_user="krupke@ibr.cs.tu-bs.de",
     exclusive=True,
     mail_type="FAIL",
