@@ -70,6 +70,7 @@ def parse_solution_overview(path, subpath=None):
         t["ArchivePath"] = path
         return t
 
+
 def parse_sample_file(f):
     t = pd.read_csv(f, sep=";", index_col="Configuration")
     samples = []
@@ -79,6 +80,7 @@ def parse_sample_file(f):
 
     t.apply(f, axis=1)
     return samples
+
 
 def parse_sample(archive_path, sample_path):
     with ZipFile(archive_path) as archive, archive.open(sample_path) as f:

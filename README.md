@@ -1,121 +1,125 @@
-# SampLNS: A Large Neighborhood Search to compute near minimal samples for feature models
+# SampLNS: A Large Neighborhood Search for Pairwise Interaction Sampling
 
-_Authors: [Dominik Krupke](https://github.com/d-krupke), Ahmad Moradi, Michael
-Perk, Phillip Keldenich, Gabriel Gehrke, Sebastian Krieter, Thomas Thüm, and
-Sándor P. Fekete_
+This is the implementation and its evaluation of the paper _How Low Can We Go?
+Minimizing Interaction Samples for Configurable Systems_ by
+[Dominik Krupke](https://github.com/d-krupke), Ahmad Moradi, Michael Perk,
+Phillip Keldenich, Gabriel Gehrke, Sebastian Krieter, Thomas Thüm, and Sándor P.
+Fekete
+([ACM Transactions on Software Engineering and Methodology 2024](https://dl.acm.org/doi/10.1145/3712193)).
+It has been developed by [Dominik Krupke](https://github.com/d-krupke), Michael
+Perk, Phillip Keldenich, and Gabriel Gehrke, and Sebastian Krieter. For any
+questions, please open an issue or contact [Dominik Krupke](https://github.com/d-krupke).
 
-SampLNS is an LNS-based optimizer for pairwise configuration sampling that comes
-with a lower bound proving technique. On many of the instances we tested, it is
-able to compute smaller samples than YASA and frequently to even prove
-optimality. A paper describing the approach is currently in progress.
+> **Abstract:** Modern software systems are typically configurable, a
+> fundamental prerequisite for wide applicability and reusability. This
+> flexibility poses an extraordinary challenge for quality assurance, as the
+> enormous number of possible configurations makes it impractical to test each
+> of them separately. This is where _t-wise interaction sampling_ can be used to
+> systematically cover the configuration space and detect unknown feature
+> interactions. Over the last two decades, numerous algorithms for computing
+> small interaction samples have been studied, providing improvements for a
+> range of heuristic results; nevertheless, it has remained unclear how much
+> these results can still be improved.
+>
+> We present a significant breakthrough: a fundamental framework, based on the
+> mathematical principle of _duality_, for combining near-optimal solutions with
+> provable lower bounds on the required sample size. This implies that we no
+> longer need to work on heuristics with marginal or no improvement, but can
+> certify the solution quality by establishing a limit on the remaining gap; in
+> many cases, we can even prove optimality of achieved solutions. This
+> theoretical contribution also provides extensive practical improvements: Our
+> algorithm SampLNS was tested on **47** small and medium-sized configurable
+> systems from the existing literature. SampLNS can reliably find samples of
+> smaller size than previous methods in **85%** of the cases; moreover, we can
+> achieve and prove optimality of solutions for **63%** of all instances. This
+> makes it possible to avoid cumbersome efforts of minimizing samples by
+> researchers as well as practitioners, and substantially save testing resources
+> for most configurable systems.
 
-> :warning: The implementation is for research purposes only and not yet ready
-> for production. Please contact us if you want to use it in production.
+## Comparison of SampLNS with Algorithms from the Literature
 
-The general idea of SampLNS is as follows: Theoretically, the problem of finding
-a minimal sample can be expressed as a SAT-problem. However, this is not
-feasible in practice as the formula is way too large. If we have an initial
-sample, we can use it to fix a part of the formula and then solve the remaining,
-much smaller, formula. If we repeat this process multiple times, we have a good
-chance of finding a minimal sample. This is essentially a Large Neighborhood
-Search (LNS). To break symmetries in the formula and supply the LNS with a lower
-bound, we have an additional optimizer that searches for a large set of mutually
-exclusive pairs of features.
+|                                                                                                                                                                                                                                                                                                                         ![Comparison Plot](./.assets/comparison_plot.png)                                                                                                                                                                                                                                                                                                                          |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| Differences of the sample sizes of various sampling algorithms (with a 900-second time limit) to the best lower bound computed by SampLNS. Not all algorithms were able to compute a feasible sample within the time limit, thus, the number of successfully solved models is added in parentheses. We can see that SampLNS never timed out, and 75% of the samples are at most 10% above the lower bound. More than 55% of the samples match the lower bound and, thus, are minimal. The next best algorithm is YASA with m=10 (resp. the 15-minute variant) with a median difference of 46% (resp. 42%). Incling yields the largest samples, with a median of twice the size of the lower bound. |
 
-**What is a Large Neighborhood Search (LNS)?** It is a metaheuristic for
-optimization problems that works as follows: You start with a feasible solution.
-Then, you iteratively destroy a part if the solution and try to repair it in a
-way that improves the solution. We are using Mixed Integer Programming and a
-SAT-based approach to do so, which allows us to find optimal solutions for the
-repair step. Mixed Integer Programming is a powerful technique that can solve
-many NP-hard problems optimally up to a reasonable size. The size of the
-destroyed part is scaled automatically to be as large as possible while still
-being able to find a repair. The larger the destroyed part, the more likely it
-is to escape local minima and find an even better solution, potentially even an
-optimal solution. As the candidate set of improvements is implicitly defined by
-an optimization problem, we do not have to iterate over all possible
-improvements as simple local search strategies have to. This allows us to
-consider a significantly larger number of improvements, which significantly
-increases the chance of finding a good solution. The downside is that we have to
-solve an optimization problem for each improvement, which is computationally
-expensive and limits scalability.
+| Feature Model        | Features | Clauses | Min    | Mean (Min)      | Mean (Max)      | Savings      | UB/LB       | Time to Bounds            |
+| -------------------- | -------- | ------- | ------ | --------------- | --------------- | ------------ | ----------- | ------------------------- |
+| calculate            | 9        | 15      | 9      | **5** (**5**)   | **5** (**5**)   | 44% (44%)    | 1.00 (1.00) | <1 second (1 second)      |
+| lcm                  | 9        | 16      | 8      | **6** (**6**)   | **6** (**6**)   | 25% (25%)    | 1.00 (1.00) | <1 second (<1 second)     |
+| email                | 10       | 17      | **6**  | **6** (**6**)   | **6** (**6**)   | 0% (0%)      | 1.00 (1.00) | <1 second (<1 second)     |
+| ChatClient           | 14       | 20      | **7**  | **7** (**7**)   | **7** (**7**)   | 0% (0%)      | 1.00 (1.00) | 1 second (2 seconds)      |
+| toybox_2006-10-31... | 16       | 13      | 9      | **8** (**8**)   | **8** (**8**)   | 11% (11%)    | 1.00 (1.00) | 1 second (1 second)       |
+| car                  | 16       | 33      | 6      | **5** (**5**)   | **5** (**5**)   | 17% (17%)    | 1.00 (1.00) | <1 second (<1 second)     |
+| FeatureIDE           | 19       | 27      | 9      | **8** (**8**)   | **8** (**8**)   | 11% (11%)    | 1.00 (1.00) | 271 seconds (128 seconds) |
+| FameDB               | 22       | 40      | **8**  | **8** (**8**)   | **8** (**8**)   | 0% (0%)      | 1.00 (1.00) | 1 second (1 second)       |
+| APL                  | 23       | 35      | 9      | **7** (**7**)   | **7** (**7**)   | 22% (22%)    | 1.00 (1.00) | 1 second (1 second)       |
+| SafeBali             | 24       | 45      | **11** | **11** (**11**) | **11** (**11**) | 0% (0%)      | 1.00 (1.00) | <1 second (<1 second)     |
+| TightVNC             | 28       | 39      | 11     | **8** (**8**)   | **8** (**8**)   | 27% (27%)    | 1.00 (1.00) | 16 seconds (21 seconds)   |
+| APL-Model            | 28       | 40      | 10     | **8** (**8**)   | **8** (**8**)   | 20% (20%)    | 1.00 (1.00) | 14 seconds (15 seconds)   |
+| gpl                  | 38       | 99      | 17     | **16** (**16**) | **16** (**16**) | 5.9% (5.9%)  | 1.00 (1.00) | 3 seconds (3 seconds)     |
+| SortingLine          | 39       | 77      | 12     | **9** (**9**)   | **9** (**9**)   | 25% (25%)    | 1.00 (1.00) | 8 seconds (9 seconds)     |
+| dell                 | 46       | 244     | 32     | **31** (**31**) | **31** (**31**) | 3.1% (3.1%)  | 1.00 (1.00) | 29 seconds (45 seconds)   |
+| PPU                  | 52       | 109     | **12** | **12** (**12**) | **12** (**12**) | 0% (0%)      | 1.00 (1.00) | 2 seconds (2 seconds)     |
+| berkeleyDB1          | 76       | 147     | 19     | **15** (**15**) | **15** (**15**) | 21% (21%)    | 1.00 (1.00) | 77 seconds (137 seconds)  |
+| axTLS                | 96       | 183     | 16     | 11 (11)         | 10 (10)         | 31% (31%)    | 1.10 (1.10) | 20 seconds (20 seconds)   |
+| Violet               | 101      | 203     | 23     | 17 (17)         | 16 (16)         | 26% (26%)    | 1.06 (1.06) | 476 seconds (656 seconds) |
+| berkeleyDB2          | 119      | 346     | 20     | 12 (12)         | 12 (12)         | 40% (40%)    | 1.00 (1.00) | 162 seconds (282 seconds) |
+| soletta_2015-06-2... | 129      | 192     | 30     | 24 (24)         | 24 (24)         | 20% (20%)    | 1.00 (1.00) | 21 seconds (60 seconds)   |
+| BattleofTanks        | 144      | 769     | 451    | 320 (295)       | 256 (256)       | 29% (35%)    | 1.25 (1.15) | 887 seconds (160 minutes) |
+| BankingSoftware      | 176      | 280     | 40     | **29** (**29**) | **29** (**29**) | 28% (28%)    | 1.00 (1.00) | 306 seconds (429 seconds) |
+| fiasco_2017-09-26... | 230      | 1181    | 234    | 225 (225)       | 225 (225)       | 3.8% (3.9%)  | 1.00 (1.00) | 382 seconds (579 seconds) |
+| fiasco_2020-12-01... | 258      | 1542    | 209    | 196 (196)       | 196 (196)       | 6.1% (6.2%)  | 1.00 (1.00) | 438 seconds (478 seconds) |
+| uclibc_2008-06-05... | 263      | 1699    | 505    | 505 (505)       | 505 (505)       | 0% (0%)      | 1.00 (1.00) | 104 seconds (67 seconds)  |
+| uclibc_2020-12-24... | 272      | 1670    | 365    | 365 (365)       | 365 (365)       | 0% (0%)      | 1.00 (1.00) | 108 seconds (112 seconds) |
+| E-Shop               | 326      | 499     | 19     | 12 (12)         | 9 (10)          | 37% (37%)    | 1.30 (1.20) | 268 seconds (64 minutes)  |
+| toybox_2020-12-06... | 334      | 92      | 18     | 13 (13)         | 7 (8)           | 28% (28%)    | 1.71 (1.62) | 532 seconds (35 minutes)  |
+| DMIE                 | 366      | 627     | 26     | 16 (16)         | 16 (16)         | 38% (38%)    | 1.00 (1.00) | 104 seconds (135 seconds) |
+| soletta_2017-03-0... | 458      | 1862    | 56     | 37 (37)         | 31 (37)         | 34% (34%)    | 1.16 (1.00) | 387 seconds (24 minutes)  |
+| busybox_2007-01-2... | 540      | 429     | 34     | 21 (21)         | 21 (21)         | 38% (38%)    | 1.00 (1.00) | 164 seconds (237 seconds) |
+| fs_2017-05-22        | 557      | 4992    | 398    | 396 (396)       | 396 (396)       | 0.5% (0.5%)  | 1.00 (1.00) | 478 seconds (575 seconds) |
+| WaterlooGenerated    | 580      | 879     | 144    | 82 (82)         | 82 (82)         | 43% (43%)    | 1.00 (1.00) | 223 seconds (310 seconds) |
+| financial_services   | 771      | 7238    | 4384   | 4368 (4340)     | 4274 (4336)     | 0.36% (1%)   | 1.02 (1.00) | 862 seconds (102 minutes) |
+| busybox-1_18_0       | 854      | 1164    | 26     | 16 (16)         | 11 (13)         | 35% (38%)    | 1.53 (1.23) | 233 seconds (59 minutes)  |
+| busybox-1_29_2       | 1018     | 997     | 36     | 22 (22)         | 17 (21)         | 38% (39%)    | 1.26 (1.05) | 465 seconds (60 minutes)  |
+| busybox_2020-12-1... | 1050     | 996     | 33     | 21 (20)         | 17 (19)         | 36% (39%)    | 1.19 (1.05) | 407 seconds (17 minutes)  |
+| am31_sim             | 1178     | 2747    | 60     | 36 (33)         | 26 (29)         | 39% (45%)    | 1.36 (1.14) | 699 seconds (77 minutes)  |
+| EMBToolkit           | 1179     | 5414    | 1881   | 1879 (1872)     | 1821 (1872)     | 0.1% (0.48%) | 1.03 (1.00) | 863 seconds (47 minutes)  |
+| atlas_mips32_4kc     | 1229     | 2875    | 66     | 38 (36)         | 31 (33)         | 41% (45%)    | 1.22 (1.09) | 548 seconds (50 minutes)  |
+| eCos-3-0_i386pc      | 1245     | 3723    | 64     | 43 (39)         | 31 (36)         | 32% (39%)    | 1.38 (1.08) | 621 seconds (146 minutes) |
+| integrator_arm7      | 1272     | 2980    | 66     | 38 (36)         | 30 (33)         | 41% (45%)    | 1.28 (1.09) | 681 seconds (82 minutes)  |
+| XSEngine             | 1273     | 2942    | 63     | 38 (36)         | 31 (32)         | 39% (43%)    | 1.23 (1.12) | 572 seconds (52 minutes)  |
+| aaed2000             | 1298     | 3036    | 87     | 55 (52)         | 51 (51)         | 36% (40%)    | 1.09 (1.02) | 707 seconds (75 minutes)  |
+| FreeBSD-8_0_0        | 1397     | 15692   | 76     | 47 (41)         | 27 (30)         | 38% (46%)    | 1.72 (1.37) | 831 seconds (120 minutes) |
+| ea2468               | 1408     | 3319    | 65     | 38 (36)         | 31 (32)         | 41% (45%)    | 1.24 (1.12) | 721 seconds (67 minutes)  |
+|                      |          |         |        |                 |                 |              |             |                           |
+| **optimality**       |          |         | 7      | ≥ 26            |                 |              |             |                           |
+|                      |          |         | [15%]  | [55%]           |                 |              |             |                           |
+| **improvements**     |          |         |        |                 | 40 [85%]        |              |             |                           |
 
-**What is a lower bound and why is it useful?** A lower bound is a value that is
-guaranteed to be smaller than the optimal solution. If you have a lower bound,
-you can stop the optimization process as soon as you reach it. The lower bound
-proves that you cannot find a better solution. If the optimization process is
-not able to match it, the lower bound at least gives you a guaranteed upper
-bound on the error of your solution. Computing perfect lower bounds for NP-hard
-problems is itself NP-hard, so we are only able to approximate them. However,
-every lower bound returned is still guaranteed to be smaller than the optimal
-solution. It may just not be sufficient to prove optimality.
+Comparison of SampLNS with algorithms from the literature. Here, "Baseline"
+indicates the best sample size found by any of the existing algorithms, each
+having five runs of 15 minutes. "SampLNS UB" shows the sample size found by
+SampLNS with the initial numbers indicating the mean over five runs of 15
+minutes each, i.e., typical outcomes for a short run, while the numbers in
+parentheses describe the best of five extended runs of up to 3 hours, i.e., the
+potential outcomes of longer runs. Similarly, "SampLNS LB" is the lower bound,
+while "Savings" quantifies the reduction in sample size achieved by SampLNS
+compared to previous algorithms. "SampLNS UB/LB" illustrates the relationship
+between upper and lower bounds, with a value of 1.0 implying optimality. "Time
+to bounds" records the moment when final lower and upper bounds were
+established, potentially preceding the time limit. A low value may signal
+efficiency, yet it could also suggest stagnation, depending on the solution
+quality at that moment.
 
-**Why does SampLNS not compute its own initial samples?** SampLNS requires an
-initial sample to start the optimization process. We do not compute this initial
-sample ourselves, but require the user to provide it. This is because there are
-already many good tools for computing initial samples, such as
-[FeatureIDE](https://featureide.github.io/). We do not want to reinvent the
-wheel and instead focus on the optimization process. If you do not have an
-initial solution, you can use the [FeatureIDE](https://featureide.github.io/) to
-compute one.
-
-## Benchmark
-
-Sample sizes and lower bounds (mean over five runs) obtained by SampLNS with a
-time limit of 900 sec compared to the best sample found by any of the other
-algorithms (each run five times). Bold values are proved to be optimal, but the
-lower bound to prove optimality may have been obtained by a separate run. In
-parenthesis are the best values computed with extended time limits of up to
-three hours.
-
-| Feature Model       | $F$  | $C$   | Best previous alg. | SampLNS           | Lower Bound       | Savings by SampLNS |
-| ------------------- | ---- | ----- | ------------------ | ----------------- | ----------------- | ------------------ |
-| calculate           | 9    | 15    | 9                  | **5** (**5**)     | **5** (**5**)     | 44% (44%)          |
-| lcm                 | 9    | 16    | 8                  | **6** (**6**)     | **6** (**6**)     | 25% (25%)          |
-| email               | 10   | 17    | **6**              | **6** (**6**)     | **6** (**6**)     | 0% (0%)            |
-| ChatClient          | 14   | 20    | 8                  | **7** (**7**)     | **7** (**7**)     | 12% (12%)          |
-| toybox_2006-10-3... | 16   | 13    | 10                 | **8** (**8**)     | **8** (**8**)     | 20% (20%)          |
-| car                 | 16   | 33    | 6                  | **5** (**5**)     | **5** (**5**)     | 17% (17%)          |
-| FeatureIDE          | 19   | 27    | 11                 | 8 (8)             | 7 (7)             | 27% (27%)          |
-| FameDB              | 22   | 40    | 9                  | **8** (**8**)     | **8** (**8**)     | 11% (11%)          |
-| APL                 | 23   | 35    | 9                  | **7** (**7**)     | **7** (**7**)     | 22% (22%)          |
-| SafeBali            | 24   | 45    | **11**             | **11** (**11**)   | 10 (**11**)       | 0% (0%)            |
-| TightVNC            | 28   | 39    | 12                 | **8** (**8**)     | **8** (**8**)     | 33% (33%)          |
-| APL-Model           | 28   | 40    | 11                 | **8** (**8**)     | **8** (**8**)     | 27% (27%)          |
-| gpl                 | 38   | 99    | 19                 | **16** (**16**)   | **16** (**16**)   | 16% (16%)          |
-| SortingLine         | 39   | 77    | 12                 | **9** (**9**)     | **9** (**9**)     | 25% (25%)          |
-| dell                | 46   | 244   | 35                 | **31** (**31**)   | **31** (**31**)   | 11% (11%)          |
-| PPU                 | 52   | 109   | **12**             | **12** (**12**)   | **12** (**12**)   | 0% (0%)            |
-| berkeleyDB1         | 76   | 147   | 20                 | **15** (**15**)   | **15** (**15**)   | 25% (25%)          |
-| axTLS               | 96   | 183   | 17                 | 11 (11)           | 10 (10)           | 35% (35%)          |
-| Violet              | 101  | 203   | 23                 | 17 (17)           | 14 (16)           | 26% (26%)          |
-| berkeleyDB2         | 119  | 346   | 21                 | **12** (**12**)   | 11 (**12**)       | 43% (43%)          |
-| soletta_2015-06-... | 129  | 192   | 30                 | **24** (**24**)   | **24** (**24**)   | 20% (20%)          |
-| BattleofTanks       | 144  | 769   | 453                | 344 (314)         | 256 (256)         | 24% (31%)          |
-| BankingSoftware     | 176  | 280   | 40                 | **29** (**29**)   | 28 (**29**)       | 28% (28%)          |
-| fiasco_2017-09-2... | 230  | 1181  | 240                | 226 (**225**)     | 223 (**225**)     | 5.8% (6.2%)        |
-| fiasco_2020-12-0... | 258  | 1542  | 214                | 198 (**196**)     | 196 (**196**)     | 7.5% (8.4%)        |
-| uclibc_2008-06-0... | 263  | 1699  | 506                | **505** (**505**) | **505** (**505**) | 0.2% (0.2%)        |
-| uclibc_2020-12-2... | 272  | 1670  | **365**            | **365** (**365**) | **365** (**365**) | 0% (0%)            |
-| E-Shop              | 326  | 499   | 20                 | 12 (12)           | 8 (9)             | 39% (40%)          |
-| toybox_2020-12-0... | 334  | 92    | 18                 | 14 (13)           | 7 (8)             | 23% (28%)          |
-| DMIE                | 366  | 627   | 26                 | **16** (**16**)   | **16** (**16**)   | 38% (38%)          |
-| busybox_2007-01-... | 540  | 429   | 36                 | 22 (**21**)       | 19 (**21**)       | 39% (42%)          |
-| fs_2017-05-22       | 557  | 4992  | 398                | **396** (**396**) | **396** (**396**) | 0.5% (0.5%)        |
-| WaterlooGenerated   | 580  | 879   | 144                | **82** (**82**)   | **82** (**82**)   | 43% (43%)          |
-| financial_services  | 771  | 7238  | 4396               | 4386 (4343)       | 4132 (4336)       | 0.22% (1.2%)       |
-| busybox-1_18_0      | 854  | 1164  | 29                 | 18 (17)           | 12 (13)           | 37% (41%)          |
-| busybox-1_29_2      | 1018 | 997   | 37                 | 25 (23)           | 16 (20)           | 33% (38%)          |
-| busybox_2020-12-... | 1050 | 996   | 34                 | 23 (21)           | 13 (19)           | 32% (38%)          |
-| am31_sim            | 1178 | 2747  | 63                 | 41 (37)           | 24 (26)           | 34% (41%)          |
-| EMBToolkit          | 1179 | 5414  | 1886               | 1889 (**1872**)   | 1593 (**1872**)   | -0.16% (0.74%)     |
-| atlas_mips32_4kc    | 1229 | 2875  | 66                 | 45 (38)           | 29 (33)           | 32% (42%)          |
-| eCos-3-0_i386pc     | 1245 | 3723  | 66                 | 55 (43)           | 30 (33)           | 17% (35%)          |
-| integrator_arm7     | 1272 | 2980  | 66                 | 45 (39)           | 30 (33)           | 32% (41%)          |
-| XSEngine            | 1273 | 2942  | 63                 | 44 (39)           | 27 (32)           | 30% (38%)          |
-| aaed2000            | 1298 | 3036  | 89                 | 68 (54)           | 46 (51)           | 23% (39%)          |
-| FreeBSD-8_0_0       | 1397 | 15692 | 76                 | 66 (47)           | 27 (29)           | 13% (38%)          |
-| ea2468              | 1408 | 3319  | 67                 | 46 (40)           | 29 (32)           | 32% (40%)          |
+- **Baseline**: Best sample size found by existing algorithms in five runs of 15
+  minutes.
+- **SampLNS UB (min)**: Mean sample size found by SampLNS in five 15-minute
+  runs. Best result from longer runs in parentheses.
+- **SampLNS LB (max)**: Lower bound of the sample size.
+- **Savings (%):** Reduction in sample size compared to previous methods.
+- **UB/LB:** Ratio between upper and lower bounds (1.0 means optimality).
+- **Time to Bounds:** Time when final bounds were established (indicates
+  efficiency vs. stagnation).
 
 ## Installation
 
@@ -329,56 +333,6 @@ pytest -s pysrc
 
 This will place the compiled binary in your source folder and run only the tests
 within the source folder.
-
-## Project Structure
-
-Please follow the following project structure. It is carefully designed and
-follows common guidelines. It uses
-[Scikit-HEP developer information](https://scikit-hep.org/developer/intro) as
-baseline.
-
-- `cmake` Should contain all cmake utilities (no cmake package manager, so
-  copy&paste)
-- `deps` Should contain all dependencies
-- `include` Public interfaces of C++-libraries you write. Should follow
-  `include/libname/header.h`
-- `python` Python packages you write. Should be of the shape
-  `python/package_name/module_name/file.py`. Can be recursive.
-- `notebooks` A place for Jupyter-notebooks.
-- `src` Your implementation internals. Can also contain header files that are
-  not part of the public interface!
-- `tests` Your tests for C++ and Python. Read also
-  [this](https://blog.ionelmc.ro/2014/05/25/python-packaging/#the-structure).
-- `.clang_format` (C&P) C++-formatting rules, so we have a common standard.
-  - Needs to be edited if: You want a different C++-coding style.
-- `.flake8` (C&P) Python checking rules
-  - Needs to be edited if: The rules do not fit your project. Especially, if
-    there are too many false positives of some rule.
-- `.gitignore` (C&P) Automatically ignore system specific files
-  - Needs to be edited if: You use some uncommon tool that creates some kind of
-    artifacts not covered by the current rules.
-- `pyproject.toml` (C&P) Tells pip the dependencies for running `setup.py`.
-  - Needs to be edited if: You use additional/different packages in `setup.py`
-- `.pre-commit-config.yaml` (C&P) For applying a set of checks locally. Run,
-  e.g., via `pre-commit run --all-files`.
-  - Needs to be edited if: Better tools appear you would like to use, like a
-    better `black` etc.
-- `CMakeLists.txt` Defines your C++-project. This is a complex topic we won't
-  dive into here. You should know the basics of CMake to continue.
-- `conanfile.txt` Defines the C++-dependencies installed via conan (use CPM
-  within CMakeLists.txt for copy&paste dependencies).
-  - Needs to be edited if: You change C++-dependencies.
-- `MANIFEST.in` (C&P) Defines all the files that need to be packaged for pip.
-  - Needs to be edited if: You need some files included that do not fit the
-    basic coding files, e.g., images.
-- `setup.py` Scripts for building and installing the package.
-  - Needs to be edited if: You add dependencies, rename the project, want to
-    change metadata, change the project structure, etc.
-  - If you don't have any CPP-components yet, you need to set the target to
-    None!
-- `requirements.txt` The recommended requirements for development on this
-  package
-  - Needs to be edited if: You are using further python packages.
 
 ## Common problems
 

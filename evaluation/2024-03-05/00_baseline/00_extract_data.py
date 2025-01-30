@@ -1,10 +1,12 @@
 import os.path
+from pathlib import Path
 from zipfile import ZipFile
-import tomllib
+
 import pandas as pd
+import tomllib
 from samplns.instances import parse_source
 from samplns.instances.parse_dimacs import parse_source as parse_source_dimacs
-from pathlib import Path
+
 
 def get_instance(instance_name, archive_path):
     """
@@ -82,12 +84,20 @@ def parse_sample(archive_path, sample_path):
         t.apply(f, axis=1)
         return samples
 
+
 if __name__ == "__main__":
-    with (Path(__file__).parent/".."/"config.toml").open("rb") as f:
+    with (Path(__file__).parent / ".." / "config.toml").open("rb") as f:
         config = tomllib.load(f)
         config_exp = config[Path(__file__).parent.name]
     df = parse_solution_overview(config_exp["external_computed_samples"])
-    df["sample"] = df.apply((lambda row: parse_sample(row["ArchivePath"], row["Path"]) if row["Path"] else None), axis=1)
+    df["sample"] = df.apply(
+        (
+            lambda row: parse_sample(row["ArchivePath"], row["Path"])
+            if row["Path"]
+            else None
+        ),
+        axis=1,
+    )
     df["SampleSize"] = df["SampleSize"].apply(lambda x: x or None)
     df.to_json(config_exp["sample_table"])
     df.drop(columns=["sample"]).to_json(config_exp["baseline_table"])

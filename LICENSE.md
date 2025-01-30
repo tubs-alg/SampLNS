@@ -1,28 +1,22 @@
-Preview License Disclaimer
+MIT License
 
-This license.md file is provided as a preview of the forthcoming license terms
-for the software code and related materials ("Code") contained in this
-repository. The terms presented here are subject to change, and the final
-licensing terms will be determined and outlined in a separate license agreement
-that will be provided at a later date.
+Copyright (c) 2024 TU Braunschweig, IBR, Algorithm Division
 
-Please be aware that until the final license terms are established and
-communicated, the Code contained in this repository is not permitted for free
-use, distribution, or any form of public or private usage. Any use of the Code
-without an officially established and agreed-upon license is prohibited.
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
 
-It is essential to understand that the absence of a finalized license means that
-you are not granted any rights or permissions to use the Code, except for the
-purpose of reviewing and assessing its contents.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-We are actively working to define the most appropriate licensing terms that will
-accommodate different types of usage, including academic and commercial
-applications. We appreciate your patience and understanding during this process.
-Once the final license terms are in place, the license.md file will be updated
-accordingly, and you will be required to adhere to the terms specified in the
-official license agreement.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-For questions or concerns related to the licensing of the Code, please contact
-us via krupke@ibr.cs.tu-bs.de.
-
-TU Braunschweig, IBR, Algorithm Lab 2023
+The packaged FeatureIDE and its algorithms may have a difference license.

@@ -1,18 +1,16 @@
+import logging
 from pathlib import Path
 from zipfile import ZipFile
-import subprocess
+
+import slurminade
 import tomllib
-from typing import List
 from algbench import Benchmark
+from samplns.baseline.algorithm import BaselineAlgorithm
+from samplns.instances import parse, parse_dimacs
 from samplns.lns.lns import LnsObserver
 from samplns.lns.neighborhood import Neighborhood, RandomNeighborhood
 from samplns.simple import SampLns
 from samplns.utils import Timer
-from samplns.baseline.algorithm import BaselineAlgorithm
-from samplns.instances import parse, parse_dimacs
-import logging
-import slurminade
-
 
 with (Path(__file__).parent / "config.toml").open("rb") as f:
     config = tomllib.load(f)
@@ -64,6 +62,7 @@ class MyLnsLogger(LnsObserver):
             }
         )
 
+
 EXPERIMENT = "samplns_3h"
 RESULT_FOLDER = Path(config[EXPERIMENT]["algbench_results"])
 ITERATIONS = config[EXPERIMENT]["iterations"]
@@ -94,8 +93,9 @@ def prepare_instance(instance_name: str) -> Path:
 
             # throw exception if both files exist -> ambiguous
             if exists(path_in_zip_xml) and exists(path_in_zip_dimacs):
+                msg = f"Ambiguous: {path_in_zip_xml} and {path_in_zip_dimacs} found in {instance_archive}"
                 raise RuntimeError(
-                    f"Ambiguous: {path_in_zip_xml} and {path_in_zip_dimacs} found in {instance_archive}"
+                    msg
                 )
             elif exists(path_in_zip_xml):
                 if not path_in_zip_xml.exists():
@@ -108,11 +108,13 @@ def prepare_instance(instance_name: str) -> Path:
                     zf.extract(str(path_in_zip_dimacs))
                 return path_in_zip_dimacs
             else:
+                msg = f"Neither {path_in_zip_xml} nor {path_in_zip_dimacs} found in {instance_archive}"
                 raise FileNotFoundError(
-                    f"Neither {path_in_zip_xml} nor {path_in_zip_dimacs} found in {instance_archive}"
+                    msg
                 )
     else:
-        raise FileNotFoundError(f"{instance_archive} not found")
+        msg = f"{instance_archive} not found"
+        raise FileNotFoundError(msg)
 
 
 @slurminade.slurmify
@@ -122,13 +124,12 @@ def run_distributed(instance_name: str, rep: int):
         instance_name,
         iterations=ITERATIONS,
         iteration_time_limit=ITERATION_TIME_LIMIT,
-        cds_iteration_time_limit = CDS_ITERATION_TIME_LIMIT,
+        cds_iteration_time_limit=CDS_ITERATION_TIME_LIMIT,
         time_limit=TIME_LIMIT,
         verify=True,
         fast_verify=True,
         rep=rep,
     )
-
 
 
 def run_samplns(

@@ -1,11 +1,12 @@
+import subprocess
 from pathlib import Path
 from zipfile import ZipFile
-import subprocess
+
 import tomllib
 
-with (Path(__file__).parent/".."/"config.toml").open("rb") as f:
-        config = tomllib.load(f)
-        config_exp = config[Path(__file__).parent.name]
+with (Path(__file__).parent / ".." / "config.toml").open("rb") as f:
+    config = tomllib.load(f)
+    config_exp = config[Path(__file__).parent.name]
 INSTANCES = config["benchmark"]["instance_names"]
 
 
@@ -40,8 +41,9 @@ def prepare_instance(instance_name: str) -> Path:
 
             # throw exception if both files exist -> ambiguous
             if exists(path_in_zip_xml) and exists(path_in_zip_dimacs):
+                msg = f"Ambiguous: {path_in_zip_xml} and {path_in_zip_dimacs} found in {instance_archive}"
                 raise RuntimeError(
-                    f"Ambiguous: {path_in_zip_xml} and {path_in_zip_dimacs} found in {instance_archive}"
+                    msg
                 )
             elif exists(path_in_zip_xml):
                 if not path_in_zip_xml.exists():
@@ -54,60 +56,65 @@ def prepare_instance(instance_name: str) -> Path:
                     zf.extract(str(path_in_zip_dimacs))
                 return path_in_zip_dimacs
             else:
+                msg = f"Neither {path_in_zip_xml} nor {path_in_zip_dimacs} found in {instance_archive}"
                 raise FileNotFoundError(
-                    f"Neither {path_in_zip_xml} nor {path_in_zip_dimacs} found in {instance_archive}"
+                    msg
                 )
     else:
-        raise FileNotFoundError(f"{instance_archive} not found")
+        msg = f"{instance_archive} not found"
+        raise FileNotFoundError(msg)
 
 
 @slurminade.slurmify
 def run_yasa(instance_name: str, output: str, timeout: int, seed: int) -> None:
-        """
+    """
     Run YASA on an instance and return the time used.
 
     java -jar formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar --command de.featjar.formula.analysis.cli.TWiseCommand --input model.xml --output sample.csv --t 2 --i -1 --timeout 100
     """
-        if Path(output).exists():
-            print(f"Skipping {instance_name} because {output} exists")
-            return
-        instance_path = prepare_instance(instance_name)
-        runner = subprocess.run(
-            [
-                "java",
-                "-jar",
-                "formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar",
-                "--command",
-                "de.featjar.formula.analysis.cli.TWiseCommand",
-                "--input",
-                str(instance_path),
-                "--output",
-                output,
-                "--t",
-                "2",
-                "--i",
-                "-1",
-                "--timeout",
-                str(timeout),
-                "--seed",
-                str(seed),
-            ],
-            capture_output=False,
-            check=True,
-        )
-        runner.check_returncode()
+    if Path(output).exists():
+        print(f"Skipping {instance_name} because {output} exists")
+        return
+    instance_path = prepare_instance(instance_name)
+    runner = subprocess.run(
+        [
+            "java",
+            "-jar",
+            "formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar",
+            "--command",
+            "de.featjar.formula.analysis.cli.TWiseCommand",
+            "--input",
+            str(instance_path),
+            "--output",
+            output,
+            "--t",
+            "2",
+            "--i",
+            "-1",
+            "--timeout",
+            str(timeout),
+            "--seed",
+            str(seed),
+        ],
+        capture_output=False,
+        check=True,
+    )
+    runner.check_returncode()
 
 
 if __name__ == "__main__":
     if not Path("formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar").exists():
+        msg = "Please put formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar in this folder."
         raise RuntimeError(
-            "Please put formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar in this folder."
+            msg
         )
     Path(config_exp["result_folder"]).mkdir(exist_ok=True)
     for rep in range(5):
         for instance in INSTANCES:
             Path(f"./{config_exp['result_folder']}/{instance}").mkdir(exist_ok=True)
-            result_path = Path(f"./{config_exp['result_folder']}/{instance}/sample_{rep}.csv")
+            result_path = Path(
+                f"./{config_exp['result_folder']}/{instance}/sample_{rep}.csv"
+            )
             if result_path.exists():
                 print(f"Skipping {instance} because {result_path} exists")
                 continue

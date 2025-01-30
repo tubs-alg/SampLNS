@@ -1,7 +1,6 @@
+import subprocess
 from pathlib import Path
 from zipfile import ZipFile
-import subprocess
-
 
 INSTANCES = [
     "calculate",
@@ -86,8 +85,9 @@ def prepare_instance(instance_name: str) -> Path:
 
             # throw exception if both files exist -> ambiguous
             if exists(path_in_zip_xml) and exists(path_in_zip_dimacs):
+                msg = f"Ambiguous: {path_in_zip_xml} and {path_in_zip_dimacs} found in {instance_archive}"
                 raise RuntimeError(
-                    f"Ambiguous: {path_in_zip_xml} and {path_in_zip_dimacs} found in {instance_archive}"
+                    msg
                 )
             elif exists(path_in_zip_xml):
                 if not path_in_zip_xml.exists():
@@ -100,11 +100,13 @@ def prepare_instance(instance_name: str) -> Path:
                     zf.extract(str(path_in_zip_dimacs))
                 return path_in_zip_dimacs
             else:
+                msg = f"Neither {path_in_zip_xml} nor {path_in_zip_dimacs} found in {instance_archive}"
                 raise FileNotFoundError(
-                    f"Neither {path_in_zip_xml} nor {path_in_zip_dimacs} found in {instance_archive}"
+                    msg
                 )
     else:
-        raise FileNotFoundError(f"{instance_archive} not found")
+        msg = f"{instance_archive} not found"
+        raise FileNotFoundError(msg)
 
 
 @slurminade.slurmify
@@ -136,7 +138,7 @@ def run_yasa(instance_name: str, output: str, timeout: int, seed: int) -> None:
             "--timeout",
             str(timeout),
             "--seed",
-            str(seed)
+            str(seed),
         ],
         capture_output=False,
         check=True,
@@ -146,8 +148,9 @@ def run_yasa(instance_name: str, output: str, timeout: int, seed: int) -> None:
 
 if __name__ == "__main__":
     if not Path("formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar").exists():
+        msg = "Please put formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar in this folder."
         raise RuntimeError(
-            "Please put formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar in this folder."
+            msg
         )
     Path("./results").mkdir(exist_ok=True)
     for rep in range(0, 5):

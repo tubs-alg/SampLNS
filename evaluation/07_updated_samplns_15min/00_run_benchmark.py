@@ -1,7 +1,5 @@
 from pathlib import Path
 from zipfile import ZipFile
-import subprocess
-
 
 INSTANCES = [
     "calculate",
@@ -70,14 +68,16 @@ slurminade.update_default_configuration(
 )
 slurminade.set_dispatch_limit(300)
 
+import logging
+
 from algbench import Benchmark
+from samplns.baseline.algorithm import BaselineAlgorithm
+from samplns.instances import parse, parse_dimacs
 from samplns.lns.lns import LnsObserver
 from samplns.lns.neighborhood import Neighborhood, RandomNeighborhood
 from samplns.simple import SampLns
 from samplns.utils import Timer
-from samplns.baseline.algorithm import BaselineAlgorithm
-from samplns.instances import parse, parse_dimacs
-import logging
+
 
 class MyLnsLogger(LnsObserver):
     """
@@ -110,6 +110,7 @@ class MyLnsLogger(LnsObserver):
             }
         )
 
+
 RESULT_FOLDER = "./results"
 ITERATIONS = 10000
 ITERATION_TIME_LIMIT = 60.0
@@ -138,8 +139,9 @@ def prepare_instance(instance_name: str) -> Path:
 
             # throw exception if both files exist -> ambiguous
             if exists(path_in_zip_xml) and exists(path_in_zip_dimacs):
+                msg = f"Ambiguous: {path_in_zip_xml} and {path_in_zip_dimacs} found in {instance_archive}"
                 raise RuntimeError(
-                    f"Ambiguous: {path_in_zip_xml} and {path_in_zip_dimacs} found in {instance_archive}"
+                    msg
                 )
             elif exists(path_in_zip_xml):
                 if not path_in_zip_xml.exists():
@@ -152,18 +154,17 @@ def prepare_instance(instance_name: str) -> Path:
                     zf.extract(str(path_in_zip_dimacs))
                 return path_in_zip_dimacs
             else:
+                msg = f"Neither {path_in_zip_xml} nor {path_in_zip_dimacs} found in {instance_archive}"
                 raise FileNotFoundError(
-                    f"Neither {path_in_zip_xml} nor {path_in_zip_dimacs} found in {instance_archive}"
+                    msg
                 )
     else:
-        raise FileNotFoundError(f"{instance_archive} not found")
-
+        msg = f"{instance_archive} not found"
+        raise FileNotFoundError(msg)
 
 
 @slurminade.slurmify
-def run_distributed(
-    instance_name: str, rep: int
-):
+def run_distributed(instance_name: str, rep: int):
     benchmark.add(
         run_samplns,
         instance_name,
@@ -203,7 +204,7 @@ def run_samplns(
     sample = BaselineAlgorithm(str(instance_path)).optimize(time_limit)
     _yasa_time_used = timer.time()
     assert sample
-    
+
     remaining_time = time_limit - _yasa_time_used
     solver = None
     logger = MyLnsLogger()
@@ -248,7 +249,10 @@ def pack_after_finish():
     """
     benchmark.compress()
 
+
 import os
+
+
 def configure_grb_license_path():
     # hack for gurobi license on alg workstations. TODO: Find a nicer way
     import socket
@@ -265,7 +269,6 @@ def configure_grb_license_path():
         raise RuntimeError(msg)
 
 
-import random
 
 if __name__ == "__main__":
     Path("./results").mkdir(exist_ok=True)

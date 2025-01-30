@@ -1,8 +1,6 @@
-import pandas as pd
-
 from pathlib import Path
-from zipfile import ZipFile
-import subprocess
+
+import pandas as pd
 import tomllib
 
 with (Path(__file__).parent / ".." / "config.toml").open("rb") as f:

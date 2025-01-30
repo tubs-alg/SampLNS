@@ -1,8 +1,8 @@
-import pandas as pd
-from _conf import SIMPLIFIED_DATA, RESULT_FOLDER
-from _utils import parse_sample_file
-
 from pathlib import Path
+
+import pandas as pd
+from _conf import RESULT_FOLDER, SIMPLIFIED_DATA
+from _utils import parse_sample_file
 
 if __name__ == "__main__":
     data = {
@@ -25,4 +25,3 @@ if __name__ == "__main__":
     print(df)
     print("Writing to", SIMPLIFIED_DATA)
     df.to_json(Path(SIMPLIFIED_DATA))
-    

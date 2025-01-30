@@ -2,8 +2,9 @@
 Extracting sharable pandas tables from the raw data.
 """
 
-import tomllib
 from pathlib import Path
+
+import tomllib
 
 if __name__ == "__main__":
     with Path("../config.toml").open("rb") as f:
@@ -30,9 +31,7 @@ if __name__ == "__main__":
             "iteration_info": data["result"]["iteration_info"],
         },
     )
-    Path(config[EXPERIMENT]["result_table"]).parent.mkdir(
-        exist_ok=True, parents=True
-    )
+    Path(config[EXPERIMENT]["result_table"]).parent.mkdir(exist_ok=True, parents=True)
     t.drop(columns=["iteration_info", "sample"]).to_json(
         config[EXPERIMENT]["result_table"]
     )
