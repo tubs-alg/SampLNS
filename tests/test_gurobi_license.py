@@ -28,7 +28,7 @@ def test_gurobi_license():
 
         # Create variables
         variables = m.addVars(dist.keys(), obj=dist, vtype=GRB.BINARY, name="e")
-        for i, j in variables:
+        for i, j in dist.keys():
             variables[j, i] = variables[i, j]  # edge in opposite direction
         m.addConstrs(variables.sum(i, "*") == 2 for i in range(n))
         m._vars = variables

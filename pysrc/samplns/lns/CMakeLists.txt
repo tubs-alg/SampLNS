@@ -1,4 +1,4 @@
-cpmaddpackage("gh:pybind/pybind11@2.10.0") # pybind11, essential
+cpmaddpackage("gh:pybind/pybind11@2.13.6") # pybind11, essential
 
 # Repeat the following part for every binding-module you want to build. If the
 # different bindings need to interact with each other/share data, it may be
