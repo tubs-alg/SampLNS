@@ -76,13 +76,25 @@ def parse_feature(feature_node, logger: logging.Logger, seen_names: set[str|int]
     if seen_names is None:
         seen_names = set()
     assert seen_names is not None, "seen_names must be a set to track feature names"
+
+    ignored_tags = {"description", "graphics", "attribute"}
+    if feature_node.tag in ignored_tags:
+        return None
+
     elements = [parse_feature(child, logger=logger, seen_names=seen_names) for child in feature_node]
     elements = [e for e in elements if e]
+    if feature_node.tag == "struct":
+        assert len(elements) == 1
+        return elements[0]
+
     mandatory = feature_node.attrib.get("mandatory", "false") == "true"
     feature_literal = FeatureLiteral(feature_node.attrib.get("name"))
-    if feature_literal.var_name in seen_names:
+    if feature_literal.var_name is None:
+        logger.error("Feature node (tag '%s') has no name! This is most likely a broken model.", feature_node.tag)
+    elif feature_literal.var_name in seen_names:
         logger.error("Feature '%s' is defined multiple times. This can lead to inconsistent models.", feature_literal.var_name)
-    seen_names.add(feature_literal.var_name)
+    else:
+        seen_names.add(feature_literal.var_name)
     if feature_node.tag == "and":
         return AndFeature(
             feature_literal, mandatory=mandatory, elements=elements, logger=logger
@@ -104,15 +116,6 @@ def parse_feature(feature_node, logger: logging.Logger, seen_names: set[str|int]
         )
     elif feature_node.tag == "feature":
         return ConcreteFeature(feature_literal, mandatory=mandatory)
-    elif feature_node.tag == "struct":
-        assert len(elements) == 1
-        return elements[0]
-    elif feature_node.tag == "description":
-        return None
-    elif feature_node.tag == "graphics":
-        return None
-    elif feature_node.tag == "attribute":
-        return None
     error_msg = f"Don't know tag '{feature_node.tag}'"
     raise ValueError(error_msg)
 
