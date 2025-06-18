@@ -136,6 +136,7 @@ class RandomNeighborhood(NeighborhoodSelector):
     def next(self) -> Neighborhood:
         initial_solution = list(self.best_solution)
         fixed_samples = []
+        assert self.coverage_set is not None, "Setup must be called first."
         self.coverage_set.clear()
 
         while True:
@@ -144,7 +145,17 @@ class RandomNeighborhood(NeighborhoodSelector):
                 break
             to_fix = random.sample(initial_solution, 1)[0]
             initial_solution.remove(to_fix)
-            self.coverage_set.cover(to_fix)
+            try:
+                self.coverage_set.cover(to_fix)
+            except Exception as e:
+                contradiction = self.coverage_set.get_contradiction()
+                assert contradiction is not None, "No contradiction found, but exception raised."
+                assert self.instance is not None, "Instance must be set up before."
+                configuration = self.instance.to_original_universe(to_fix)
+                assert self.instance.is_feasible(to_fix, verbose=True)
+                logging.error("Contradiction found: %s [internal interaction], %s [external interaction]", contradiction, self.instance.to_original_universe({contradiction[0][0]: contradiction[0][1], contradiction[1][0]: contradiction[1][1]}))
+                logging.error("It is in the following configuration: %s", configuration)
+                raise 
             fixed_samples.append(to_fix)
         free_tuples = list(self.coverage_set.missing_tuples())
         return Neighborhood(fixed_samples, free_tuples, initial_solution)

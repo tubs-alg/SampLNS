@@ -72,11 +72,17 @@ def parse_features(xmltree: ET, logger: logging.Logger):
     return parse_feature(xmltree.find("struct"), logger=logger)
 
 
-def parse_feature(feature_node, logger: logging.Logger):
-    elements = [parse_feature(child, logger=logger) for child in feature_node]
+def parse_feature(feature_node, logger: logging.Logger, seen_names: set[str|int]|None=None):
+    if seen_names is None:
+        seen_names = set()
+    assert seen_names is not None, "seen_names must be a set to track feature names"
+    elements = [parse_feature(child, logger=logger, seen_names=seen_names) for child in feature_node]
     elements = [e for e in elements if e]
     mandatory = feature_node.attrib.get("mandatory", "false") == "true"
     feature_literal = FeatureLiteral(feature_node.attrib.get("name"))
+    if feature_literal.var_name in seen_names:
+        logger.error("Feature '%s' is defined multiple times. This can lead to inconsistent models.", feature_literal.var_name)
+    seen_names.add(feature_literal.var_name)
     if feature_node.tag == "and":
         return AndFeature(
             feature_literal, mandatory=mandatory, elements=elements, logger=logger
@@ -86,13 +92,13 @@ def parse_feature(feature_node, logger: logging.Logger):
             feature_literal, mandatory=mandatory, elements=elements, logger=logger
         )
     elif feature_node.tag == "alt":
-        if len(elements) == 1:
-            logger.warning(
-                "Removing ALT-Feature %s with only one element.",
-                feature_literal.var_name,
-            )
-            elements[0].mandatory = mandatory
-            return elements[0]
+        # if len(elements) == 1:
+        #     logger.warning(
+        #         "Removing ALT-Feature %s with only one element.",
+        #         feature_literal.var_name,
+        #     )
+        #     elements[0].mandatory = mandatory
+        #     return elements[0]
         return AltFeature(
             feature_literal, mandatory=mandatory, elements=elements, logger=logger
         )

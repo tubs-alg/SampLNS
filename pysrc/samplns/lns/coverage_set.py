@@ -58,6 +58,16 @@ class CoverageSet:
 
     def __len__(self):
         return int(self._feasible_tuples.num_covered_tuples)
+    
+    def get_contradiction(self) -> tuple[Literal, Literal]|None:
+        """
+        Returns a pair of literals that contradict each other.
+        If no contradiction is found, returns None.
+        """
+        if len(self._covered_tuples.contradictions) == 0:
+            return None
+        contradiction = self._covered_tuples.contradictions[0]
+        return (contradiction.feature_a, contradiction.value_a), (contradiction.feature_b, contradiction.value_b)
 
     def clear(self):
         self._covered_tuples.clear()

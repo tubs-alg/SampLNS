@@ -79,7 +79,7 @@ class BaseModelCreator:
         literals = [
             self._get_struct_var(variables, element) for element in structure.elements
         ]
-        assert len(literals) > 1, "Should otherwise have been removed by preprocessor."
+        #assert len(literals) > 1, "Should otherwise have been removed by preprocessor."
         alt_feature = self._get_struct_var(variables, structure)
         model.Add(sum(literals) == alt_feature)
 

@@ -98,6 +98,16 @@ private:
   std::vector<std::vector<bool>> feasibility_matrix;
 };
 
+struct Contradiction {
+  Contradiction(int feature_a, int feature_b, bool value_a, bool value_b)
+      : feature_a{feature_a}, feature_b{feature_b}, value_a{value_a},
+        value_b{value_b} {}
+  int feature_a;
+  int feature_b;
+  bool value_a;
+  bool value_b;
+};
+
 class CoverageSet {
 public:
   CoverageSet(CoveredTuples feasible_tuples)
@@ -114,11 +124,14 @@ public:
     }
   }
 
-  bool is_configuration_contradicting(const std::vector<bool> &conf) const {
+  bool is_configuration_contradicting(const std::vector<bool> &conf) {
     for (int i = 0; i < this->feasible_tuples.num_concrete_features; i++) {
       for (int j = i + 1; j < this->feasible_tuples.num_concrete_features;
            j++) {
         if (!this->feasible_tuples.is_contained(i, conf[i], j, conf[j])) {
+          this->contradictions.push_back(Contradiction(
+              i, j, conf[i], conf[j]
+          ));
           return true; // contradiction found, configuration is invalid
         }
       }
@@ -134,6 +147,7 @@ public:
   void clear() {
     this->covered_tuples =
         CoveredTuples{this->feasible_tuples.num_concrete_features};
+    this->contradictions.clear();
   }
 
   std::vector<std::pair<std::pair<int, bool>, std::pair<int, bool>>>
@@ -157,6 +171,7 @@ public:
     return missing_tuples;
   }
 
+  std::vector<Contradiction> contradictions;
 private:
   CoveredTuples feasible_tuples;
   CoveredTuples covered_tuples;
@@ -164,6 +179,12 @@ private:
 
 PYBIND11_MODULE(_coverage_set, m) {
   namespace py = pybind11;
+  py::class_<Contradiction>(m, "Contradiction")
+      .def(py::init<int, int, bool, bool>())
+      .def_readonly("feature_a", &Contradiction::feature_a)
+      .def_readonly("feature_b", &Contradiction::feature_b)
+      .def_readonly("value_a", &Contradiction::value_a)
+      .def_readonly("value_b", &Contradiction::value_b);
   py::class_<CoveredTuples>(m, "CoveredTuples")
       .def(py::init<const std::vector<std::vector<bool>> &, int>())
       .def("is_contained", &CoveredTuples::is_contained)
@@ -177,5 +198,6 @@ PYBIND11_MODULE(_coverage_set, m) {
       .def("add_configuration", &CoverageSet::add_configuration)
       .def("num_missing_tuples", &CoverageSet::num_missing_tuples)
       .def("clear", &CoverageSet::clear)
-      .def("get_missing_tuples", &CoverageSet::get_missing_tuples);
+      .def("get_missing_tuples", &CoverageSet::get_missing_tuples)
+      .def_readonly("contradictions", &CoverageSet::contradictions);
 }

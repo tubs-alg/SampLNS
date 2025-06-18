@@ -37,6 +37,7 @@ class BaselineAlgorithm:
         algorithm="YASA",
         logger: logging.Logger = _logger,
         seed: Optional[int] = None,
+        jars_dir: str|None = None,
     ):
         self._configuration = self.DEFAULT_CONFIGURATION.copy()
         if seed is not None:
@@ -46,7 +47,10 @@ class BaselineAlgorithm:
 
         self._configuration_dir = "config"
         self._model_path = file_path
-        self._jars_dir = os.path.join(sys.prefix, "deps/samplns")
+        if jars_dir is not None:
+            self._jars_dir = jars_dir
+        else:
+            self._jars_dir = os.path.join(sys.prefix, "deps/samplns")
         self._log = logger.getChild("Baseline")
         self._log.info("Using seed %d for FeatureIDE", self._configuration["seed"])
 

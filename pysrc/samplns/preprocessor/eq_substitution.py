@@ -6,7 +6,7 @@ select at the same time.
 """
 import typing
 
-from ..instances import EQ, VAR, AndFeature, CompositeFeature, FeatureNode, Instance
+from ..instances import EQ, VAR, AndFeature, CompositeFeature, FeatureNode, Instance, AltFeature
 from .equivalence import EquivalenceClasses
 from .universe_mapping import UniverseMapping
 
@@ -43,6 +43,13 @@ class EqualityOptimizer:
                     b = element.feature_literal
                     inverse = a.negated != b.negated
                     eq.mark_equivalent(a.var_name, b.var_name, inverse)
+        if isinstance(feature_tree, AltFeature):
+            if len(feature_tree.elements) == 1:
+                # If an alternative feature has only one element,
+                # it is equivalent to the feature itself.
+                eq.mark_equivalent(
+                    feature_tree.feature_literal,
+                    feature_tree.elements[0].feature_literal)
         if isinstance(feature_tree, CompositeFeature):
             for element in feature_tree.elements:
                 self._search_ands(element, eq)
