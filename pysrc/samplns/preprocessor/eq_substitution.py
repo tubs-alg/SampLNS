@@ -47,9 +47,10 @@ class EqualityOptimizer:
             if len(feature_tree.elements) == 1:
                 # If an alternative feature has only one element,
                 # it is equivalent to the feature itself.
-                eq.mark_equivalent(
-                    feature_tree.feature_literal,
-                    feature_tree.elements[0].feature_literal)
+                a = feature_tree.feature_literal
+                b = feature_tree.elements[0].feature_literal
+                inverse = a.negated != b.negated
+                eq.mark_equivalent(a.var_name, b.var_name, inverse)
         if isinstance(feature_tree, CompositeFeature):
             for element in feature_tree.elements:
                 self._search_ands(element, eq)
