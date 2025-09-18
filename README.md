@@ -172,6 +172,14 @@ By default, the script enforces a time limit of 3600 seconds per instance.
 
 ## Installation
 
+> [!WARNING]
+>
+> The native parts of SampLNS can be troublesome to install on some systems.
+> We highly recommend using Docker as described above and just place all
+> instances you want to solve in the `instances/` folder. Then you just need
+> to run the `solve_instances.sh` script to solve all instances. It should also
+> fairly easy to modify the script to your needs.
+
 SampLNS is a Python-library that comes with a CLI. It can be easily installed
 with the Python package manager `pip`, which also handles most of the
 dependencies (except for a C++-compiler and a Java runtime environment). All C++
