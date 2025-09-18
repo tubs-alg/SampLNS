@@ -1,42 +1,158 @@
 ---
-current_version: "11.0.0"
+current_version: "12.0.3"
 versions:
-  "11.0.0":
+  "12.0.3":
+    "Macos":
+      "x86_64":
+        download_url: "https://packages.gurobi.com/12.0/gurobi12.0.3_macos_universal2.pkg"
+        download_type: "pkg"
+        sha256: "e1e771e9cf8aa7882b1cdc000be91c2b5fadd18f3fcdd00f2824dd207be09613"
+        cpp_source_dirs:
+          - {"path": "Library/gurobi1203/macos_universal2/include", "extract_to": "include"}
+          - {"path": "Library/gurobi1203/macos_universal2/src/cpp", "extract_to": "src"}
+          - {"path": "Library/gurobi1203/macos_universal2/bin", "extract_to": "bin"}
+        binary_paths: ["Library/gurobi1203/macos_universal2/lib/libgurobi120.dylib"]
+        fix_binary_commands:
+          - ["install_name_tool", "-id", "@rpath/libgurobi120.dylib"]
+          - ["codesign", "--remove-signature"]
+          - ["codesign", "-s", "-"]
+        library_names:
+          - "gurobi_c++"
+          - "gurobi120"
+      "armv8":
+        download_url: "https://packages.gurobi.com/12.0/gurobi12.0.3_macos_universal2.pkg"
+        download_type: "pkg"
+        sha256: "e1e771e9cf8aa7882b1cdc000be91c2b5fadd18f3fcdd00f2824dd207be09613"
+        cpp_source_dirs:
+          - {"path": "Library/gurobi1203/macos_universal2/include", "extract_to": "include"}
+          - {"path": "Library/gurobi1203/macos_universal2/src/cpp", "extract_to": "src"}
+          - {"path": "Library/gurobi1203/macos_universal2/bin", "extract_to": "bin"}
+        binary_paths: ["Library/gurobi1203/macos_universal2/lib/libgurobi120.dylib"]
+        fix_binary_commands:
+          - ["install_name_tool", "-id", "@rpath/libgurobi120.dylib"]
+          - ["codesign", "--remove-signature"]
+          - ["codesign", "-s", "-"]
+        library_names:
+          - "gurobi_c++"
+          - "gurobi120"
     "Linux":
       "x86_64":
-        download_url: "https://packages.gurobi.com/11.0/gurobi11.0.0_linux64.tar.gz"
+        download_url: "https://packages.gurobi.com/12.0/gurobi12.0.3_linux64.tar.gz"
         download_type: "tar.gz"
-        sha256: "6a1ec7499b230aea0542bc893bf0642ae8ce983dd5ef0c37cb3a253d827ce634"
+        sha256: "21bdabbaaf83ce2da42a4f13ecde7a1fd17b6eec4d74c97bad8a051887d11021"
         cpp_source_dirs:
-          - { "path": "gurobi1100/linux64/include", "extract_to": "include" }
-          - { "path": "gurobi1100/linux64/src/cpp", "extract_to": "src" }
-          - { "path": "gurobi1100/linux64/bin", "extract_to": "bin" }
+          - {"path": "gurobi1203/linux64/include", "extract_to": "include"}
+          - {"path": "gurobi1203/linux64/src/cpp", "extract_to": "src"}
+          - {"path": "gurobi1203/linux64/bin", "extract_to": "bin"}
         binary_paths:
-          - "gurobi1100/linux64/lib/libgurobi110.so"
+          - "gurobi1203/linux64/lib/libgurobi120.so"
+        library_names:
+          - "gurobi_c++"
+          - "gurobi120"
+        fix_binary_commands: []
+    "Windows":
+      "x86_64":
+        download_url: "https://packages.gurobi.com/12.0/Gurobi-12.0.3-win64.msi"
+        download_type: "msi"
+        sha256: "79aa683de59e5e1ab4f214ba7bdf69e3f8ca436b723310a5850f35e68efadf00"
+        cpp_source_dirs:
+          - {"path": "gurobi1203\\win64\\src\\cpp", "extract_to": "src"}
+          - {"path": "gurobi1203\\win64\\include", "extract_to": "include"}
+          - {"path": "gurobi1203\\win64\\bin", "extract_to": "bin"}
+        binary_paths:
+          - "gurobi1203\\win64\\bin\\gurobi120.dll"
+          - "gurobi1203\\win64\\lib\\gurobi120.lib"
+        library_names: ["gurobi_c++", "gurobi120"]
+        fix_binary_commands: []
+  "12.0.0":
+    "Macos":
+      "x86_64":
+        download_url: "https://packages.gurobi.com/12.0/gurobi12.0.0_macos_universal2.pkg"
+        download_type: "pkg"
+        sha256: "6fde66459ef2f52dc890dde280b8f91281491b9f38f61d3b9fd7971e43a93ded"
+        cpp_source_dirs:
+          - {"path": "Library/gurobi1200/macos_universal2/include", "extract_to": "include"}
+          - {"path": "Library/gurobi1200/macos_universal2/src/cpp", "extract_to": "src"}
+          - {"path": "Library/gurobi1200/macos_universal2/bin", "extract_to": "bin"}
+        binary_paths: ["Library/gurobi1200/macos_universal2/lib/libgurobi120.dylib"]
+        fix_binary_commands:
+          - ["install_name_tool", "-id", "@rpath/libgurobi120.dylib"]
+          - ["codesign", "--remove-signature"]
+          - ["codesign", "-s", "-"]
+        library_names:
+          - "gurobi_c++"
+          - "gurobi120"
+      "armv8":
+        download_url: "https://packages.gurobi.com/12.0/gurobi12.0.0_macos_universal2.pkg"
+        download_type: "pkg"
+        sha256: "6fde66459ef2f52dc890dde280b8f91281491b9f38f61d3b9fd7971e43a93ded"
+        cpp_source_dirs:
+          - {"path": "Library/gurobi1200/macos_universal2/include", "extract_to": "include"}
+          - {"path": "Library/gurobi1200/macos_universal2/src/cpp", "extract_to": "src"}
+          - {"path": "Library/gurobi1200/macos_universal2/bin", "extract_to": "bin"}
+        binary_paths: ["Library/gurobi1200/macos_universal2/lib/libgurobi120.dylib"]
+        fix_binary_commands:
+          - ["install_name_tool", "-id", "@rpath/libgurobi120.dylib"]
+          - ["codesign", "--remove-signature"]
+          - ["codesign", "-s", "-"]
+        library_names:
+          - "gurobi_c++"
+          - "gurobi120"
+    "Linux":
+      "x86_64":
+        download_url: "https://packages.gurobi.com/12.0/gurobi12.0.0_linux64.tar.gz"
+        download_type: "tar.gz"
+        sha256: "a2bdc9c1d6bf8eb4e551a184af1ce8d7b0435ea8e7d19a017cc7d53fd5efda12"
+        cpp_source_dirs:
+          - {"path": "gurobi1200/linux64/include", "extract_to": "include"}
+          - {"path": "gurobi1200/linux64/src/cpp", "extract_to": "src"}
+          - {"path": "gurobi1200/linux64/bin", "extract_to": "bin"}
+        binary_paths:
+          - "gurobi1200/linux64/lib/libgurobi120.so"
+        library_names:
+          - "gurobi_c++"
+          - "gurobi120"
+        fix_binary_commands: []
+    "Windows":
+      "x86_64":
+        download_url: "https://packages.gurobi.com/12.0/Gurobi-12.0.0-win64.msi"
+        download_type: "msi"
+        sha256: "66b2037aa814636eb038ffd63654ce6b7a3b6318d2527a0aebe3ecc4394061a6"
+        cpp_source_dirs:
+          - {"path": "gurobi1200\\win64\\src\\cpp", "extract_to": "src"}
+          - {"path": "gurobi1200\\win64\\include", "extract_to": "include"}
+          - {"path": "gurobi1200\\win64\\bin", "extract_to": "bin"}
+        binary_paths:
+          - "gurobi1200\\win64\\bin\\gurobi120.dll"
+          - "gurobi1200\\win64\\lib\\gurobi120.lib"
+        library_names: ["gurobi_c++", "gurobi120"]
+        fix_binary_commands: []
+  "11.0.2":
+    "Linux":
+      "x86_64":
+        download_url: "https://packages.gurobi.com/11.0/gurobi11.0.2_linux64.tar.gz"
+        download_type: "tar.gz"
+        sha256: "f43ac8a3edb987b9a0a61452acd9d8dbe9eb37368c6da7ce36e5247cb2a1a368"
+        cpp_source_dirs:
+          - {"path": "gurobi1102/linux64/include", "extract_to": "include"}
+          - {"path": "gurobi1102/linux64/src/cpp", "extract_to": "src"}
+          - {"path": "gurobi1102/linux64/bin", "extract_to": "bin"}
+        binary_paths:
+          - "gurobi1102/linux64/lib/libgurobi110.so"
         library_names:
           - "gurobi_c++"
           - "gurobi110"
         fix_binary_commands: []
     "Macos":
       "x86_64":
-        download_url: "https://packages.gurobi.com/11.0/gurobi11.0.0_macos_universal2.pkg"
+        download_url: "https://packages.gurobi.com/11.0/gurobi11.0.2_macos_universal2.pkg"
         download_type: "pkg"
-        sha256: "80867d9da2b5c9b293d82d0b5ba54abdc2d1797d19bdce36fce97f7bfbac405d"
+        sha256: "e5709586ce2c1179bba16656a0855e43a5a3becaf1fbe85e0ab123371448f072"
         cpp_source_dirs:
-          - {
-              "path": "Library/gurobi1100/macos_universal2/include",
-              "extract_to": "include",
-            }
-          - {
-              "path": "Library/gurobi1100/macos_universal2/src/cpp",
-              "extract_to": "src",
-            }
-          - {
-              "path": "Library/gurobi1100/macos_universal2/bin",
-              "extract_to": "bin",
-            }
-        binary_paths:
-          ["Library/gurobi1100/macos_universal2/lib/libgurobi110.dylib"]
+          - {"path": "Library/gurobi1102/macos_universal2/include", "extract_to": "include"}
+          - {"path": "Library/gurobi1102/macos_universal2/src/cpp", "extract_to": "src"}
+          - {"path": "Library/gurobi1102/macos_universal2/bin", "extract_to": "bin"}
+        binary_paths: ["Library/gurobi1102/macos_universal2/lib/libgurobi110.dylib"]
         fix_binary_commands:
           - ["install_name_tool", "-id", "@rpath/libgurobi110.dylib"]
           - ["codesign", "--remove-signature"]
@@ -45,24 +161,14 @@ versions:
           - "gurobi_c++"
           - "gurobi110"
       "armv8":
-        download_url: "https://packages.gurobi.com/11.0/gurobi11.0.0_macos_universal2.pkg"
+        download_url: "https://packages.gurobi.com/11.0/gurobi11.0.2_macos_universal2.pkg"
         download_type: "pkg"
-        sha256: "80867d9da2b5c9b293d82d0b5ba54abdc2d1797d19bdce36fce97f7bfbac405d"
+        sha256: "e5709586ce2c1179bba16656a0855e43a5a3becaf1fbe85e0ab123371448f072"
         cpp_source_dirs:
-          - {
-              "path": "Library/gurobi1100/macos_universal2/include",
-              "extract_to": "include",
-            }
-          - {
-              "path": "Library/gurobi1100/macos_universal2/src/cpp",
-              "extract_to": "src",
-            }
-          - {
-              "path": "Library/gurobi1100/macos_universal2/bin",
-              "extract_to": "bin",
-            }
-        binary_paths:
-          ["Library/gurobi1100/macos_universal2/lib/libgurobi110.dylib"]
+          - {"path": "Library/gurobi1102/macos_universal2/include", "extract_to": "include"}
+          - {"path": "Library/gurobi1102/macos_universal2/src/cpp", "extract_to": "src"}
+          - {"path": "Library/gurobi1102/macos_universal2/bin", "extract_to": "bin"}
+        binary_paths: ["Library/gurobi1102/macos_universal2/lib/libgurobi110.dylib"]
         fix_binary_commands:
           - ["install_name_tool", "-id", "@rpath/libgurobi110.dylib"]
           - ["codesign", "--remove-signature"]
@@ -72,15 +178,16 @@ versions:
           - "gurobi110"
     "Windows":
       "x86_64":
-        download_url: "https://packages.gurobi.com/11.0/Gurobi-11.0.0-win64.msi"
+        download_url: "https://packages.gurobi.com/11.0/Gurobi-11.0.2-win64.msi"
         download_type: "msi"
-        sha256: "a003a1955dce470d7265b8563f6c797d8e78bcf6c11fff7a19f1506084d4e4ba"
+        sha256: "560300b5dd6fd1577c240a0fdad90f8a2f390af32489d11554ec753fcf72e077"
         cpp_source_dirs:
-          - { "path": "gurobi1100\\win64\\src\\cpp", "extract_to": "src" }
-          - { "path": "gurobi1100\\win64\\include", "extract_to": "include" }
-          - { "path": "gurobi1100\\win64\\bin", "extract_to": "bin" }
+          - {"path": "gurobi1102\\win64\\src\\cpp", "extract_to": "src"}
+          - {"path": "gurobi1102\\win64\\include", "extract_to": "include"}
+          - {"path": "gurobi1102\\win64\\bin", "extract_to": "bin"}
         binary_paths:
-          - "gurobi1100\\win64\\bin\\gurobi110.dll"
-          - "gurobi1100\\win64\\lib\\gurobi110.lib"
+          - "gurobi1102\\win64\\bin\\gurobi110.dll"
+          - "gurobi1102\\win64\\lib\\gurobi110.lib"
         library_names: ["gurobi_c++", "gurobi110"]
         fix_binary_commands: []
+...

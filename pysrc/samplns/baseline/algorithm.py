@@ -6,19 +6,14 @@ import subprocess
 import sys
 import tempfile
 from glob import glob
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
 
 _logger = logging.getLogger("SampLNS")
 
-
-class BaselineAlgorithm:
-    """
-    Provides an interface for running baseline algorithms with FeatJAR
-    """
-
-    DEFAULT_CONFIGURATION = {
+DEFAULT_CONFIGURATION = {
         "output": "results",
         "models": "models",
         "phases": "clean,de.featjar.evaluation.twise.SamplingPhase",
@@ -31,6 +26,11 @@ class BaselineAlgorithm:
         "t": 2,
     }
 
+class BaselineAlgorithm:
+    """
+    Provides an interface for running baseline algorithms with FeatJAR
+    """
+
     def __init__(
         self,
         file_path: str,
@@ -39,7 +39,7 @@ class BaselineAlgorithm:
         seed: Optional[int] = None,
         jars_dir: str|None = None,
     ):
-        self._configuration = self.DEFAULT_CONFIGURATION.copy()
+        self._configuration = DEFAULT_CONFIGURATION.copy()
         if seed is not None:
             self._configuration["seed"] = seed
         else:
@@ -65,8 +65,9 @@ class BaselineAlgorithm:
         else:
             msg = "Unknown algorithm"
             raise ValueError(msg)
-
-        assert os.path.isfile(self._model_path)
+        if not Path(self._model_path).is_file():
+            msg = f"The given model path '{self._model_path}' is not a valid file."
+            raise ValueError(msg)
 
     def _prepare(self, tmp_dir):
         """
@@ -77,38 +78,41 @@ class BaselineAlgorithm:
 
         model_name = "model"
 
-        config_dir = os.path.join(tmp_dir, self._configuration_dir)
-        model_dir = os.path.join(tmp_dir, self._configuration["models"], model_name)
-        os.makedirs(config_dir)
-        os.makedirs(model_dir)
+        config_dir = Path(tmp_dir) / self._configuration_dir
+        model_dir = Path(tmp_dir) / self._configuration["models"] / model_name
+        config_dir.mkdir(parents=True, exist_ok=True)
+        model_dir.mkdir(parents=True, exist_ok=True)
 
-        config_file = os.path.join(config_dir, "config.properties")
-        model_file = os.path.join(config_dir, "models.txt")
-        with open(config_file, "w") as f:
+        config_file = config_dir / "config.properties"
+        model_file = config_dir / "models.txt"
+        with config_file.open("w") as f:
             for key, val in self._configuration.items():
                 f.write(f"{key}={val}\n")
 
-        with open(model_file, "w") as f:
+        with model_file.open("w") as f:
             f.write("model\n")
 
+        model_dst = model_dir / "model.xml"
+        self._log.info("Copying model from %s to %s for solving with FeatureIDE", self._model_path, model_dst)
         shutil.copy(
             self._model_path,
-            os.path.join(model_dir, os.path.basename(self._model_path)),
+            dst=model_dst,
         )
         os.symlink(
-            os.path.join(self._jars_dir, "tools"), os.path.join(tmp_dir, "tools")
+            Path(self._jars_dir) / "tools", Path(tmp_dir) / "tools"
         )
 
     def _parse_result(self, tmp_dir):
         # This matches all valid samples that were generated.
-        samples = glob(
-            os.path.join(tmp_dir, self._configuration["output"], "*", "*.csv")
-        )
+        samples = list((Path(tmp_dir) / self._configuration["output"]).glob("*/*.csv"))
 
         if not samples:
+            logging.error("The folder %s contains no samples. Content: %s", tmp_dir, str(os.listdir(tmp_dir)))
             return None
 
-        assert len(samples) > 0
+        if len(samples) == 0:
+            msg = "No sample found. This should not happen."
+            raise ValueError(msg)
 
         t = pd.read_csv(samples[0], sep=";", index_col="Configuration")
         samples = []
@@ -117,7 +121,7 @@ class BaselineAlgorithm:
         )
         return samples
 
-    def optimize(self, timelimit):
+    def optimize(self, timelimit: float) -> list[dict]|None:
         """
         Uses some FeatJAR baseline algorithm to solve the given instance.
         @param timelimit Time limit in seconds
@@ -134,19 +138,17 @@ class BaselineAlgorithm:
                 [
                     "java",
                     "-jar",
-                    os.path.join(
-                        self._jars_dir,
-                        "evaluation-sampling-algorithms-0.1.0-SNAPSHOT-all.jar",
-                    ),
+                    Path(self._jars_dir) / "evaluation-sampling-algorithms-0.1.0-SNAPSHOT-all.jar",
                     "twise-sampler",
                     self._configuration_dir,
                 ],
                 cwd=tmp_dir,
                 capture_output=True,
                 text=True,
+                check=False,
             )
-            self._log.info(runner.stdout)
-            self._log.error(runner.stderr)
+            self._log.info("stdout from featureide: %s", runner.stdout)
+            self._log.error("stderr from featureide: %s", runner.stderr)
 
             self._log.info("Finished running baseline. Parsing result...")
 
@@ -154,5 +156,7 @@ class BaselineAlgorithm:
 
             if samples:
                 self._log.info("Found a valid sample.")
+            else:
+                self._log.info("No valid sample found. Files in %s: %s", tmp_dir, str(os.listdir(tmp_dir)))
 
         return samples

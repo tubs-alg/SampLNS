@@ -56,6 +56,7 @@ setup(  # https://scikit-build.readthedocs.io/en/latest/usage.html#setup-options
         "chardet>=4.0.0",
         "requests>=2.25.1",
         "ortools>=9.5.2237",
+        'pytest'
     ],
     data_files=[
         (

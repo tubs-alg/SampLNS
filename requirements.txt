@@ -1,7 +1,6 @@
 aemeasure~=0.2.9
 chardet>=4.0.0
 conan>=2.0.0
-gurobipy~=10.0.1
 networkx>=2.5.1
 pytest>=7.1.2
 requests>=2.25.1

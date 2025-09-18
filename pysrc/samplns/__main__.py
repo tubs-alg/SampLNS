@@ -6,6 +6,7 @@ import argparse
 import json
 import logging
 from importlib.metadata import version
+from pathlib import Path
 
 from samplns.baseline import BaselineAlgorithm
 from samplns.instances import parse
@@ -107,9 +108,24 @@ def main():
     logger.addHandler(ch)
 
     instance_path = args.file
+    if not Path(instance_path).is_file():
+        logger.error("The given instance file '%s' does not exist.", instance_path)
+        exit(1)
+    if not Path(instance_path).suffix in {".xml", ".dimacs", ".cnf"}:
+        logger.error(
+            "The given instance file '%s' is not a supported format. Supported formats are FeatJAR XML (*.xml) and DIMACS (*.dimacs, *.cnf).",
+            instance_path,
+        )
+        exit(1)
+    if not Path(instance_path).is_file():
+        logger.error("The given instance file '%s' does not exist.", instance_path)
+        exit(1)
     feature_model = parse(instance_path, logger=logger)
 
     if args.initial_sample:
+        if not Path(args.initial_sample).is_file():
+            logger.error("The given initial sample file '%s' does not exist.", args.initial_sample)
+            exit(1)
         with open(args.initial_sample) as f:
             initial_sample = json.load(f)
     else:  # args.baseline

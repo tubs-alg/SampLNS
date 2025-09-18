@@ -121,6 +121,55 @@ quality at that moment.
 - **Time to Bounds:** Time when final bounds were established (indicates
   efficiency vs. stagnation).
 
+## Usage via Docker
+
+We provide a simplified procedure for running **SampLNS** using Docker.
+To proceed, ensure that **Docker** is installed on your system and that you have a Docker-compatible Gurobi license file.  
+
+<details>
+<summary>Gurobi Academic License</summary>
+
+1. Visit the [Gurobi Academic Program](https://www.gurobi.com/academia/academic-program-and-licenses/) and click **Claim Your Free License Now**.  
+2. Sign up with your academic email address.  
+3. In the *Licenses* tab, click **Request**.  
+4. Select **WLS Academic**, which works in Docker containers but requires access to an academic network (e.g., university VPN).  
+   Gurobi describes the WLS Academic license as:  
+   - Runs on multiple machines/containers  
+   - Requires Gurobi v10+  
+   - Needs an internet connection during usage  
+   - Academic network required only for generation; usable anywhere afterwards  
+   - Valid for 90 days, renewable while eligible  
+5. Click **Go to License**.  
+6. On the right, click **Open License within the Web License Manager** (icon).  
+7. Click **Download**.  
+8. Enter any application name (e.g., `sammy`).  
+9. Save the `gurobi.lic` file in the same directory as this `README.md`.  
+
+*Note: The process may change; consult the official Gurobi documentation if you encounter issues.*  
+</details>
+
+SanmpLNS supports two instance formats: FeatJAR XML and DIMACS CNF. Place the instances you want to solve in the `./instances/` directory in the same directory as this `README.md` (you have to create this folder).
+For testing, you can use the example instances from the `examples/` directory.
+
+Also place your Gurobi license file as `gurobi.lic` in the same directory as this `README.md`.
+
+Build the Docker image by executing the following command in this directory:  
+
+```bash
+docker build --platform linux/amd64 -t samplns .
+```
+
+After building the image, run:
+
+```bash
+./solve_instances.sh
+```
+
+This script solves all instances in the `instances/` directory and stores the results in the `results/` directory.
+
+You may edit `solve_instances.sh` to adjust the arguments passed to SampLNS or to change the locations of the instances, results, or license file.
+By default, the script enforces a time limit of 3600 seconds per instance.
+
 ## Installation
 
 SampLNS is a Python-library that comes with a CLI. It can be easily installed
