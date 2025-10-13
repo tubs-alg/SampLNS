@@ -65,6 +65,15 @@ class BaselineAlgorithm:
         else:
             msg = "Unknown algorithm"
             raise ValueError(msg)
+        if Path(self._model_path).is_dir():
+            # check for a `model.dimacs` or `model.xml` file in the given directory.
+            if Path(self._model_path, "model.xml").is_file():  # always prefer xml as it is more expressive
+                self._model_path = str(Path(self._model_path) / "model.xml")
+            elif Path(self._model_path, "model.dimacs").is_file():
+                self._model_path = str(Path(self._model_path) / "model.dimacs")
+            else:
+                msg = f"The given model path '{self._model_path}' is a directory, but does not contain a model.dimacs or model.xml file."
+                raise ValueError(msg)
         if not Path(self._model_path).is_file():
             msg = f"The given model path '{self._model_path}' is not a valid file."
             raise ValueError(msg)
@@ -92,7 +101,11 @@ class BaselineAlgorithm:
         with model_file.open("w") as f:
             f.write("model\n")
 
-        model_dst = model_dir / "model.xml"
+        input_suffix = self._model_path.split(".")[-1].lower()
+        if input_suffix not in ["dimacs", "xml"]:
+            msg = f"The given model path '{self._model_path}' does not point to a .dimacs or .xml file."
+            raise ValueError(msg)
+        model_dst = model_dir / f"model.{input_suffix}"
         self._log.info("Copying model from %s to %s for solving with FeatureIDE", self._model_path, model_dst)
         shutil.copy(
             self._model_path,

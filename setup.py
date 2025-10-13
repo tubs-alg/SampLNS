@@ -41,8 +41,9 @@ setup(  # https://scikit-build.readthedocs.io/en/latest/usage.html#setup-options
         # "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
     ],
-    use_scm_version=True,
-    setup_requires=["setuptools_scm"],
+    version="0.8.0",
+    #use_scm_version=True,
+    #setup_requires=["setuptools_scm"],
     # ~~~~~~~~~~~~ CRITICAL PYTHON SETUP ~~~~~~~~~~~~~~~~~~~
     # This project structures defines the python packages in a subfolder.
     # Thus, we have to collect this subfolder and define it as root.

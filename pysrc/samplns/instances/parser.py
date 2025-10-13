@@ -16,6 +16,7 @@ from collections import defaultdict
 from .feature import AltFeature, AndFeature, ConcreteFeature, FeatureLiteral, OrFeature
 from .instance import Instance
 from .sat_formula import AND, EQ, IMPL, NOT, OR, VAR, SatNode
+from .parse_dimacs import parse_source as parse_source_dimacs
 
 _logger = logging.getLogger("SampLNS")
 
@@ -37,6 +38,12 @@ def parse(path: str, logger: logging.Logger = _logger) -> Instance:
                     return parse_source(
                         tar.extractfile(tarinfo.name), path, logger=logger
                     )
+                elif tarinfo.isreg() and tarinfo.name.endswith(".dimacs"):
+                    logger.info("Parsing dimacs file: %s", tarinfo.name)
+                    return parse_source_dimacs(
+                        tar.extractfile(tarinfo.name), path, logger=logger
+                    )
+
         error_msg = "Could not extract xml file from archive"
         raise ValueError(error_msg)
     elif path.endswith(".zip"):
@@ -45,9 +52,15 @@ def parse(path: str, logger: logging.Logger = _logger) -> Instance:
                 if info.filename.endswith(".xml"):
                     logger.info("Parsing xml file: %s", info.filename)
                     return parse_source(zip.open(info.filename), path, logger=logger)
+                elif info.filename.endswith(".dimacs"):
+                    logger.info("Parsing dimacs file: %s", info.filename)
+                    return parse_source_dimacs(zip.open(info.filename), path, logger=logger)
         error_msg = "Could not extract xml file from archive"
         raise ValueError(error_msg)
     else:
+        if path.endswith(".dimacs"):
+            with open(path) as f:
+                return parse_source_dimacs(f, path, logger=logger)
         with open(path) as f:
             return parse_source(f, path, logger=logger)
 

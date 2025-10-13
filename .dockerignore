@@ -1,0 +1,92 @@
+# Ignore data folder
+# --- Project data / large folders (do not copy heavy datasets into images)
+data/
+DATA/
+evaluation/
+experiments/
+
+# --- Version control and CI
+.git
+.github
+.gitignore
+
+# --- Python build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+eggs/
+MANIFEST
+
+# --- CMake / C/C++ build artifacts
+_skbuild/
+_skbuild_/
+cmake-build/
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# --- Python caches and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual environments
+venv/
+ENV/
+env/
+.venv/
+venv.bak/
+
+# --- Packaging / installer caches
+pip-wheel-metadata/
+pip-log.txt
+
+# --- IDE / editor
+.vscode/
+*.sublime-workspace
+*.sublime-project
+*.idea/
+*.iml
+
+# --- Logs and temp
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+# --- Dependency manager caches
+.cache/
+__pypackages__/
+node_modules/
+/.m2/
+
+# --- Python eggs and build dirs from pip
+build/
+dist/
+*.egg-info/
+
+# --- Test output and coverage
+.pytest_cache/
+htmlcov/
+coverage.xml
+
+# --- Large example/experimental artifacts
+examples/**/plots/
+experiments/**/plots/
+
+# --- Keep necessary project files (negation examples)
+!setup.py
+!pyproject.toml
+!requirements.txt
+!README.md
+!LICENSE.md
+!CMakeLists.txt
+!src/**
+!pysrc/**
+
+# Ensure Dockerfile itself is sent (if present)
+!Dockerfile

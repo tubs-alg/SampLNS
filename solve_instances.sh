@@ -3,12 +3,12 @@
 # SampLNS Instance Solver Script
 # ==============================
 #
-# This script processes all .xml and .cnf instance files in the ./instances/ directory
+# This script processes all .xml and .dimacs instance files in the ./instances/ directory
 # and generates corresponding output files in the ./results/ directory using a Docker container.
 #
 # Prerequisites:
 # - Docker container built with: docker build --platform linux/amd64 -t samplns .
-# - Instance files in XML (FeatJAR) or DIMACS (.cnf) format
+# - Instance files in XML (FeatJAR) or DIMACS (.dimacs) format
 #
 # Usage:
 #   ./solve_instances.sh [OPTIONS]
@@ -50,7 +50,7 @@ show_help() {
     cat << EOF
 Usage: $0 [OPTIONS]
 
-Process .xml and .cnf instance files using SampLNS solver in Docker.
+Process .xml and .dimcas instance files using SampLNS solver in Docker.
 
 OPTIONS:
     -i, --instances DIR                    Instance directory (default: $INSTANCE_FOLDER)
@@ -172,7 +172,7 @@ validate_prerequisites() {
     if [[ ! -d "$INSTANCE_FOLDER" ]]; then
         echo "❌ Error: Instance directory '$INSTANCE_FOLDER' not found!"
         echo "   Create a folder named '$INSTANCE_FOLDER' and move all the instances you want to solve in it."
-        echo "   Supported formats: .xml (FeatJAR) and .cnf (DIMACS)."
+        echo "   Supported formats: .xml (FeatJAR) and .dimacs (DIMACS)."
         exit 1
     fi
 
@@ -193,14 +193,12 @@ validate_prerequisites() {
 
 # Check for instances
 check_instances() {
-    local count=$(find -L "$INSTANCE_FOLDER" -name "*.xml" -o -name "*.cnf" 2>/dev/null | wc -l)
-
+    local count
+    count=$(find -L "$INSTANCE_FOLDER" -type f \( -name '*.xml' -o -name '*.dimacs' \) 2>/dev/null | wc -l)
     if [[ "$count" -eq 0 ]]; then
-        echo "❌ No .xml or .cnf files found in '$INSTANCE_FOLDER'"
-        echo "   SampLNS accepts FeatJAR XML or DIMACS CNF format files."
+        echo "❌ No .xml or .dimacs files found in '$INSTANCE_FOLDER'"
         exit 1
     fi
-
     echo "📊 Found $count instance(s) to process"
 }
 
@@ -223,50 +221,83 @@ build_samplns_args() {
     
     echo "$args"
 }
+# Helper: portable absolute path (works even if realpath isn't available)
+to_abs() {
+    if command -v realpath >/dev/null 2>&1; then
+        realpath -m "$1"
+    else
+        # Use command substitution to concatenate the directory and basename
+        echo "$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")"
+    fi
+}
 
-# Process all instances
+
+# Process all instances (recursively, mirroring subfolders in results)
 process_instances() {
     local processed=0
     local any_failed=0
-    local samplns_args=$(build_samplns_args)
+    local samplns_args; samplns_args="$(build_samplns_args)"
 
-    for instance_file in "$INSTANCE_FOLDER"/*.xml "$INSTANCE_FOLDER"/*.cnf; do
-        [[ -f "$instance_file" ]] || continue
+    # Absolute paths for reliable docker -v mounts
+    local abs_instances; abs_instances="$(to_abs "$INSTANCE_FOLDER")"
+    local abs_results;   abs_results="$(to_abs "$RESULTS_FOLDER")"
+    local abs_license;   abs_license="$(to_abs "$GUROBI_LICENSE")"
 
-        local filename=$(basename "$instance_file")
-        local output_file="$RESULTS_FOLDER/${filename%.*}.json"
+    # Base docker volumes
+    local docker_volumes="-v $abs_license:/opt/gurobi/gurobi.lic:ro -v $abs_instances:/instances -v $abs_results:/results"
+    if [[ -n "$INITIAL_SAMPLE" ]]; then
+        local abs_init_dir; abs_init_dir="$(to_abs "$(dirname "$INITIAL_SAMPLE")")"
+        docker_volumes="$docker_volumes -v $abs_init_dir:/initial_sample"
+    fi
+
+    # Use a TTY only if we're actually attached to one
+    local docker_tty_flag=""
+    if [[ -t 1 ]]; then
+        docker_tty_flag="-t"
+    fi
+
+    # Find all instances recursively; handle spaces/newlines with -print0
+    while IFS= read -r -d '' instance_file; do
+        # Path relative to INSTANCE_FOLDER (to mirror subfolders in results)
+        local rel_path="${instance_file#"$abs_instances"/}"
+        local rel_dir;    rel_dir="$(dirname "$rel_path")"
+        local base_name;  base_name="$(basename "$rel_path")"
+
+        # Create output dir and file (mirroring subfolders)
+        local output_dir="$abs_results/$rel_dir"
+        local output_file="$output_dir/${base_name%.*}.json"
+        mkdir -p "$output_dir"
 
         ((processed++))
-        echo "🔄 Processing [$processed]: $filename"
-        echo "   Output: $(basename "$output_file")"
+        echo "🔄 Processing [$processed]: $rel_path"
+        echo "   Output: ${output_file#"$abs_results/"}"
 
-        # Prepare Docker volumes
-        local docker_volumes="-v $GUROBI_LICENSE:/opt/gurobi/gurobi.lic:ro -v $INSTANCE_FOLDER:/instances/ -v $RESULTS_FOLDER:/results/"
-        [[ -n "$INITIAL_SAMPLE" ]] && docker_volumes="$docker_volumes -v $(dirname "$INITIAL_SAMPLE"):/initial_sample/"
+        # Container paths
+        local container_input="/instances/$rel_path"
+        local container_output="/results/$rel_dir/${base_name%.*}.json"
 
-        # Run SampLNS in Docker
-        
-        if docker run --platform "$DOCKER_PLATFORM" --rm -it \
-          $docker_volumes \
-          "$DOCKER_IMAGE" \
-          --file "/instances/$filename" \
-          --output "/results/$(basename "$output_file")" \
-          $samplns_args; then
-            echo "✅ Completed: $filename"
+        # Run solver in Docker (no -i; add -t only if TTY)
+        if docker run --platform "$DOCKER_PLATFORM" --rm $docker_tty_flag \
+            $docker_volumes \
+            "$DOCKER_IMAGE" \
+            --file "$container_input" \
+            --output "$container_output" \
+            $samplns_args; then
+            echo "✅ Completed: $rel_path"
         else
-            echo "❌ Failed: $filename"
+            echo "❌ Failed: $rel_path"
             any_failed=1
         fi
 
-        # Sleep after each solve to prevent Gurobi license issues
         echo "⏳ Sleeping for ${SLEEP_DURATION}s to prevent license conflicts..."
         sleep "$SLEEP_DURATION"
         echo
-    done
+    done < <(find -L "$abs_instances" -type f \( -name '*.xml' -o -name '*.dimacs' \) -print0)
 
     echo "📈 Processed $processed instance(s)"
     return $any_failed
 }
+
 
 # Main execution
 main() {
